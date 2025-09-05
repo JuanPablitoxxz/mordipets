@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mordipets - Galletas para Perros</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <img src="logo.jpg" alt="Mordipets Logo" class="logo-img">
+                        <div class="logo-text">
+                            <h1>Mordipets</h1>
+                            <p>Galletas para Perros</p>
+                        </div>
+                    </div>
+                    
+                    <ul class="nav-menu">
+                        <li><a href="#inicio" class="nav-link">Inicio</a></li>
+                        <li><a href="#productos" class="nav-link">Productos</a></li>
+                        <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
+                        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                    </ul>
+                    
+                    <div class="nav-actions">
+                        <button class="btn-primary" id="loginBtn">
+                            <i class="fas fa-user"></i> Iniciar Sesión
+                        </button>
+                        <button class="btn-secondary" id="registerBtn">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="exclusive-badge">EXCLUSIVO</div>
+                <h2>Nueva línea de galletas Mordipets para perros</h2>
+                <p class="hero-subtitle">Formuladas para cuidar lo esencial</p>
+                <div class="hero-features">
+                    <div class="feature">
+                        <i class="fas fa-leaf"></i>
+                        <span>100% Natural</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-paw"></i>
+                        <span>Respaldo Veterinario</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Calidad Premium</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="product-showcase">
+                    <div class="product-item">
+                        <div class="product-bottle galleta-leche"></div>
+                        <span>Galleta Leche</span>
+                    </div>
+                    <div class="product-item">
+                        <div class="product-bottle galleta-carne"></div>
+                        <span>Galleta Carne</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="isAdmin">
+                        <span class="checkmark"></span>
+                        Soy Administrador
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Registrarse</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName">Nombre Completo</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Correo Electrónico</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">Número de Teléfono</label>
+                    <input type="tel" id="regPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="regLocation">Ubicación/Establecimiento</label>
+                    <input type="text" id="regLocation" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Contraseña</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="regConfirmPassword">Confirmar Contraseña</label>
+                    <input type="password" id="regConfirmPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Registrarse</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel hidden">
+        <div class="admin-header">
+            <h2>Panel de Administración - Mordipets</h2>
+            <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+        </div>
+        
+        <div class="admin-nav">
+            <button class="admin-nav-btn active" data-section="inventario">Inventario</button>
+            <button class="admin-nav-btn" data-section="insumos">Insumos</button>
+            <button class="admin-nav-btn" data-section="pedidos">Pedidos</button>
+        </div>
+
+        <!-- Inventario Section -->
+        <div id="inventarioSection" class="admin-section">
+            <div class="section-header">
+                <h3>Gestión de Inventario</h3>
+                <button class="btn-primary" id="addProductBtn">
+                    <i class="fas fa-plus"></i> Añadir Producto
+                </button>
+            </div>
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Insumos Section -->
+        <div id="insumosSection" class="admin-section hidden">
+            <div class="section-header">
+                <h3>Gestión de Insumos</h3>
+                <button class="btn-primary" id="addIngredientBtn">
+                    <i class="fas fa-plus"></i> Añadir Insumo
+                </button>
+            </div>
+            <div class="ingredients-grid" id="ingredientsGrid">
+                <!-- Ingredients will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Pedidos Section -->
+        <div id="pedidosSection" class="admin-section hidden">
+            <div class="section-header">
+                <h3>Gestión de Pedidos</h3>
+            </div>
+            <div class="orders-list" id="ordersList">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Panel -->
+    <div id="clientPanel" class="client-panel hidden">
+        <div class="client-header">
+            <h2>Bienvenido a Mordipets</h2>
+            <button id="clientLogoutBtn" class="btn-secondary">Cerrar Sesión</button>
+        </div>
+
+        <div class="client-nav">
+            <button class="client-nav-btn active" data-section="catalogo">Catálogo</button>
+            <button class="client-nav-btn" data-section="pedidos">Mis Pedidos</button>
+        </div>
+
+        <!-- Catálogo Section -->
+        <div id="catalogoSection" class="client-section">
+            <div class="catalog-header">
+                <h3>Nuestras Galletas Disponibles</h3>
+                <div class="search-bar">
+                    <input type="text" id="searchProducts" placeholder="Buscar galletas...">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="catalog-grid" id="catalogGrid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Pedidos Cliente Section -->
+        <div id="pedidosClienteSection" class="client-section hidden">
+            <div class="section-header">
+                <h3>Mis Pedidos</h3>
+            </div>
+            <div class="client-orders-list" id="clientOrdersList">
+                <!-- Client orders will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Añadir Nuevo Producto</h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label for="productCode">Código</label>
+                    <input type="text" id="productCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="productName">Nombre del Producto</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-group">
+                    <label for="productDescription">Descripción</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Precio</label>
+                    <input type="number" id="productPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Stock</label>
+                    <input type="number" id="productStock" required>
+                </div>
+                <div class="form-group">
+                    <label for="productWeight">Peso (gr)</label>
+                    <input type="number" id="productWeight" required>
+                </div>
+                <button type="submit" class="btn-primary">Añadir Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Ingredient Modal -->
+    <div id="addIngredientModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Añadir Nuevo Insumo</h2>
+            <form id="addIngredientForm">
+                <div class="form-group">
+                    <label for="ingredientName">Nombre del Insumo</label>
+                    <input type="text" id="ingredientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="ingredientType">Tipo</label>
+                    <select id="ingredientType" required>
+                        <option value="">Seleccionar tipo</option>
+                        <option value="proteina">Proteína</option>
+                        <option value="carbohidrato">Carbohidrato</option>
+                        <option value="vitamina">Vitamina</option>
+                        <option value="mineral">Mineral</option>
+                        <option value="conservante">Conservante</option>
+                        <option value="saborizante">Saborizante</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ingredientQuantity">Cantidad Disponible</label>
+                    <input type="number" id="ingredientQuantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="ingredientUnit">Unidad</label>
+                    <select id="ingredientUnit" required>
+                        <option value="kg">Kilogramos</option>
+                        <option value="gr">Gramos</option>
+                        <option value="lt">Litros</option>
+                        <option value="ml">Mililitros</option>
+                        <option value="und">Unidades</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Añadir Insumo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Realizar Pedido</h2>
+            <div id="orderSummary">
+                <!-- Order summary will be loaded here -->
+            </div>
+            <div class="order-actions">
+                <button class="btn-secondary" id="payNowBtn">
+                    <i class="fas fa-credit-card"></i> Pagar Ahora
+                </button>
+                <button class="btn-primary" id="payOnDeliveryBtn">
+                    <i class="fas fa-truck"></i> Pagar Contraentrega
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <div class="chat-icon">
+            <i class="fas fa-comments"></i>
+            <span class="notification-dot"></span>
+        </div>
+        <div class="chat-message">
+            ¡Hola, bienvenido a Mordipets! Estaré aquí para ayudarte...
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
