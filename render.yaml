@@ -1,10 +1,9 @@
 services:
   - type: web
     name: mordipets
-    env: static
+    env: node
     buildCommand: npm install
-    startCommand: npm start
-    staticPublishPath: .
+    startCommand: npm run mordipets
     routes:
       - type: rewrite
         source: /*

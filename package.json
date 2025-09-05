@@ -4,9 +4,10 @@
   "description": "Aplicación web para gestión y venta de galletas para perros",
   "main": "index.html",
   "scripts": {
-    "start": "npx serve -s . -l 3000",
+    "start": "npx serve -s . -l $PORT",
     "build": "echo 'No build step required for static site'",
-    "dev": "npx serve -s . -l 3000"
+    "dev": "npx serve -s . -l 3000",
+    "mordipets": "npx serve -s . -l $PORT"
   },
   "keywords": [
     "galletas",
