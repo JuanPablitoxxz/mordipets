@@ -19,10 +19,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Dependencias (si se añaden en el futuro)
+# Dependencias
 node_modules/
 package-lock.json
 yarn.lock
+
+# Archivos de Render
+.render/
 
 # Archivos de build
 dist/

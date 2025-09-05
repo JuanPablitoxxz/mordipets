@@ -1,0 +1,26 @@
+{
+  "name": "mordipets",
+  "version": "1.0.0",
+  "description": "Aplicación web para gestión y venta de galletas para perros",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -s . -l 3000",
+    "build": "echo 'No build step required for static site'",
+    "dev": "npx serve -s . -l 3000"
+  },
+  "keywords": [
+    "galletas",
+    "perros",
+    "mascotas",
+    "ecommerce",
+    "web"
+  ],
+  "author": "JuanPablitoxxz",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

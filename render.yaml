@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: mordipets
+    env: static
+    buildCommand: npm install
+    startCommand: npm start
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

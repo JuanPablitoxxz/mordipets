@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requisitos Funcionales y No Funcionales - Mordipets</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #ff6b35;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            color: #ff6b35;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 2px solid #20c997;
+        }
+        
+        .subsection {
+            margin-bottom: 25px;
+        }
+        
+        .subsection-title {
+            font-size: 20px;
+            color: #20c997;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .requirement {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b35;
+            border-radius: 5px;
+        }
+        
+        .requirement-id {
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 5px;
+        }
+        
+        .requirement-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .requirement-desc {
+            margin-bottom: 10px;
+        }
+        
+        .requirement-priority {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .priority-high {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .priority-low {
+            background: #28a745;
+            color: white;
+        }
+        
+        .tech-specs {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .tech-specs h4 {
+            color: #20c997;
+            margin-bottom: 10px;
+        }
+        
+        .tech-specs ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .tech-specs li {
+            margin-bottom: 5px;
+        }
+        
+        .user-story {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .user-story-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+        
+        .acceptance-criteria {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .acceptance-criteria h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        
+        .acceptance-criteria ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .acceptance-criteria li {
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #666;
+        }
+        
+        .version-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🐕 Mordipets</div>
+            <div class="subtitle">Galletas para Perros</div>
+            <h1>Requisitos Funcionales y No Funcionales</h1>
+        </div>
+        
+        <div class="version-info">
+            <strong>Versión:</strong> 1.0 | <strong>Fecha:</strong> Enero 2025 | <strong>Proyecto:</strong> Aplicación Web de Gestión y Venta
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">1. INFORMACIÓN GENERAL DEL PROYECTO</h2>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">1.1 Descripción del Proyecto</h3>
+                <p>Mordipets es una aplicación web desarrollada para la gestión y venta de galletas para perros. La aplicación permite a los administradores gestionar inventario, insumos y pedidos, mientras que los clientes pueden explorar el catálogo de productos, realizar pedidos y gestionar sus compras.</p>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">1.2 Objetivos del Sistema</h3>
+                <ul>
+                    <li>Digitalizar la gestión de inventario de galletas para perros</li>
+                    <li>Facilitar el proceso de compra para los clientes</li>
+                    <li>Automatizar la gestión de pedidos y entregas</li>
+                    <li>Proporcionar una plataforma moderna y fácil de usar</li>
+                    <li>Mejorar la experiencia del cliente y la eficiencia operativa</li>
+                </ul>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">1.3 Alcance del Sistema</h3>
+                <p>El sistema incluye funcionalidades para administradores (gestión completa) y clientes (compra y seguimiento), con un catálogo de 15 productos diferentes de galletas para perros, sistema de carrito de compras, gestión de pedidos y múltiples métodos de pago.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">2. REQUISITOS FUNCIONALES</h2>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.1 Gestión de Usuarios</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-001</div>
+                    <div class="requirement-title">Registro de Clientes</div>
+                    <div class="requirement-desc">El sistema debe permitir a los usuarios registrarse como clientes proporcionando información personal completa.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="user-story">
+                        <div class="user-story-title">Historia de Usuario:</div>
+                        <p>Como cliente potencial, quiero registrarme en el sistema para poder realizar compras de galletas para mi perro.</p>
+                    </div>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>El formulario debe solicitar: nombre completo, correo electrónico, número de teléfono, ubicación/establecimiento y contraseña</li>
+                            <li>Validar que el correo electrónico sea único</li>
+                            <li>Validar que las contraseñas coincidan</li>
+                            <li>Mostrar mensaje de confirmación al completar el registro</li>
+                            <li>Redirigir automáticamente al panel de cliente</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-002</div>
+                    <div class="requirement-title">Autenticación de Usuarios</div>
+                    <div class="requirement-desc">El sistema debe permitir el inicio de sesión tanto para clientes como para administradores.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Formulario de login con correo electrónico y contraseña</li>
+                            <li>Checkbox para identificar usuarios administradores</li>
+                            <li>Validación de credenciales</li>
+                            <li>Redirección al panel correspondiente según el tipo de usuario</li>
+                            <li>Manejo de errores de autenticación</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-003</div>
+                    <div class="requirement-title">Cierre de Sesión</div>
+                    <div class="requirement-desc">El sistema debe permitir a los usuarios cerrar sesión de forma segura.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.2 Gestión de Productos (Administrador)</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-004</div>
+                    <div class="requirement-title">Visualización de Inventario</div>
+                    <div class="requirement-desc">El administrador debe poder ver todos los productos disponibles con información detallada.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Mostrar productos en formato de tarjetas con: nombre, código, precio, stock, peso y descripción</li>
+                            <li>Indicador visual del estado del stock (disponible, bajo stock, sin stock)</li>
+                            <li>Botones de acción para editar y eliminar productos</li>
+                            <li>Diseño responsive para diferentes dispositivos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-005</div>
+                    <div class="requirement-title">Añadir Nuevos Productos</div>
+                    <div class="requirement-desc">El administrador debe poder agregar nuevos productos al inventario.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Formulario modal con campos: código, nombre, descripción, precio, stock y peso</li>
+                            <li>Validación de campos obligatorios</li>
+                            <li>Validación de formato de precio (números positivos)</li>
+                            <li>Actualización automática de la lista de productos</li>
+                            <li>Mensaje de confirmación al agregar producto</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-006</div>
+                    <div class="requirement-title">Edición de Productos</div>
+                    <div class="requirement-desc">El administrador debe poder modificar la información de productos existentes.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-007</div>
+                    <div class="requirement-title">Eliminación de Productos</div>
+                    <div class="requirement-desc">El administrador debe poder eliminar productos del inventario.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Confirmación antes de eliminar</li>
+                            <li>Actualización automática de la lista</li>
+                            <li>Mensaje de confirmación de eliminación</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.3 Gestión de Insumos (Administrador)</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-008</div>
+                    <div class="requirement-title">Visualización de Insumos</div>
+                    <div class="requirement-desc">El administrador debe poder ver todos los insumos disponibles organizados por tipo.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Mostrar insumos con: nombre, tipo, cantidad disponible y unidad</li>
+                            <li>Clasificación por colores según el tipo (proteína, carbohidrato, vitamina, etc.)</li>
+                            <li>Botones para editar y eliminar insumos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-009</div>
+                    <div class="requirement-title">Añadir Nuevos Insumos</div>
+                    <div class="requirement-desc">El administrador debe poder agregar nuevos insumos al inventario.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Formulario con campos: nombre, tipo, cantidad y unidad</li>
+                            <li>Lista desplegable de tipos: proteína, carbohidrato, vitamina, mineral, conservante, saborizante</li>
+                            <li>Lista desplegable de unidades: kg, gr, lt, ml, und</li>
+                            <li>Validación de campos obligatorios</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-010</div>
+                    <div class="requirement-title">Edición y Eliminación de Insumos</div>
+                    <div class="requirement-desc">El administrador debe poder modificar y eliminar insumos existentes.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.4 Gestión de Pedidos (Administrador)</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-011</div>
+                    <div class="requirement-title">Visualización de Pedidos</div>
+                    <div class="requirement-desc">El administrador debe poder ver todos los pedidos realizados por los clientes.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Lista de pedidos con: ID, cliente, fecha, total, método de pago y estado</li>
+                            <li>Detalle de productos en cada pedido</li>
+                            <li>Indicadores visuales del estado (pendiente, confirmado, entregado)</li>
+                            <li>Botones para cambiar el estado de los pedidos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-012</div>
+                    <div class="requirement-title">Actualización de Estado de Pedidos</div>
+                    <div class="requirement-desc">El administrador debe poder cambiar el estado de los pedidos (confirmar, marcar como entregado).</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.5 Catálogo de Productos (Cliente)</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-013</div>
+                    <div class="requirement-title">Visualización del Catálogo</div>
+                    <div class="requirement-desc">Los clientes deben poder ver todos los productos disponibles con información relevante.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Mostrar solo productos con stock disponible</li>
+                            <li>Información de: nombre, precio, stock disponible, código y descripción</li>
+                            <li>Botón "Agregar al Carrito" para productos disponibles</li>
+                            <li>Botón deshabilitado para productos sin stock</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-014</div>
+                    <div class="requirement-title">Búsqueda de Productos</div>
+                    <div class="requirement-desc">Los clientes deben poder buscar productos por nombre.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Campo de búsqueda en tiempo real</li>
+                            <li>Filtrado instantáneo de resultados</li>
+                            <li>Búsqueda insensible a mayúsculas/minúsculas</li>
+                            <li>Mostrar mensaje cuando no hay resultados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.6 Sistema de Carrito y Pedidos (Cliente)</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-015</div>
+                    <div class="requirement-title">Agregar Productos al Carrito</div>
+                    <div class="requirement-desc">Los clientes deben poder agregar productos al carrito de compras.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Botón "Agregar al Carrito" en cada producto</li>
+                            <li>Actualización automática del stock del producto</li>
+                            <li>Mensaje de confirmación al agregar producto</li>
+                            <li>Prevenir agregar productos sin stock</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-016</div>
+                    <div class="requirement-title">Visualización del Carrito</div>
+                    <div class="requirement-desc">Los clientes deben poder ver el contenido de su carrito antes de realizar el pedido.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Modal con resumen del pedido</li>
+                            <li>Lista de productos con cantidades y precios</li>
+                            <li>Cálculo automático del total</li>
+                            <li>Formato de precios en pesos colombianos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-017</div>
+                    <div class="requirement-title">Realización de Pedidos</div>
+                    <div class="requirement-desc">Los clientes deben poder realizar pedidos con diferentes métodos de pago.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Dos opciones de pago: "Pagar Ahora" y "Pagar Contraentrega"</li>
+                            <li>Validación de carrito no vacío</li>
+                            <li>Generación automática de ID de pedido</li>
+                            <li>Registro de información del cliente y productos</li>
+                            <li>Mensaje de confirmación según el método de pago</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-018</div>
+                    <div class="requirement-title">Seguimiento de Pedidos (Cliente)</div>
+                    <div class="requirement-desc">Los clientes deben poder ver el estado de sus pedidos.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Lista de pedidos del cliente</li>
+                            <li>Información de: ID, fecha, total, método de pago y estado</li>
+                            <li>Detalle de productos en cada pedido</li>
+                            <li>Indicadores visuales del estado</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">2.7 Persistencia de Datos</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RF-019</div>
+                    <div class="requirement-title">Almacenamiento Local</div>
+                    <div class="requirement-desc">El sistema debe mantener los datos almacenados localmente en el navegador.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                    
+                    <div class="acceptance-criteria">
+                        <h4>Criterios de Aceptación:</h4>
+                        <ul>
+                            <li>Persistencia de productos, insumos y pedidos</li>
+                            <li>Mantenimiento de sesión de usuario</li>
+                            <li>Recuperación de datos al recargar la página</li>
+                            <li>Datos de muestra pre-cargados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">3. REQUISITOS NO FUNCIONALES</h2>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.1 Rendimiento</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-001</div>
+                    <div class="requirement-title">Tiempo de Carga</div>
+                    <div class="requirement-desc">La aplicación debe cargar completamente en menos de 3 segundos en conexiones estándar.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-002</div>
+                    <div class="requirement-title">Respuesta de Interfaz</div>
+                    <div class="requirement-desc">Las acciones del usuario deben tener respuesta visual inmediata (menos de 100ms).</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-003</div>
+                    <div class="requirement-title">Búsqueda en Tiempo Real</div>
+                    <div class="requirement-desc">La búsqueda de productos debe mostrar resultados instantáneamente mientras el usuario escribe.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.2 Usabilidad</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-004</div>
+                    <div class="requirement-title">Facilidad de Uso</div>
+                    <div class="requirement-desc">La interfaz debe ser intuitiva y no requerir capacitación previa para usuarios básicos.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-005</div>
+                    <div class="requirement-title">Navegación Intuitiva</div>
+                    <div class="requirement-desc">La navegación entre secciones debe ser clara y consistente en toda la aplicación.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-006</div>
+                    <div class="requirement-title">Feedback Visual</div>
+                    <div class="requirement-desc">Todas las acciones del usuario deben tener feedback visual claro (botones, mensajes, animaciones).</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-007</div>
+                    <div class="requirement-title">Mensajes de Error</div>
+                    <div class="requirement-desc">Los mensajes de error deben ser claros y proporcionar orientación sobre cómo solucionarlos.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.3 Compatibilidad</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-008</div>
+                    <div class="requirement-title">Compatibilidad con Navegadores</div>
+                    <div class="requirement-desc">La aplicación debe funcionar correctamente en los navegadores más utilizados (Chrome, Firefox, Safari, Edge).</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-009</div>
+                    <div class="requirement-title">Diseño Responsive</div>
+                    <div class="requirement-desc">La aplicación debe adaptarse correctamente a diferentes tamaños de pantalla (móviles, tablets, desktop).</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-010</div>
+                    <div class="requirement-title">Soporte para Dispositivos Móviles</div>
+                    <div class="requirement-desc">La aplicación debe ser completamente funcional en dispositivos móviles con pantallas táctiles.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.4 Seguridad</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-011</div>
+                    <div class="requirement-title">Validación de Datos</div>
+                    <div class="requirement-desc">Todos los datos de entrada deben ser validados tanto en el cliente como en el servidor.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-012</div>
+                    <div class="requirement-title">Protección de Sesiones</div>
+                    <div class="requirement-desc">Las sesiones de usuario deben ser seguras y protegidas contra accesos no autorizados.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-013</div>
+                    <div class="requirement-title">Sanitización de Entrada</div>
+                    <div class="requirement-desc">Todos los datos de entrada deben ser sanitizados para prevenir inyección de código.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.5 Mantenibilidad</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-014</div>
+                    <div class="requirement-title">Código Limpio</div>
+                    <div class="requirement-desc">El código debe estar bien documentado y seguir buenas prácticas de desarrollo.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-015</div>
+                    <div class="requirement-title">Modularidad</div>
+                    <div class="requirement-desc">El código debe estar organizado en módulos lógicos para facilitar el mantenimiento.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-016</div>
+                    <div class="requirement-title">Escalabilidad</div>
+                    <div class="requirement-desc">La arquitectura debe permitir la adición de nuevas funcionalidades sin afectar las existentes.</div>
+                    <span class="requirement-priority priority-low">BAJA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.6 Disponibilidad</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-017</div>
+                    <div class="requirement-title">Funcionamiento Offline</div>
+                    <div class="requirement-desc">La aplicación debe funcionar sin conexión a internet para funcionalidades básicas.</div>
+                    <span class="requirement-priority priority-low">BAJA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-018</div>
+                    <div class="requirement-title">Recuperación de Datos</div>
+                    <div class="requirement-desc">Los datos deben persistir en el navegador y recuperarse automáticamente al recargar la página.</div>
+                    <span class="requirement-priority priority-high">ALTA</span>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">3.7 Estética y Diseño</h3>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-019</div>
+                    <div class="requirement-title">Diseño Moderno</div>
+                    <div class="requirement-desc">La interfaz debe tener un diseño moderno, atractivo y profesional.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-020</div>
+                    <div class="requirement-title">Consistencia Visual</div>
+                    <div class="requirement-desc">Todos los elementos de la interfaz deben seguir un esquema de colores y tipografía consistente.</div>
+                    <span class="requirement-priority priority-medium">MEDIA</span>
+                </div>
+                
+                <div class="requirement">
+                    <div class="requirement-id">RNF-021</div>
+                    <div class="requirement-title">Animaciones Suaves</div>
+                    <div class="requirement-desc">Las transiciones y animaciones deben ser suaves y mejorar la experiencia del usuario.</div>
+                    <span class="requirement-priority priority-low">BAJA</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">4. ESPECIFICACIONES TÉCNICAS</h2>
+            
+            <div class="tech-specs">
+                <h4>4.1 Tecnologías Utilizadas</h4>
+                <ul>
+                    <li><strong>HTML5:</strong> Estructura semántica y accesible</li>
+                    <li><strong>CSS3:</strong> Estilos modernos con Flexbox y Grid</li>
+                    <li><strong>JavaScript ES6+:</strong> Funcionalidad interactiva</li>
+                    <li><strong>Font Awesome:</strong> Iconografía</li>
+                    <li><strong>Google Fonts:</strong> Tipografía Poppins</li>
+                    <li><strong>LocalStorage:</strong> Persistencia de datos</li>
+                </ul>
+            </div>
+            
+            <div class="tech-specs">
+                <h4>4.2 Arquitectura del Sistema</h4>
+                <ul>
+                    <li><strong>Frontend:</strong> Aplicación web de una sola página (SPA)</li>
+                    <li><strong>Almacenamiento:</strong> LocalStorage del navegador</li>
+                    <li><strong>Navegación:</strong> Sistema de pestañas y modales</li>
+                    <li><strong>Estado:</strong> Gestión de estado con JavaScript vanilla</li>
+                </ul>
+            </div>
+            
+            <div class="tech-specs">
+                <h4>4.3 Estructura de Datos</h4>
+                <ul>
+                    <li><strong>Productos:</strong> ID, código, nombre, descripción, precio, stock, peso</li>
+                    <li><strong>Insumos:</strong> ID, nombre, tipo, cantidad, unidad</li>
+                    <li><strong>Pedidos:</strong> ID, cliente, items, total, método de pago, estado, fecha</li>
+                    <li><strong>Usuarios:</strong> Nombre, email, teléfono, ubicación, tipo (admin/cliente)</li>
+                </ul>
+            </div>
+            
+            <div class="tech-specs">
+                <h4>4.4 Características de Diseño</h4>
+                <ul>
+                    <li><strong>Colores:</strong> Naranja (#ff6b35) y Turquesa (#20c997)</li>
+                    <li><strong>Tipografía:</strong> Poppins (Google Fonts)</li>
+                    <li><strong>Iconos:</strong> Font Awesome 6.0</li>
+                    <li><strong>Responsive:</strong> Mobile-first design</li>
+                    <li><strong>Animaciones:</strong> CSS transitions y transforms</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">5. CASOS DE USO PRINCIPALES</h2>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">5.1 Casos de Uso del Administrador</h3>
+                <ul>
+                    <li><strong>Gestionar Inventario:</strong> Añadir, editar y eliminar productos</li>
+                    <li><strong>Controlar Insumos:</strong> Administrar ingredientes y materias primas</li>
+                    <li><strong>Procesar Pedidos:</strong> Ver, confirmar y marcar pedidos como entregados</li>
+                    <li><strong>Monitorear Stock:</strong> Revisar niveles de inventario</li>
+                </ul>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">5.2 Casos de Uso del Cliente</h3>
+                <ul>
+                    <li><strong>Explorar Catálogo:</strong> Ver productos disponibles y buscar por nombre</li>
+                    <li><strong>Realizar Compras:</strong> Agregar productos al carrito y realizar pedidos</li>
+                    <li><strong>Gestionar Pedidos:</strong> Ver el estado de sus pedidos</li>
+                    <li><strong>Elegir Método de Pago:</strong> Pagar online o contraentrega</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">6. CRITERIOS DE ACEPTACIÓN GENERALES</h2>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">6.1 Funcionalidad</h3>
+                <ul>
+                    <li>Todos los formularios deben validar datos de entrada</li>
+                    <li>Los mensajes de error deben ser claros y útiles</li>
+                    <li>Las acciones del usuario deben tener feedback inmediato</li>
+                    <li>Los datos deben persistir entre sesiones</li>
+                </ul>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">6.2 Usabilidad</h3>
+                <ul>
+                    <li>La interfaz debe ser intuitiva para usuarios sin experiencia</li>
+                    <li>La navegación debe ser consistente en toda la aplicación</li>
+                    <li>Los botones y enlaces deben ser claramente identificables</li>
+                    <li>La aplicación debe funcionar correctamente en dispositivos móviles</li>
+                </ul>
+            </div>
+            
+            <div class="subsection">
+                <h3 class="subsection-title">6.3 Rendimiento</h3>
+                <ul>
+                    <li>La aplicación debe cargar en menos de 3 segundos</li>
+                    <li>Las búsquedas deben ser instantáneas</li>
+                    <li>Las animaciones deben ser suaves (60fps)</li>
+                    <li>No debe haber bloqueos de la interfaz</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Mordipets - Galletas para Perros</strong></p>
+            <p>Documento de Requisitos Funcionales y No Funcionales</p>
+            <p>Versión 1.0 | Enero 2025</p>
+        </div>
+    </div>
+</body>
+</html>
