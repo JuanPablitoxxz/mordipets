@@ -5,9 +5,10 @@
   "main": "index.html",
   "scripts": {
     "start": "npx serve -s . -l $PORT",
-    "build": "echo 'No build step required for static site'",
+    "build": "chmod +x mordipets && chmod +x mordipets.sh",
     "dev": "npx serve -s . -l 3000",
-    "mordipets": "npx serve -s . -l $PORT"
+    "mordipets": "npx serve -s . -l $PORT",
+    "postinstall": "chmod +x mordipets && chmod +x mordipets.sh"
   },
   "keywords": [
     "galletas",

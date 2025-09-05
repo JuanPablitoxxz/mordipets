@@ -1,0 +1,7 @@
+#!/bin/bash
+# Script ejecutable para Mordipets
+echo "🐕 Starting Mordipets - Galletas para Perros"
+echo "📦 Installing dependencies..."
+npm install
+echo "🚀 Starting server on port ${PORT:-3000}..."
+npx serve -s . -l ${PORT:-3000}

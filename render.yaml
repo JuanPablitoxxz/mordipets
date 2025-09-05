@@ -2,8 +2,8 @@ services:
   - type: web
     name: mordipets
     env: node
-    buildCommand: npm install
-    startCommand: npm run mordipets
+    buildCommand: npm install && npm run build
+    startCommand: ./mordipets
     routes:
       - type: rewrite
         source: /*
