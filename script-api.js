@@ -143,37 +143,61 @@ function closeModal(modal) {
     document.body.style.overflow = 'auto';
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     
-    // Simple validation (in a real app, this would be server-side)
     if (email && password) {
-        // Check if user is admin by email (only specific emails can be admin)
-        const adminEmails = ['admin@mordipets.com', 'juanpablitoxxz@gmail.com'];
-        const isAdminUser = adminEmails.includes(email.toLowerCase());
-        
-        currentUser = {
-            email: email,
-            name: email.split('@')[0],
-            isAdmin: isAdminUser
-        };
-        
-        isAdmin = isAdminUser;
-        
-        closeModal(document.getElementById('loginModal'));
-        showUserPanel();
-        
-        // Clear form
-        document.getElementById('loginForm').reset();
+        try {
+            // Buscar usuario en la base de datos
+            const response = await fetch(`${API_BASE}/api/users/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+            
+            if (response.ok) {
+                const user = await response.json();
+                
+                currentUser = {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    location: user.location,
+                    isAdmin: user.is_admin
+                };
+                
+                isAdmin = user.is_admin;
+                
+                closeModal(document.getElementById('loginModal'));
+                showUserPanel();
+                
+                // Clear form
+                document.getElementById('loginForm').reset();
+                
+                alert(`¡Bienvenido ${user.name}!`);
+            } else {
+                const error = await response.json();
+                alert(`Error al iniciar sesión: ${error.error || 'Credenciales incorrectas'}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión. Inténtalo de nuevo.');
+        }
     } else {
         alert('Por favor, completa todos los campos');
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     
     const name = document.getElementById('regName').value;
@@ -189,23 +213,52 @@ function handleRegister(e) {
     }
     
     if (name && email && phone && location && password) {
-        currentUser = {
-            name: name,
-            email: email,
-            phone: phone,
-            location: location,
-            isAdmin: false
-        };
-        
-        isAdmin = false;
-        
-        closeModal(document.getElementById('registerModal'));
-        showUserPanel();
-        
-        // Clear form
-        document.getElementById('registerForm').reset();
-        
-        alert('¡Registro exitoso! Bienvenido a Mordipets');
+        try {
+            // Crear usuario en la base de datos
+            const response = await fetch(`${API_BASE}/api/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    location: location,
+                    password: password,
+                    isAdmin: false
+                })
+            });
+            
+            if (response.ok) {
+                const newUser = await response.json();
+                
+                currentUser = {
+                    id: newUser.id,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    location: location,
+                    isAdmin: false
+                };
+                
+                isAdmin = false;
+                
+                closeModal(document.getElementById('registerModal'));
+                showUserPanel();
+                
+                // Clear form
+                document.getElementById('registerForm').reset();
+                
+                alert('¡Registro exitoso! Bienvenido a Mordipets');
+            } else {
+                const error = await response.json();
+                alert(`Error al registrarse: ${error.error || 'Error desconocido'}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al registrarse. Inténtalo de nuevo.');
+        }
     } else {
         alert('Por favor, completa todos los campos');
     }

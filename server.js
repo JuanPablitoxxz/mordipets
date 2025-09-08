@@ -28,6 +28,58 @@ async function startServer() {
 
 // Rutas API
 
+// Crear un nuevo usuario
+app.post('/api/users', async (req, res) => {
+  try {
+    const { name, email, phone, location, password, isAdmin } = req.body;
+    
+    // Verificar si el email ya existe
+    const existingUser = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+    
+    const result = await pool.query(
+      'INSERT INTO users (name, email, phone, location, password, is_admin) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [name, email, phone, location, password, isAdmin || false]
+    );
+    
+    // No devolver la contraseña
+    const user = result.rows[0];
+    delete user.password;
+    
+    res.status(201).json(user);
+  } catch (error) {
+    console.error('Error creando usuario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Login de usuario
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1 AND password = $2',
+      [email, password]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Credenciales incorrectas' });
+    }
+    
+    // No devolver la contraseña
+    const user = result.rows[0];
+    delete user.password;
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Error en login:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // Obtener todos los productos
 app.get('/api/products', async (req, res) => {
   try {
