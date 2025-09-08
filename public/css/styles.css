@@ -202,35 +202,75 @@ body {
 }
 
 .product-showcase {
-    display: flex;
-    gap: 30px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
     align-items: end;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .product-item {
     text-align: center;
+    transition: transform 0.3s ease;
 }
 
-.product-bottle {
-    width: 80px;
+.product-item:hover {
+    transform: translateY(-10px);
+}
+
+.product-image {
+    width: 100px;
     height: 120px;
+    object-fit: cover;
     border-radius: 15px;
     margin-bottom: 15px;
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    border: 3px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
 }
 
-.galleta-leche {
-    background: linear-gradient(135deg, #87ceeb, #4682b4);
-}
-
-.galleta-carne {
-    background: linear-gradient(135deg, #cd853f, #8b4513);
+.product-image:hover {
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.4);
 }
 
 .product-item span {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 12px;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    display: block;
+    margin-top: 5px;
+}
+
+/* Responsive design for product showcase */
+@media (max-width: 768px) {
+    .product-showcase {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    
+    .product-image {
+        width: 80px;
+        height: 100px;
+    }
+    
+    .product-item span {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-showcase {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .product-image {
+        width: 70px;
+        height: 90px;
+    }
 }
 
 /* Modal Styles */
