@@ -2,12 +2,12 @@
   "name": "mordipets",
   "version": "1.0.0",
   "description": "Aplicación web para gestión y venta de galletas para perros",
-  "main": "index.html",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server.js",
     "build": "echo 'Build completed - server ready'",
-    "dev": "node server.js",
-    "mordipets": "node server.js"
+    "dev": "node src/server.js",
+    "mordipets": "node src/server.js"
   },
   "keywords": [
     "galletas",

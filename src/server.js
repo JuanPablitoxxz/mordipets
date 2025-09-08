@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));
+app.use(express.static('../public'));
 
 // Inicializar base de datos al arrancar
 async function startServer() {
@@ -288,7 +288,7 @@ app.put('/api/orders/:id/status', async (req, res) => {
 
 // Ruta para servir la aplicación principal
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Iniciar servidor

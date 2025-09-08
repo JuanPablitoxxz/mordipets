@@ -1,128 +1,198 @@
-# 🐕 Mordipets - Galletas para Perros
+# Mordipets - Galletas para Perros 🐕
 
-Una aplicación web moderna para la gestión y venta de galletas para perros, desarrollada con HTML, CSS y JavaScript.
+Aplicación web completa para la gestión y venta de galletas para perros, desarrollada con Node.js, Express, PostgreSQL y una interfaz web moderna.
 
-## 🌟 Características
-
-### 👥 Sistema de Usuarios
-- **Registro de clientes** con información completa
-- **Login diferenciado** para administradores y clientes
-- **Gestión de perfiles** de usuario
-
-### 👨‍💼 Panel de Administración
-- **Gestión de inventario** - Añadir, editar y eliminar productos
-- **Control de insumos** - Administrar ingredientes y materias primas
-- **Gestión de pedidos** - Ver y administrar órdenes de clientes
-- **Seguimiento de stock** en tiempo real
-
-### 🛒 Panel de Clientes
-- **Catálogo de productos** con información detallada
-- **Sistema de carrito** de compras
-- **Búsqueda de productos** por nombre
-- **Sistema de pedidos** con dos opciones de pago:
-  - 💳 Pago online
-  - 🚚 Pago contraentrega
-
-## 🍪 Productos Disponibles
-
-### Galletas Tradicionales (1000 gr)
-- Galleta Leche - $15.500
-- Galleta Carne - $16.000
-- Galleta Pollo - $15.750
-- Galleta Hígado - $17.000
-- Galleta Espinaca - $16.250
-- Galleta Zanahoria - $15.000
-- Galleta Avena - $14.750
-- Galleta Linaza - $16.500
-
-### Galletas Especiales (1000 gr)
-- Galleta Monedita Leche - $18.000
-- Galleta Monedita Carne - $18.500
-- Galleta Mixta - $17.250
-- Galleta Polvorosa - $16.750
-
-### Paquetes Pequeños
-- Huesito 3/4 Paquete x2 (85 gr) - $8.500
-- Paquete pequeño x12 (35 gr) - $12.000
-- Paquete x8 (40 gr) - $10.500
-
-## 🚀 Cómo Usar
-
-### Para Clientes
-1. **Registrarse** con tus datos personales
-2. **Explorar el catálogo** de galletas disponibles
-3. **Agregar productos** al carrito
-4. **Realizar pedido** con tu método de pago preferido
-
-### Para Administradores
-1. **Iniciar sesión** marcando "Soy Administrador"
-2. **Gestionar inventario** - Añadir nuevos productos
-3. **Controlar insumos** - Administrar ingredientes
-4. **Revisar pedidos** - Confirmar y gestionar entregas
-
-## 🛠️ Tecnologías Utilizadas
-
-- **HTML5** - Estructura semántica
-- **CSS3** - Diseño responsive y moderno
-- **JavaScript ES6+** - Funcionalidad interactiva
-- **Font Awesome** - Iconografía
-- **Google Fonts** - Tipografía Poppins
-- **LocalStorage** - Persistencia de datos
-
-## 🎨 Diseño
-
-- **Colores principales**: Naranja (#ff6b35) y Turquesa (#20c997)
-- **Diseño responsive** para móviles y tablets
-- **Animaciones suaves** y transiciones elegantes
-- **Interfaz intuitiva** y fácil de usar
-
-## 📱 Responsive Design
-
-La aplicación está optimizada para:
-- 💻 Desktop
-- 📱 Móviles
-- 📱 Tablets
-
-## 🔧 Instalación
-
-1. **Clona el repositorio**:
-   ```bash
-   git clone https://github.com/tu-usuario/mordipets.git
-   ```
-
-2. **Navega al directorio**:
-   ```bash
-   cd mordipets
-   ```
-
-3. **Abre el archivo** `index.html` en tu navegador
-
-## 📁 Estructura del Proyecto
+## 🏗️ Estructura del Proyecto
 
 ```
 mordipets/
-├── index.html          # Página principal
-├── styles.css          # Estilos CSS
-├── script.js           # Funcionalidad JavaScript
-├── logo.jpg           # Logo de la empresa
-└── README.md          # Documentación
+├── public/                 # Archivos públicos del frontend
+│   ├── css/               # Hojas de estilo
+│   │   └── styles.css
+│   ├── images/            # Imágenes de la web
+│   │   └── logo.jpg
+│   ├── js/                # JavaScript del frontend
+│   │   ├── script-api.js  # Script principal con API
+│   │   └── script.js      # Script original (backup)
+│   └── index.html         # Página principal
+├── src/                   # Código del servidor
+│   ├── server.js          # Servidor Express
+│   └── database.js        # Configuración de PostgreSQL
+├── scripts/               # Scripts de utilidad
+│   ├── *.sh              # Scripts de instalación
+│   ├── *.bat             # Scripts de Windows
+│   ├── *.py              # Scripts de Python
+│   └── mordipets*        # Scripts específicos
+├── docs/                  # Documentación
+│   └── requisitos-mordipets.html
+├── package.json           # Dependencias y scripts
+├── Dockerfile            # Configuración de Docker
+├── render.yaml           # Configuración de Render
+├── vercel.json           # Configuración de Vercel
+└── README.md             # Este archivo
 ```
 
-## 🌟 Características Destacadas
+## 🚀 Características
 
-- ✅ **Diseño moderno** y profesional
-- ✅ **Sistema de autenticación** completo
-- ✅ **Gestión de inventario** en tiempo real
-- ✅ **Carrito de compras** funcional
-- ✅ **Sistema de pedidos** con múltiples métodos de pago
-- ✅ **Búsqueda de productos** en tiempo real
-- ✅ **Persistencia de datos** con LocalStorage
-- ✅ **Diseño responsive** para todos los dispositivos
+### Para Administradores
+- ✅ Gestión completa de productos
+- ✅ Gestión de ingredientes e insumos
+- ✅ Administración de pedidos
+- ✅ Control de inventario en tiempo real
+- ✅ Panel de administración intuitivo
 
-## 📞 Contacto
+### Para Clientes
+- ✅ Catálogo de productos
+- ✅ Sistema de carrito de compras
+- ✅ Proceso de pedidos
+- ✅ Historial de compras
+- ✅ Búsqueda de productos
 
-Para más información sobre Mordipets, contacta con nosotros.
+### Técnicas
+- ✅ Base de datos PostgreSQL
+- ✅ API REST completa
+- ✅ Interfaz responsive
+- ✅ Autenticación de usuarios
+- ✅ Despliegue en Railway
+
+## 🛠️ Instalación y Configuración
+
+### Requisitos
+- Node.js 18+
+- PostgreSQL
+- npm o yarn
+
+### Instalación Local
+```bash
+# Clonar el repositorio
+git clone https://github.com/JuanPablitoxxz/mordipets.git
+cd mordipets
+
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp env.example .env
+# Editar .env con tu configuración de base de datos
+
+# Iniciar el servidor
+npm start
+```
+
+### Variables de Entorno
+```env
+DATABASE_URL=postgresql://usuario:password@host:puerto/database
+NODE_ENV=production
+PORT=3000
+```
+
+## 🗄️ Base de Datos
+
+### Tablas Principales
+- **users**: Usuarios del sistema (admin/clientes)
+- **products**: Catálogo de productos
+- **ingredients**: Insumos e ingredientes
+- **orders**: Pedidos realizados
+- **order_items**: Items de cada pedido
+
+### Usuario Admin por Defecto
+- **Email**: admin@mordipets.com
+- **Contraseña**: admin123
+
+## 🌐 Despliegue
+
+### Railway (Recomendado)
+1. Conectar repositorio de GitHub
+2. Crear servicio PostgreSQL
+3. Configurar variable `DATABASE_URL`
+4. Desplegar automáticamente
+
+### Render
+1. Conectar repositorio
+2. Configurar build y start commands
+3. Agregar base de datos PostgreSQL
+4. Configurar variables de entorno
+
+### Vercel
+1. Conectar repositorio
+2. Configurar vercel.json
+3. Desplegar automáticamente
+
+## 📱 Uso de la Aplicación
+
+### Registro de Clientes
+1. Hacer clic en "Registrarse"
+2. Completar formulario
+3. Acceso automático como cliente
+
+### Login de Administradores
+1. Hacer clic en "Iniciar Sesión"
+2. Usar credenciales de admin
+3. Acceso al panel de administración
+
+### Gestión de Productos (Admin)
+1. Ir a "Inventario"
+2. Agregar/editar/eliminar productos
+3. Controlar stock y precios
+
+### Realizar Pedidos (Cliente)
+1. Explorar catálogo
+2. Agregar productos al carrito
+3. Proceder al checkout
+4. Seleccionar método de pago
+
+## 🛡️ Seguridad
+
+- Contraseñas almacenadas en base de datos
+- Validación de formularios
+- Autenticación por email
+- Roles de usuario (admin/cliente)
+
+## 🔧 Desarrollo
+
+### Scripts Disponibles
+```bash
+npm start      # Iniciar servidor de producción
+npm run dev    # Iniciar servidor de desarrollo
+npm run build  # Build del proyecto
+```
+
+### Estructura de API
+```
+GET    /api/products      # Obtener productos
+POST   /api/products      # Crear producto
+PUT    /api/products/:id  # Actualizar producto
+DELETE /api/products/:id  # Eliminar producto
+
+GET    /api/ingredients   # Obtener ingredientes
+POST   /api/ingredients   # Crear ingrediente
+
+GET    /api/orders        # Obtener pedidos
+POST   /api/orders        # Crear pedido
+PUT    /api/orders/:id/status # Actualizar estado
+
+POST   /api/users         # Registrar usuario
+POST   /api/users/login   # Login de usuario
+```
+
+## 📄 Licencia
+
+MIT License - Ver archivo LICENSE para más detalles.
+
+## 👨‍💻 Autor
+
+**JuanPablitoxxz**
+- GitHub: [@JuanPablitoxxz](https://github.com/JuanPablitoxxz)
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor:
+1. Fork el proyecto
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
+5. Abre un Pull Request
 
 ---
 
-**Mordipets** - La mejor opción en galletas para perros 🐕✨
+🐕 **Mordipets** - Galletas para Perros de Calidad Premium
