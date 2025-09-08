@@ -186,6 +186,32 @@
                     <i class="fas fa-plus"></i> Añadir Producto
                 </button>
             </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="inventory-controls">
+                <div class="search-bar">
+                    <input type="text" id="searchProducts" placeholder="Buscar productos...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="filter-controls">
+                    <select id="stockFilter">
+                        <option value="all">Todos los productos</option>
+                        <option value="in-stock">En stock</option>
+                        <option value="low-stock">Stock bajo</option>
+                        <option value="out-of-stock">Sin stock</option>
+                    </select>
+                    <select id="sortProducts">
+                        <option value="name">Ordenar por nombre</option>
+                        <option value="price">Ordenar por precio</option>
+                        <option value="stock">Ordenar por stock</option>
+                        <option value="date">Ordenar por fecha</option>
+                    </select>
+                    <button class="btn-secondary btn-small" id="clearFiltersBtn">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+            
             <div class="products-grid" id="productsGrid">
                 <!-- Products will be loaded here -->
             </div>

@@ -126,7 +126,12 @@ function setupEventListeners() {
     document.getElementById('addIngredientBtn').addEventListener('click', () => openModal(addIngredientModal));
     
     // Search functionality
-    document.getElementById('searchProducts').addEventListener('input', handleSearch);
+    document.getElementById('searchProducts').addEventListener('input', handleProductSearch);
+    
+    // Filter functionality
+    document.getElementById('stockFilter').addEventListener('change', handleProductFilter);
+    document.getElementById('sortProducts').addEventListener('change', handleProductSort);
+    document.getElementById('clearFiltersBtn').addEventListener('click', clearProductFilters);
     
     // Order buttons
     document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
@@ -496,7 +501,10 @@ function createOrderCard(order) {
 async function handleAddProduct(e) {
     e.preventDefault();
     
-    const newProduct = {
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const isEditing = submitBtn.dataset.productId;
+    
+    const productData = {
         code: document.getElementById('productCode').value,
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
@@ -506,32 +514,66 @@ async function handleAddProduct(e) {
     };
     
     try {
-        const response = await fetch(`${API_BASE}/api/products`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newProduct)
-        });
+        let response;
+        if (isEditing) {
+            // Update existing product
+            response = await fetch(`${API_BASE}/api/products/${isEditing}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData)
+            });
+        } else {
+            // Create new product
+            response = await fetch(`${API_BASE}/api/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(productData)
+            });
+        }
         
         if (response.ok) {
-            const createdProduct = await response.json();
-            products.push(createdProduct);
+            const updatedProduct = await response.json();
+            
+            if (isEditing) {
+                // Update existing product in array
+                const index = products.findIndex(p => p.id === parseInt(isEditing));
+                if (index !== -1) {
+                    products[index] = updatedProduct;
+                }
+                alert('Producto actualizado exitosamente');
+            } else {
+                // Add new product to array
+                products.push(updatedProduct);
+                alert('Producto añadido exitosamente');
+            }
             
             closeModal(document.getElementById('addProductModal'));
             loadProductsGrid();
             
-            // Clear form
+            // Reset form and button
             document.getElementById('addProductForm').reset();
-            
-            alert('Producto añadido exitosamente');
+            resetProductForm();
         } else {
-            throw new Error('Error al crear producto');
+            throw new Error(isEditing ? 'Error al actualizar producto' : 'Error al crear producto');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al añadir el producto');
+        alert(isEditing ? 'Error al actualizar el producto' : 'Error al añadir el producto');
     }
+}
+
+function resetProductForm() {
+    const modal = document.getElementById('addProductModal');
+    const title = modal.querySelector('h2');
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    
+    title.textContent = 'Añadir Nuevo Producto';
+    submitBtn.textContent = 'Añadir Producto';
+    delete submitBtn.dataset.productId;
 }
 
 async function handleAddIngredient(e) {
@@ -680,11 +722,63 @@ function switchAdminSection(section) {
     });
     document.querySelector(`[data-section="${section}"]`).classList.add('active');
     
-    // Show/hide sections
+    // Show/hide sections with animation
     document.querySelectorAll('.admin-section').forEach(sec => {
         sec.classList.add('hidden');
     });
-    document.getElementById(`${section}Section`).classList.remove('hidden');
+    
+    const targetSection = document.getElementById(`${section}Section`);
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+        
+        // Add loading state and refresh data
+        showSectionLoading(section);
+        
+        // Load section-specific data
+        setTimeout(() => {
+            loadSectionData(section);
+            hideSectionLoading(section);
+        }, 300);
+    }
+}
+
+function showSectionLoading(section) {
+    const targetSection = document.getElementById(`${section}Section`);
+    if (targetSection) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'section-loading';
+        loadingDiv.innerHTML = `
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Cargando ${section}...</span>
+            </div>
+        `;
+        targetSection.appendChild(loadingDiv);
+    }
+}
+
+function hideSectionLoading(section) {
+    const targetSection = document.getElementById(`${section}Section`);
+    if (targetSection) {
+        const loadingDiv = targetSection.querySelector('.section-loading');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+    }
+}
+
+function loadSectionData(section) {
+    switch(section) {
+        case 'inventario':
+            loadProductsGrid();
+            break;
+        case 'insumos':
+            loadIngredientsGrid();
+            break;
+        case 'pedidos':
+            loadOrdersList();
+            break;
+    }
 }
 
 function switchClientSection(section) {
@@ -713,6 +807,99 @@ function handleSearch(e) {
             card.style.display = 'none';
         }
     });
+}
+
+function handleProductSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.product-card');
+    
+    cards.forEach(card => {
+        const productName = card.querySelector('h4').textContent.toLowerCase();
+        const productCode = card.querySelector('p').textContent.toLowerCase();
+        
+        if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function handleProductFilter(e) {
+    const filterValue = e.target.value;
+    const cards = document.querySelectorAll('.product-card');
+    
+    cards.forEach(card => {
+        const stockElement = card.querySelector('.stock');
+        const stockText = stockElement.textContent.toLowerCase();
+        
+        let shouldShow = true;
+        
+        switch(filterValue) {
+            case 'in-stock':
+                shouldShow = !stockText.includes('sin stock') && !stockText.includes('stock bajo');
+                break;
+            case 'low-stock':
+                shouldShow = stockText.includes('stock bajo');
+                break;
+            case 'out-of-stock':
+                shouldShow = stockText.includes('sin stock');
+                break;
+            case 'all':
+            default:
+                shouldShow = true;
+                break;
+        }
+        
+        card.style.display = shouldShow ? 'block' : 'none';
+    });
+}
+
+function handleProductSort(e) {
+    const sortValue = e.target.value;
+    const grid = document.getElementById('productsGrid');
+    const cards = Array.from(grid.querySelectorAll('.product-card'));
+    
+    cards.sort((a, b) => {
+        switch(sortValue) {
+            case 'name':
+                return a.querySelector('h4').textContent.localeCompare(b.querySelector('h4').textContent);
+            case 'price':
+                const priceA = parseFloat(a.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
+                const priceB = parseFloat(b.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
+                return priceA - priceB;
+            case 'stock':
+                const stockA = parseInt(a.querySelector('.stock').textContent.replace(/[^0-9]+/g, '') || 0);
+                const stockB = parseInt(b.querySelector('.stock').textContent.replace(/[^0-9]+/g, '') || 0);
+                return stockB - stockA;
+            case 'date':
+                // For now, just return 0 since we don't have date info
+                return 0;
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    cards.forEach(card => grid.appendChild(card));
+}
+
+function clearProductFilters() {
+    // Reset search input
+    document.getElementById('searchProducts').value = '';
+    
+    // Reset filter selects
+    document.getElementById('stockFilter').value = 'all';
+    document.getElementById('sortProducts').value = 'name';
+    
+    // Show all products
+    const cards = document.querySelectorAll('.product-card');
+    cards.forEach(card => {
+        card.style.display = 'block';
+    });
+    
+    // Reload products grid to reset order
+    loadProductsGrid();
 }
 
 async function updateOrderStatus(orderId, newStatus) {
@@ -744,8 +931,33 @@ async function updateOrderStatus(orderId, newStatus) {
 }
 
 function editProduct(productId) {
-    // In a real application, this would open an edit modal
-    alert('Funcionalidad de edición en desarrollo');
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        alert('Producto no encontrado');
+        return;
+    }
+    
+    // Fill the form with existing data
+    document.getElementById('productCode').value = product.code;
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productDescription').value = product.description;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stock;
+    document.getElementById('productWeight').value = product.weight;
+    
+    // Change form title and button
+    const modal = document.getElementById('addProductModal');
+    const title = modal.querySelector('h2');
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    
+    title.textContent = 'Editar Producto';
+    submitBtn.textContent = 'Actualizar Producto';
+    
+    // Store the product ID for updating
+    submitBtn.dataset.productId = productId;
+    
+    // Open modal
+    openModal(modal);
 }
 
 async function deleteProduct(productId) {
