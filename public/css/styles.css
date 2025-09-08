@@ -704,6 +704,43 @@ body {
     color: #666;
 }
 
+/* Catalog Controls */
+.catalog-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    border: 2px solid #e9ecef;
+}
+
+.catalog-filters {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.catalog-filters select {
+    padding: 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.catalog-filters select:focus {
+    outline: none;
+    border-color: #ff6b35;
+}
+
+.catalog-filters select:hover {
+    border-color: #ff6b35;
+}
+
 /* Inventory Controls */
 .inventory-controls {
     display: flex;
@@ -946,6 +983,59 @@ body {
     left: 100%;
 }
 
+/* Out of Stock Styles for Client Catalog */
+.catalog-card.out-of-stock {
+    opacity: 0.7;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-color: #dee2e6;
+    position: relative;
+}
+
+.catalog-card.out-of-stock::after {
+    content: 'AGOTADA';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transform: rotate(15deg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.catalog-card.out-of-stock:hover {
+    transform: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-color: #dee2e6;
+}
+
+.catalog-card.out-of-stock .price {
+    color: #6c757d;
+    text-decoration: line-through;
+}
+
+.catalog-card.out-of-stock .stock.out {
+    background: #dc3545;
+    color: white;
+    font-weight: 700;
+}
+
+.catalog-card.out-of-stock .btn-add-to-cart:disabled {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.catalog-card.out-of-stock .btn-add-to-cart:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;
@@ -1023,6 +1113,17 @@ body {
     }
     
     .filter-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .catalog-controls {
+        flex-direction: column;
+        gap: 20px;
+        align-items: stretch;
+    }
+    
+    .catalog-filters {
         flex-direction: column;
         gap: 10px;
     }

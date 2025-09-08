@@ -133,6 +133,10 @@ function setupEventListeners() {
     document.getElementById('sortProducts').addEventListener('change', handleProductSort);
     document.getElementById('clearFiltersBtn').addEventListener('click', clearProductFilters);
     
+    // Catalog filter functionality
+    document.getElementById('availabilityFilter').addEventListener('change', handleCatalogFilter);
+    document.getElementById('sortCatalog').addEventListener('change', handleCatalogSort);
+    
     // Order buttons
     document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
     document.getElementById('payOnDeliveryBtn').addEventListener('click', () => handlePayment('delivery'));
@@ -332,10 +336,8 @@ function loadCatalogGrid() {
     grid.innerHTML = '';
     
     products.forEach(product => {
-        if (product.stock > 0) {
-            const catalogCard = createProductCard(product, false);
-            grid.appendChild(catalogCard);
-        }
+        const catalogCard = createProductCard(product, false);
+        grid.appendChild(catalogCard);
     });
 }
 
@@ -343,8 +345,31 @@ function createProductCard(product, isAdmin = false) {
     const card = document.createElement('div');
     card.className = isAdmin ? 'product-card' : 'catalog-card';
     
-    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
-    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock';
+    // Para admin: mostrar stock exacto
+    // Para cliente: mostrar estado más amigable
+    let stockClass, stockText;
+    
+    if (isAdmin) {
+        stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
+        stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock';
+    } else {
+        // Para clientes: mostrar estado más amigable
+        if (product.stock > 10) {
+            stockClass = 'stock';
+            stockText = 'Disponible';
+        } else if (product.stock > 0) {
+            stockClass = 'stock low';
+            stockText = 'Pocas unidades';
+        } else {
+            stockClass = 'stock out';
+            stockText = 'Agotada';
+        }
+    }
+    
+    // Agregar clase especial para productos agotados en el catálogo
+    if (!isAdmin && product.stock === 0) {
+        card.classList.add('out-of-stock');
+    }
     
     card.innerHTML = `
         <h4>${product.name}</h4>
@@ -365,7 +390,7 @@ function createProductCard(product, isAdmin = false) {
                 </button>
             ` : `
                 <button class="btn-small btn-add-to-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                    <i class="fas fa-cart-plus"></i> ${product.stock === 0 ? 'Agotada' : 'Agregar al Carrito'}
                 </button>
             `}
         </div>
@@ -900,6 +925,68 @@ function clearProductFilters() {
     
     // Reload products grid to reset order
     loadProductsGrid();
+}
+
+function handleCatalogFilter(e) {
+    const filterValue = e.target.value;
+    const cards = document.querySelectorAll('.catalog-card');
+    
+    cards.forEach(card => {
+        const stockElement = card.querySelector('.stock');
+        const stockText = stockElement.textContent.toLowerCase();
+        
+        let shouldShow = true;
+        
+        switch(filterValue) {
+            case 'available':
+                shouldShow = stockText.includes('disponible');
+                break;
+            case 'low-stock':
+                shouldShow = stockText.includes('pocas unidades');
+                break;
+            case 'out-of-stock':
+                shouldShow = stockText.includes('agotada');
+                break;
+            case 'all':
+            default:
+                shouldShow = true;
+                break;
+        }
+        
+        card.style.display = shouldShow ? 'block' : 'none';
+    });
+}
+
+function handleCatalogSort(e) {
+    const sortValue = e.target.value;
+    const grid = document.getElementById('catalogGrid');
+    const cards = Array.from(grid.querySelectorAll('.catalog-card'));
+    
+    cards.sort((a, b) => {
+        switch(sortValue) {
+            case 'name':
+                return a.querySelector('h4').textContent.localeCompare(b.querySelector('h4').textContent);
+            case 'price':
+                const priceA = parseFloat(a.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
+                const priceB = parseFloat(b.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
+                return priceA - priceB;
+            case 'availability':
+                const stockA = a.querySelector('.stock').textContent.toLowerCase();
+                const stockB = b.querySelector('.stock').textContent.toLowerCase();
+                
+                // Disponible primero, luego pocas unidades, luego agotadas
+                if (stockA.includes('disponible') && !stockB.includes('disponible')) return -1;
+                if (!stockA.includes('disponible') && stockB.includes('disponible')) return 1;
+                if (stockA.includes('pocas') && stockB.includes('agotada')) return -1;
+                if (stockA.includes('agotada') && stockB.includes('pocas')) return 1;
+                return 0;
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    cards.forEach(card => grid.appendChild(card));
 }
 
 async function updateOrderStatus(orderId, newStatus) {

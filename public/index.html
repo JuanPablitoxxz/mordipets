@@ -256,10 +256,25 @@
         <!-- Catálogo Section -->
         <div id="catalogoSection" class="client-section">
             <div class="catalog-header">
-                <h3>Nuestras Galletas Disponibles</h3>
-                <div class="search-bar">
-                    <input type="text" id="searchProducts" placeholder="Buscar galletas...">
-                    <i class="fas fa-search"></i>
+                <h3>Nuestras Galletas</h3>
+                <div class="catalog-controls">
+                    <div class="search-bar">
+                        <input type="text" id="searchProducts" placeholder="Buscar galletas...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="catalog-filters">
+                        <select id="availabilityFilter">
+                            <option value="all">Todas las galletas</option>
+                            <option value="available">Solo disponibles</option>
+                            <option value="low-stock">Pocas unidades</option>
+                            <option value="out-of-stock">Solo agotadas</option>
+                        </select>
+                        <select id="sortCatalog">
+                            <option value="name">Ordenar por nombre</option>
+                            <option value="price">Ordenar por precio</option>
+                            <option value="availability">Disponibles primero</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="catalog-grid" id="catalogGrid">
