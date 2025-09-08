@@ -87,6 +87,35 @@ async function initializeDatabase() {
   }
 }
 
+// Función para crear usuario admin por defecto
+async function createDefaultAdmin() {
+  try {
+    // Verificar si ya existe un admin
+    const adminCheck = await pool.query('SELECT COUNT(*) FROM users WHERE is_admin = true');
+    if (adminCheck.rows[0].count > 0) {
+      console.log('👤 El usuario admin ya existe');
+      return;
+    }
+
+    // Crear usuario admin por defecto
+    await pool.query(`
+      INSERT INTO users (name, email, phone, location, password, is_admin) 
+      VALUES ($1, $2, $3, $4, $5, $6)
+    `, [
+      'Administrador Mordipets',
+      'admin@mordipets.com',
+      '3001234567',
+      'Bogotá, Colombia',
+      'admin123', // En producción, esto debería estar hasheado
+      true
+    ]);
+
+    console.log('✅ Usuario admin creado: admin@mordipets.com / admin123');
+  } catch (error) {
+    console.error('❌ Error creando usuario admin:', error);
+  }
+}
+
 // Función para insertar datos de ejemplo
 async function insertSampleData() {
   try {
@@ -148,5 +177,6 @@ async function insertSampleData() {
 module.exports = {
   pool,
   initializeDatabase,
-  insertSampleData
+  insertSampleData,
+  createDefaultAdmin
 };

@@ -148,17 +148,20 @@ function handleLogin(e) {
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    const isAdminCheck = document.getElementById('isAdmin').checked;
     
     // Simple validation (in a real app, this would be server-side)
     if (email && password) {
+        // Check if user is admin by email (only specific emails can be admin)
+        const adminEmails = ['admin@mordipets.com', 'juanpablitoxxz@gmail.com'];
+        const isAdminUser = adminEmails.includes(email.toLowerCase());
+        
         currentUser = {
             email: email,
             name: email.split('@')[0],
-            isAdmin: isAdminCheck
+            isAdmin: isAdminUser
         };
         
-        isAdmin = isAdminCheck;
+        isAdmin = isAdminUser;
         
         closeModal(document.getElementById('loginModal'));
         showUserPanel();

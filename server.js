@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { pool, initializeDatabase, insertSampleData } = require('./database');
+const { pool, initializeDatabase, insertSampleData, createDefaultAdmin } = require('./database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +15,7 @@ app.use(express.static('.'));
 async function startServer() {
   try {
     await initializeDatabase();
+    await createDefaultAdmin();
     await insertSampleData();
     
     app.listen(PORT, () => {
