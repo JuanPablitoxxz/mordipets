@@ -13,7 +13,11 @@ RUN npm install
 # Copiar todos los archivos del proyecto
 COPY . .
 
-# Exponer el puerto 3000
+# Hacer ejecutables los scripts si existen
+RUN if [ -f "mordipets" ]; then chmod +x mordipets; fi
+RUN if [ -f "mordipets.sh" ]; then chmod +x mordipets.sh; fi
+
+# Exponer el puerto (Render asignará el puerto automáticamente)
 EXPOSE 3000
 
 # Comando para iniciar la aplicación

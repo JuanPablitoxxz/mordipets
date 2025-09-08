@@ -4,11 +4,10 @@
   "description": "Aplicación web para gestión y venta de galletas para perros",
   "main": "index.html",
   "scripts": {
-    "start": "npx serve -s . -l $PORT",
-    "build": "chmod +x mordipets",
-    "dev": "npx serve -s . -l 3000",
-    "mordipets": "npx serve -s . -l $PORT",
-    "postinstall": "chmod +x mordipets"
+    "start": "serve -s . -l $PORT",
+    "build": "echo 'Build completed - static site ready'",
+    "dev": "serve -s . -l 3000",
+    "mordipets": "serve -s . -l $PORT"
   },
   "keywords": [
     "galletas",
@@ -19,7 +18,7 @@
   ],
   "author": "JuanPablitoxxz",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "serve": "^14.2.1"
   },
   "engines": {

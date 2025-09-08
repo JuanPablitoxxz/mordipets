@@ -1,1 +1,1 @@
-web: npm run mordipets
+web: npm start
