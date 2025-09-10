@@ -93,7 +93,7 @@ function createPublicProductCard(product) {
     const card = document.createElement('div');
     card.className = 'producto-card';
     
-    // Mapeo de nombres de productos a archivos de imagen
+    // Mapeo de nombres de productos a archivos de imagen (solo las que existen)
     const imageMap = {
         'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
         'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
@@ -102,26 +102,26 @@ function createPublicProductCard(product) {
         'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
         'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
         'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-        'Galleta Linaza x 1000 gr': 'galletasLinaza.jpg',
-        'Galleta Monedita Leche x 1000 gr': 'galletasMoneditaLeche.jpg',
-        'Galleta Monedita Carne x 1000 gr': 'galletasMoneditaCarne.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
+        'Galleta Monedita Leche x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
+        'Galleta Monedita Carne x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
         'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
-        'Galleta Polvorosa x 1000 gr': 'galletasPolvorosa.jpg',
-        'Huesito 3/4 Paquete x2 X 85 grm': 'huesitos.jpg',
-        'Paquete pequeño x 12 unds X 35 gr': 'paquetePequeño.jpg',
-        'Paquete x 8 Unds X 40 gr': 'paquete8unds.jpg'
+        'Galleta Polvorosa x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
+        'Huesito 3/4 Paquete x2 X 85 grm': 'galletasMixtas.jpg', // Usar imagen disponible
+        'Paquete pequeño x 12 unds X 35 gr': 'galletasMixtas.jpg', // Usar imagen disponible
+        'Paquete x 8 Unds X 40 gr': 'galletasMixtas.jpg' // Usar imagen disponible
     };
     
     const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
     
     card.innerHTML = `
         <div class="producto-image">
-            <img src="images/${imageName}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="product-placeholder" style="display:none;">🍪</div>
+            <img src="images/${imageName}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="product-placeholder" style="display:none; width: 100%; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px;">🍪</div>
         </div>
-        <div class="producto-info">
-            <h4>${product.name}</h4>
-            <p class="producto-description">${product.description}</p>
+        <div class="producto-info" style="padding: 15px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #333;">${product.name}</h4>
+            <p class="producto-description" style="margin: 0; font-size: 14px; color: #666; line-height: 1.4;">${product.description}</p>
         </div>
     `;
     
