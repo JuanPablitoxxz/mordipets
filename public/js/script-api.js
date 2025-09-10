@@ -1298,6 +1298,7 @@ function loadSectionData(section) {
 }
 
 function switchClientSection(section) {
+    console.log('=== switchClientSection START ===');
     console.log('switchClientSection called with section:', section);
     
     // Update navigation
@@ -1329,6 +1330,8 @@ function switchClientSection(section) {
     } else {
         console.error('Section not found:', `${section}Section`);
     }
+    
+    console.log('=== switchClientSection END ===');
 }
 
 function handleSearch(e) {
