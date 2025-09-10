@@ -74,8 +74,31 @@ function loadPublicProducts() {
     const grid = document.getElementById('productosGrid');
     if (!grid) return;
     
-    // Mostrar mensaje en lugar de productos
-    grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
+    // Filtrar solo productos que tienen imágenes
+    const productsWithImages = products.filter(product => {
+        const imageMap = {
+            'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
+            'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
+            'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
+            'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
+            'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
+            'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
+            'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
+            'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg'
+        };
+        return imageMap[product.name];
+    });
+    
+    if (productsWithImages.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
+        return;
+    }
+    
+    grid.innerHTML = '';
+    productsWithImages.forEach(product => {
+        const productCard = createPublicProductCard(product);
+        grid.appendChild(productCard);
+    });
 }
 
 function createPublicProductCard(product) {
@@ -325,11 +348,15 @@ function showUserPanel() {
         if (adminPanel) {
             adminPanel.style.display = 'block';
             loadAdminData();
+            // Scroll to admin panel
+            adminPanel.scrollIntoView({ behavior: 'smooth' });
         }
     } else {
         if (clientPanel) {
             clientPanel.style.display = 'block';
             loadClientData();
+            // Scroll to client panel
+            clientPanel.scrollIntoView({ behavior: 'smooth' });
         }
     }
 }
@@ -409,10 +436,10 @@ function createProductCard(product, isAdmin = false) {
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             ` : `
-                <div class="quantity-controls" style="margin-bottom: 10px;">
-                    <button onclick="decreaseQuantity(${product.id})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">-</button>
-                    <span id="qty-${product.id}" style="margin: 0 10px; font-weight: bold;">1</span>
-                    <button onclick="increaseQuantity(${product.id})" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+</button>
+                <div class="quantity-controls">
+                    <button onclick="decreaseQuantity(${product.id})" class="quantity-btn">-</button>
+                    <span id="qty-${product.id}" class="quantity-display">1</span>
+                    <button onclick="increaseQuantity(${product.id})" class="quantity-btn">+</button>
                 </div>
                 <button class="btn-small btn-add-to-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
                     <i class="fas fa-cart-plus"></i> Agregar al Carrito
