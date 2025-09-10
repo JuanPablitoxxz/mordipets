@@ -1282,17 +1282,37 @@ function loadSectionData(section) {
 }
 
 function switchClientSection(section) {
+    console.log('switchClientSection called with section:', section);
+    
     // Update navigation
     document.querySelectorAll('.client-nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    const activeBtn = document.querySelector(`[data-section="${section}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+        console.log('Active button set:', activeBtn);
+    } else {
+        console.error('Button not found for section:', section);
+    }
     
     // Show/hide sections
     document.querySelectorAll('.client-section').forEach(sec => {
-        sec.classList.add('hidden');
+        sec.style.display = 'none';
     });
-    document.getElementById(`${section}Section`).classList.remove('hidden');
+    
+    const targetSection = document.getElementById(`${section}Section`);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        console.log('Section displayed:', targetSection);
+        
+        // Si es la sección de pedidos, cargar los pedidos
+        if (section === 'pedidosCliente') {
+            loadClientOrders();
+        }
+    } else {
+        console.error('Section not found:', `${section}Section`);
+    }
 }
 
 function handleSearch(e) {
