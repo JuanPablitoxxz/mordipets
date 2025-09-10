@@ -22,15 +22,35 @@ async function startServer() {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Error iniciando servidor:', error);
+    console.error('❌ Error con la base de datos:', error.message);
+    console.log('🔄 Iniciando servidor en modo fallback (sin base de datos)');
+    
+    // Iniciar servidor sin base de datos
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo en puerto ${PORT} (modo fallback)`);
+    });
   }
 }
 
 // Rutas API
 
+// Función para verificar si la base de datos está disponible
+async function isDatabaseAvailable() {
+  try {
+    await pool.query('SELECT 1');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 // Crear un nuevo usuario
 app.post('/api/users', async (req, res) => {
   try {
+    if (!(await isDatabaseAvailable())) {
+      return res.status(503).json({ error: 'Base de datos no disponible' });
+    }
+    
     const { name, email, phone, location, password, isAdmin } = req.body;
     
     // Verificar si el email ya existe
@@ -58,6 +78,10 @@ app.post('/api/users', async (req, res) => {
 // Login de usuario
 app.post('/api/users/login', async (req, res) => {
   try {
+    if (!(await isDatabaseAvailable())) {
+      return res.status(503).json({ error: 'Base de datos no disponible' });
+    }
+    
     const { email, password } = req.body;
     
     const result = await pool.query(
@@ -83,6 +107,21 @@ app.post('/api/users/login', async (req, res) => {
 // Obtener todos los productos
 app.get('/api/products', async (req, res) => {
   try {
+    if (!(await isDatabaseAvailable())) {
+      // Datos de prueba cuando la base de datos no está disponible
+      const productosPrueba = [
+        { id: 1, code: 'GL001', name: 'Galleta Leche', description: 'Deliciosa galleta con sabor a leche', price: 5000, stock: 50, weight: 100 },
+        { id: 2, code: 'GL002', name: 'Galleta Carne', description: 'Galleta rica en proteínas de carne', price: 5500, stock: 30, weight: 100 },
+        { id: 3, code: 'GL003', name: 'Galleta Pollo', description: 'Galleta con sabor a pollo natural', price: 5200, stock: 25, weight: 100 },
+        { id: 4, code: 'GL004', name: 'Galleta Hígado', description: 'Galleta nutritiva con hígado', price: 5800, stock: 15, weight: 100 },
+        { id: 5, code: 'GL005', name: 'Galleta Espinaca', description: 'Galleta verde con espinaca', price: 4800, stock: 40, weight: 100 },
+        { id: 6, code: 'GL006', name: 'Galleta Zanahoria', description: 'Galleta naranja con zanahoria', price: 4900, stock: 35, weight: 100 },
+        { id: 7, code: 'GL007', name: 'Galleta Avena', description: 'Galleta saludable con avena', price: 5100, stock: 20, weight: 100 },
+        { id: 8, code: 'GL008', name: 'Galleta Mixta', description: 'Mezcla de sabores naturales', price: 5600, stock: 10, weight: 100 }
+      ];
+      return res.json(productosPrueba);
+    }
+    
     const result = await pool.query('SELECT * FROM products ORDER BY name');
     res.json(result.rows);
   } catch (error) {
