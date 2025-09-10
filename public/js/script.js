@@ -119,24 +119,13 @@ function setupEventListeners() {
     const addIngredientModal = document.getElementById('addIngredientModal');
     const orderModal = document.getElementById('orderModal');
     
-    console.log('Login button found:', loginBtn);
-    console.log('Register button found:', registerBtn);
-    console.log('Login modal found:', loginModal);
-    console.log('Register modal found:', registerModal);
-    
     // Login/Register buttons
     if (loginBtn && loginModal) {
-        loginBtn.addEventListener('click', () => {
-            console.log('Login button clicked');
-            openModal(loginModal);
-        });
+        loginBtn.addEventListener('click', () => openModal(loginModal));
     }
     
     if (registerBtn && registerModal) {
-        registerBtn.addEventListener('click', () => {
-            console.log('Register button clicked');
-            openModal(registerModal);
-        });
+        registerBtn.addEventListener('click', () => openModal(registerModal));
     }
     
     // Close modals
@@ -296,14 +285,9 @@ function handleLogout() {
 }
 
 function showUserPanel() {
-    console.log('showUserPanel called, isAdmin:', isAdmin);
-    console.log('currentUser:', currentUser);
-    
     // Hide login/register buttons
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
-    console.log('Login button:', loginBtn);
-    console.log('Register button:', registerBtn);
     
     if (loginBtn) loginBtn.style.display = 'none';
     if (registerBtn) registerBtn.style.display = 'none';
@@ -316,15 +300,11 @@ function showUserPanel() {
     if (clientPanel) clientPanel.style.display = 'none';
     
     if (isAdmin) {
-        console.log('Showing admin panel');
-        console.log('Admin panel element:', adminPanel);
         if (adminPanel) {
             adminPanel.style.display = 'block';
             loadAdminData();
         }
     } else {
-        console.log('Showing client panel');
-        console.log('Client panel element:', clientPanel);
         if (clientPanel) {
             clientPanel.style.display = 'block';
             loadClientData();
@@ -346,6 +326,8 @@ function loadClientData() {
 
 function loadProductsGrid() {
     const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     products.forEach(product => {
@@ -356,6 +338,8 @@ function loadProductsGrid() {
 
 function loadIngredientsGrid() {
     const grid = document.getElementById('ingredientsGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     ingredients.forEach(ingredient => {
@@ -366,6 +350,8 @@ function loadIngredientsGrid() {
 
 function loadCatalogGrid() {
     const grid = document.getElementById('catalogGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     products.forEach(product => {
@@ -401,6 +387,11 @@ function createProductCard(product, isAdmin = false) {
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             ` : `
+                <div class="quantity-controls" style="margin-bottom: 10px;">
+                    <button onclick="decreaseQuantity(${product.id})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">-</button>
+                    <span id="qty-${product.id}" style="margin: 0 10px; font-weight: bold;">1</span>
+                    <button onclick="increaseQuantity(${product.id})" style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">+</button>
+                </div>
                 <button class="btn-small btn-add-to-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
                     <i class="fas fa-cart-plus"></i> Agregar al Carrito
                 </button>
@@ -447,6 +438,8 @@ function createIngredientCard(ingredient) {
 
 function loadOrdersList() {
     const list = document.getElementById('ordersList');
+    if (!list) return;
+    
     list.innerHTML = '';
     
     if (orders.length === 0) {
@@ -462,6 +455,8 @@ function loadOrdersList() {
 
 function loadClientOrders() {
     const list = document.getElementById('clientOrdersList');
+    if (!list) return;
+    
     list.innerHTML = '';
     
     const clientOrders = orders.filter(order => order.clientEmail === currentUser.email);
@@ -583,27 +578,55 @@ function handleAddIngredient(e) {
     alert('Insumo añadido exitosamente');
 }
 
+function increaseQuantity(productId) {
+    const qtyElement = document.getElementById(`qty-${productId}`);
+    const currentQty = parseInt(qtyElement.textContent);
+    const product = products.find(p => p.id === productId);
+    
+    if (product && currentQty < product.stock) {
+        qtyElement.textContent = currentQty + 1;
+    }
+}
+
+function decreaseQuantity(productId) {
+    const qtyElement = document.getElementById(`qty-${productId}`);
+    const currentQty = parseInt(qtyElement.textContent);
+    
+    if (currentQty > 1) {
+        qtyElement.textContent = currentQty - 1;
+    }
+}
+
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
-    if (product && product.stock > 0) {
+    const qtyElement = document.getElementById(`qty-${productId}`);
+    const quantity = parseInt(qtyElement.textContent);
+    
+    if (product && product.stock >= quantity) {
         const existingItem = cart.find(item => item.id === productId);
         
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.quantity += quantity;
         } else {
             cart.push({
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                quantity: 1
+                quantity: quantity
             });
         }
         
         // Update stock
-        product.stock -= 1;
+        product.stock -= quantity;
         saveToLocalStorage('mordipets_products', products);
         
-        alert(`${product.name} agregado al carrito`);
+        // Reset quantity
+        qtyElement.textContent = '1';
+        
+        updateCartCount();
+        alert(`${product.name} agregado al carrito (${quantity} unidades)`);
+    } else {
+        alert('No hay suficiente stock disponible');
     }
 }
 
@@ -660,6 +683,7 @@ function handlePayment(method) {
     
     // Clear cart
     cart = [];
+    updateCartCount();
     
     closeModal(document.getElementById('orderModal'));
     
@@ -719,6 +743,18 @@ function updateOrderStatus(orderId, newStatus) {
     const order = orders.find(o => o.id === orderId);
     if (order) {
         order.status = newStatus;
+        
+        // If confirming order, reduce stock
+        if (newStatus === 'confirmed') {
+            order.items.forEach(item => {
+                const product = products.find(p => p.id === item.id);
+                if (product) {
+                    product.stock -= item.quantity;
+                }
+            });
+            saveToLocalStorage('mordipets_products', products);
+        }
+        
         saveToLocalStorage('mordipets_orders', orders);
         loadOrdersList();
         alert(`Estado del pedido actualizado a: ${newStatus}`);
