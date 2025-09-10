@@ -675,26 +675,15 @@ function saveToLocalStorage(key, data) {
 }
 
 function loadPublicProducts() {
-    console.log('Loading public products...');
     const grid = document.getElementById('productosGrid');
-    console.log('Grid element:', grid);
-    
-    if (!grid) {
-        console.log('Grid not found, retrying in 100ms...');
-        setTimeout(loadPublicProducts, 100);
-        return;
-    }
+    if (!grid) return;
     
     grid.innerHTML = '';
-    console.log('Products to load:', products.length);
     
-    products.forEach((product, index) => {
-        console.log(`Creating card for product ${index + 1}:`, product.name);
+    products.forEach(product => {
         const productCard = createPublicProductCard(product);
         grid.appendChild(productCard);
     });
-    
-    console.log('Public products loaded successfully');
 }
 
 function createPublicProductCard(product) {
@@ -704,30 +693,9 @@ function createPublicProductCard(product) {
     const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
     const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
     
-    // Simple image mapping
-    const imageMap = {
-        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
-        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
-        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
-        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
-        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
-        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
-        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-        'Galleta Linaza x 1000 gr': 'galletasLinaza.jpg',
-        'Galleta Monedita Leche x 1000 gr': 'galletasMoneditaLeche.jpg',
-        'Galleta Monedita Carne x 1000 gr': 'galletasMoneditaCarne.jpg',
-        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
-        'Galleta Polvorosa x 1000 gr': 'galletasPolvorosa.jpg',
-        'Huesito 3/4 Paquete x2 X 85 grm': 'huesitos.jpg',
-        'Paquete pequeño x 12 unds X 35 gr': 'paquetePequeño.jpg',
-        'Paquete x 8 Unds X 40 gr': 'paquete8unds.jpg'
-    };
-    
-    const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
-    
     card.innerHTML = `
         <div class="producto-image">
-            <img src="images/${imageName}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <div class="product-placeholder" style="display:none;">🍪</div>
         </div>
         <div class="producto-info">
@@ -740,15 +708,3 @@ function createPublicProductCard(product) {
     return card;
 }
 
-// Add cart functionality to client panel
-document.addEventListener('DOMContentLoaded', function() {
-    // Add cart button to client panel
-    const clientHeader = document.querySelector('.client-header');
-    if (clientHeader) {
-        const cartButton = document.createElement('button');
-        cartButton.className = 'btn-primary';
-        cartButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Ver Carrito';
-        cartButton.onclick = showOrderModal;
-        clientHeader.appendChild(cartButton);
-    }
-});
