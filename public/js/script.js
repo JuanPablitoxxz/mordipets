@@ -6,7 +6,7 @@ let ingredients = [];
 let orders = [];
 let cart = [];
 
-// Sample data based on the Excel image
+// Sample data - Solo productos con imágenes disponibles
 const sampleProducts = [
     { id: 1, code: '10', name: 'Galleta Leche x 1000 gr', price: 15500, stock: 25, weight: 1000, description: 'Deliciosas galletas de leche para perros' },
     { id: 2, code: '20', name: 'Galleta Carne x 1000 gr', price: 16000, stock: 30, weight: 1000, description: 'Galletas con sabor a carne' },
@@ -15,14 +15,7 @@ const sampleProducts = [
     { id: 5, code: '50', name: 'Galleta Espinaca x 1000 gr', price: 16250, stock: 18, weight: 1000, description: 'Galletas con espinaca para perros' },
     { id: 6, code: '60', name: 'Galleta Zanahoria x 1000 gr', price: 15000, stock: 22, weight: 1000, description: 'Galletas de zanahoria saludables' },
     { id: 7, code: '70', name: 'Galleta Avena x 1000 gr', price: 14750, stock: 28, weight: 1000, description: 'Galletas de avena energéticas' },
-    { id: 8, code: '80', name: 'Galleta Linaza x 1000 gr', price: 16500, stock: 12, weight: 1000, description: 'Galletas de linaza con omega-3' },
-    { id: 9, code: '90', name: 'Galleta Monedita Leche x 1000 gr', price: 18000, stock: 20, weight: 1000, description: 'Galletas monedita de leche' },
-    { id: 10, code: '100', name: 'Galleta Monedita Carne x 1000 gr', price: 18500, stock: 15, weight: 1000, description: 'Galletas monedita de carne' },
-    { id: 11, code: '101', name: 'Galleta Mixta x 1000 gr', price: 17250, stock: 25, weight: 1000, description: 'Mezcla de sabores' },
-    { id: 12, code: '102', name: 'Galleta Polvorosa x 1000 gr', price: 16750, stock: 18, weight: 1000, description: 'Galletas polvorosas especiales' },
-    { id: 13, code: '103', name: 'Huesito 3/4 Paquete x2 X 85 grm', price: 8500, stock: 40, weight: 85, description: 'Huesitos pequeños para perros' },
-    { id: 14, code: '104', name: 'Paquete pequeño x 12 unds X 35 gr', price: 12000, stock: 35, weight: 35, description: 'Paquete pequeño de galletas' },
-    { id: 15, code: '105', name: 'Paquete x 8 Unds X 40 gr', price: 10500, stock: 30, weight: 40, description: 'Paquete de 8 galletas' }
+    { id: 8, code: '101', name: 'Galleta Mixta x 1000 gr', price: 17250, stock: 25, weight: 1000, description: 'Mezcla de sabores' }
 ];
 
 const sampleIngredients = [
@@ -93,7 +86,7 @@ function createPublicProductCard(product) {
     const card = document.createElement('div');
     card.className = 'producto-card';
     
-    // Mapeo de nombres de productos a archivos de imagen (solo las que existen)
+    // Mapeo exacto de productos a imágenes disponibles
     const imageMap = {
         'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
         'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
@@ -102,22 +95,14 @@ function createPublicProductCard(product) {
         'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
         'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
         'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Galleta Monedita Leche x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Galleta Monedita Carne x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
-        'Galleta Polvorosa x 1000 gr': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Huesito 3/4 Paquete x2 X 85 grm': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Paquete pequeño x 12 unds X 35 gr': 'galletasMixtas.jpg', // Usar imagen disponible
-        'Paquete x 8 Unds X 40 gr': 'galletasMixtas.jpg' // Usar imagen disponible
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg'
     };
     
     const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
     
     card.innerHTML = `
         <div class="producto-image">
-            <img src="images/${imageName}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="product-placeholder" style="display:none; width: 100%; height: 200px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px;">🍪</div>
+            <img src="images/${imageName}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
         </div>
         <div class="producto-info" style="padding: 15px;">
             <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #333;">${product.name}</h4>
@@ -302,16 +287,34 @@ function handleLogout() {
 }
 
 function showUserPanel() {
+    console.log('showUserPanel called, isAdmin:', isAdmin);
+    console.log('currentUser:', currentUser);
+    
     // Hide login/register buttons
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('registerBtn').style.display = 'none';
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    console.log('Login button:', loginBtn);
+    console.log('Register button:', registerBtn);
+    
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (registerBtn) registerBtn.style.display = 'none';
     
     if (isAdmin) {
-        document.getElementById('adminPanel').classList.remove('hidden');
-        loadAdminData();
+        console.log('Showing admin panel');
+        const adminPanel = document.getElementById('adminPanel');
+        console.log('Admin panel element:', adminPanel);
+        if (adminPanel) {
+            adminPanel.classList.remove('hidden');
+            loadAdminData();
+        }
     } else {
-        document.getElementById('clientPanel').classList.remove('hidden');
-        loadClientData();
+        console.log('Showing client panel');
+        const clientPanel = document.getElementById('clientPanel');
+        console.log('Client panel element:', clientPanel);
+        if (clientPanel) {
+            clientPanel.classList.remove('hidden');
+            loadClientData();
+        }
     }
 }
 
