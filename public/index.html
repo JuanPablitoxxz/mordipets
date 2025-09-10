@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mordipets - Galletas para Perros</title>
+    <title>Mordipets - Galletas para mascotas</title>
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -106,6 +106,126 @@
                         <div class="product-placeholder" style="display:none;">🍪</div>
                         <span>Galleta Mixta</span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos Section -->
+    <section class="productos-section" id="productos">
+        <div class="container">
+            <div class="section-header">
+                <h2>Nuestros Productos</h2>
+                <p>Descubre nuestra amplia variedad de galletas para perros</p>
+            </div>
+            <div class="productos-grid" id="productosGrid">
+                <!-- Los productos se cargarán aquí -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Nosotros Section -->
+    <section class="nosotros-section" id="nosotros">
+        <div class="container">
+            <div class="nosotros-content">
+                <div class="nosotros-text">
+                    <h2>Acerca de Mordipets</h2>
+                    <p>Somos una empresa dedicada a la elaboración de galletas saludables y nutritivas para perros. Nuestro compromiso es brindar productos de la más alta calidad que contribuyan al bienestar y la felicidad de tu mascota.</p>
+                    <div class="nosotros-features">
+                        <div class="feature-item">
+                            <i class="fas fa-heart"></i>
+                            <h3>Amor por las Mascotas</h3>
+                            <p>Cada galleta está hecha con amor y cuidado pensando en el bienestar de tu perro.</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-leaf"></i>
+                            <h3>Ingredientes Naturales</h3>
+                            <p>Utilizamos solo ingredientes naturales y de la más alta calidad.</p>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Calidad Garantizada</h3>
+                            <p>Nuestros productos cuentan con respaldo veterinario y certificaciones de calidad.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="nosotros-image">
+                    <img src="images/logo.jpg" alt="Mordipets" class="nosotros-img">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto Section -->
+    <section class="contacto-section" id="contacto">
+        <div class="container">
+            <div class="section-header">
+                <h2>Contacto</h2>
+                <p>¿Tienes alguna pregunta? ¡Nos encantaría escucharte!</p>
+            </div>
+            <div class="contacto-content">
+                <div class="contacto-info">
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Ubicación</h3>
+                            <p>Bogotá, Colombia</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h3>Teléfono</h3>
+                            <p>+57 (1) 234-5678</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h3>Email</h3>
+                            <p>info@mordipets.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>Horarios</h3>
+                            <p>Lunes - Viernes: 8:00 AM - 6:00 PM<br>Sábados: 9:00 AM - 2:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contacto-form">
+                    <form id="contactoForm">
+                        <div class="form-group">
+                            <label for="contactoNombre">Nombre Completo</label>
+                            <input type="text" id="contactoNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactoEmail">Correo Electrónico</label>
+                            <input type="email" id="contactoEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactoTelefono">Teléfono</label>
+                            <input type="tel" id="contactoTelefono">
+                        </div>
+                        <div class="form-group">
+                            <label for="contactoAsunto">Asunto</label>
+                            <select id="contactoAsunto" required>
+                                <option value="">Seleccionar asunto</option>
+                                <option value="consulta">Consulta general</option>
+                                <option value="pedido">Realizar pedido</option>
+                                <option value="queja">Queja o sugerencia</option>
+                                <option value="soporte">Soporte técnico</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactoMensaje">Mensaje</label>
+                            <textarea id="contactoMensaje" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -388,16 +508,6 @@
         </div>
     </div>
 
-    <!-- Chat Widget -->
-    <div class="chat-widget">
-        <div class="chat-icon">
-            <i class="fas fa-comments"></i>
-            <span class="notification-dot"></span>
-        </div>
-        <div class="chat-message">
-            ¡Hola, bienvenido a Mordipets! Estaré aquí para ayudarte...
-        </div>
-    </div>
 
     <script src="js/script-api.js"></script>
 </body>
