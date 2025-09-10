@@ -513,6 +513,84 @@
         </div>
     </div>
 
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Producto</h2>
+            <form id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label for="editProductCode">Código</label>
+                    <input type="text" id="editProductCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductName">Nombre del Producto</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductDescription">Descripción</label>
+                    <textarea id="editProductDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editProductPrice">Precio</label>
+                    <input type="number" id="editProductPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductStock">Stock</label>
+                    <input type="number" id="editProductStock" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductWeight">Peso (gr)</label>
+                    <input type="number" id="editProductWeight" required>
+                </div>
+                <button type="submit" class="btn-primary">Actualizar Producto</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Ingredient Modal -->
+    <div id="editIngredientModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Editar Insumo</h2>
+            <form id="editIngredientForm">
+                <input type="hidden" id="editIngredientId">
+                <div class="form-group">
+                    <label for="editIngredientName">Nombre del Insumo</label>
+                    <input type="text" id="editIngredientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editIngredientType">Tipo</label>
+                    <select id="editIngredientType" required>
+                        <option value="">Seleccionar tipo</option>
+                        <option value="proteina">Proteína</option>
+                        <option value="carbohidrato">Carbohidrato</option>
+                        <option value="vitamina">Vitamina</option>
+                        <option value="mineral">Mineral</option>
+                        <option value="conservante">Conservante</option>
+                        <option value="saborizante">Saborizante</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editIngredientQuantity">Cantidad Disponible</label>
+                    <input type="number" id="editIngredientQuantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="editIngredientUnit">Unidad</label>
+                    <select id="editIngredientUnit" required>
+                        <option value="kg">Kilogramos</option>
+                        <option value="gr">Gramos</option>
+                        <option value="lt">Litros</option>
+                        <option value="ml">Mililitros</option>
+                        <option value="und">Unidades</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Actualizar Insumo</button>
+            </form>
+        </div>
+    </div>
+
 
     <script src="js/script.js"></script>
 </body>

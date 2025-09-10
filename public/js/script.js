@@ -148,6 +148,8 @@ function setupEventListeners() {
     document.getElementById('registerForm').addEventListener('submit', handleRegister);
     document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
     document.getElementById('addIngredientForm').addEventListener('submit', handleAddIngredient);
+    document.getElementById('editProductForm').addEventListener('submit', handleEditProduct);
+    document.getElementById('editIngredientForm').addEventListener('submit', handleEditIngredient);
     
     // Admin navigation
     document.querySelectorAll('.admin-nav-btn').forEach(btn => {
@@ -762,8 +764,20 @@ function updateOrderStatus(orderId, newStatus) {
 }
 
 function editProduct(productId) {
-    // In a real application, this would open an edit modal
-    alert('Funcionalidad de edición en desarrollo');
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    // Fill the edit form with product data
+    document.getElementById('editProductId').value = product.id;
+    document.getElementById('editProductCode').value = product.code;
+    document.getElementById('editProductName').value = product.name;
+    document.getElementById('editProductDescription').value = product.description;
+    document.getElementById('editProductPrice').value = product.price;
+    document.getElementById('editProductStock').value = product.stock;
+    document.getElementById('editProductWeight').value = product.weight;
+    
+    // Open the edit modal
+    openModal(document.getElementById('editProductModal'));
 }
 
 function deleteProduct(productId) {
@@ -776,8 +790,18 @@ function deleteProduct(productId) {
 }
 
 function editIngredient(ingredientId) {
-    // In a real application, this would open an edit modal
-    alert('Funcionalidad de edición en desarrollo');
+    const ingredient = ingredients.find(i => i.id === ingredientId);
+    if (!ingredient) return;
+    
+    // Fill the edit form with ingredient data
+    document.getElementById('editIngredientId').value = ingredient.id;
+    document.getElementById('editIngredientName').value = ingredient.name;
+    document.getElementById('editIngredientType').value = ingredient.type;
+    document.getElementById('editIngredientQuantity').value = ingredient.quantity;
+    document.getElementById('editIngredientUnit').value = ingredient.unit;
+    
+    // Open the edit modal
+    openModal(document.getElementById('editIngredientModal'));
 }
 
 function deleteIngredient(ingredientId) {
@@ -791,7 +815,7 @@ function deleteIngredient(ingredientId) {
 
 function saveToLocalStorage(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
-}
+ }
 
 function showCart() {
     if (cart.length === 0) {
@@ -902,4 +926,68 @@ function checkout() {
     
     // Reload client data
     loadClientData();
+}
+
+function handleEditProduct(e) {
+    e.preventDefault();
+    
+    const productId = parseInt(document.getElementById('editProductId').value);
+    const productIndex = products.findIndex(p => p.id === productId);
+    
+    if (productIndex === -1) {
+        alert('Producto no encontrado');
+        return;
+    }
+    
+    // Update product data
+    products[productIndex] = {
+        id: productId,
+        code: document.getElementById('editProductCode').value,
+        name: document.getElementById('editProductName').value,
+        description: document.getElementById('editProductDescription').value,
+        price: parseFloat(document.getElementById('editProductPrice').value),
+        stock: parseInt(document.getElementById('editProductStock').value),
+        weight: parseInt(document.getElementById('editProductWeight').value)
+    };
+    
+    saveToLocalStorage('mordipets_products', products);
+    
+    closeModal(document.getElementById('editProductModal'));
+    loadProductsGrid();
+    
+    // Clear form
+    document.getElementById('editProductForm').reset();
+    
+    alert('Producto actualizado exitosamente');
+}
+
+function handleEditIngredient(e) {
+    e.preventDefault();
+    
+    const ingredientId = parseInt(document.getElementById('editIngredientId').value);
+    const ingredientIndex = ingredients.findIndex(i => i.id === ingredientId);
+    
+    if (ingredientIndex === -1) {
+        alert('Insumo no encontrado');
+        return;
+    }
+    
+    // Update ingredient data
+    ingredients[ingredientIndex] = {
+        id: ingredientId,
+        name: document.getElementById('editIngredientName').value,
+        type: document.getElementById('editIngredientType').value,
+        quantity: parseInt(document.getElementById('editIngredientQuantity').value),
+        unit: document.getElementById('editIngredientUnit').value
+    };
+    
+    saveToLocalStorage('mordipets_ingredients', ingredients);
+    
+    closeModal(document.getElementById('editIngredientModal'));
+    loadIngredientsGrid();
+    
+    // Clear form
+    document.getElementById('editIngredientForm').reset();
+    
+    alert('Insumo actualizado exitosamente');
 }
