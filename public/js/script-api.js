@@ -79,30 +79,44 @@ function cargarProductosPublicos() {
     
     productosGrid.innerHTML = '';
     
-    productos.forEach(producto => {
-        const productoCard = crearTarjetaProductoPublico(producto);
+    // Lista de todas las galletas disponibles con sus imágenes
+    const galletasDisponibles = [
+        { nombre: 'Galleta Leche', imagen: 'images/GalletasLechee.jpg' },
+        { nombre: 'Galleta Carne', imagen: 'images/galletasCarne.jpg' },
+        { nombre: 'Galleta Pollo', imagen: 'images/galletasPollo.jpg' },
+        { nombre: 'Galleta Hígado', imagen: 'images/galletasHigado.jpg' },
+        { nombre: 'Galleta Espinaca', imagen: 'images/galletasEspinaca.jpg' },
+        { nombre: 'Galleta Zanahoria', imagen: 'images/galletasZanahoria.jpg' },
+        { nombre: 'Galleta Avena', imagen: 'images/galletasAvena.jpg' },
+        { nombre: 'Galleta Mixta', imagen: 'images/galletasMixtas.jpg' }
+    ];
+    
+    galletasDisponibles.forEach(galleta => {
+        const productoCard = crearTarjetaGalleta(galleta);
         productosGrid.appendChild(productoCard);
     });
 }
 
-// Función para crear tarjeta de producto en la sección pública
-function crearTarjetaProductoPublico(producto) {
+// Función para crear tarjeta de galleta en la sección pública
+function crearTarjetaGalleta(galleta) {
     const card = document.createElement('div');
     card.className = 'producto-card';
     
-    // Determinar estado del stock
-    let estadoStock = '';
-    let claseStock = '';
-    if (producto.stock === 0) {
-        estadoStock = 'Agotado';
-        claseStock = 'stock-agotado';
-    } else if (producto.stock <= 5) {
-        estadoStock = 'Pocas unidades';
-        claseStock = 'stock-bajo';
-    } else {
-        estadoStock = 'Disponible';
-        claseStock = 'stock-disponible';
-    }
+    card.innerHTML = `
+        <img src="${galleta.imagen}" alt="${galleta.nombre}" class="producto-image" onerror="this.src='images/logo.jpg'">
+        <div class="producto-info">
+            <h3>${galleta.nombre}</h3>
+            <p class="producto-description">Deliciosa galleta para tu mascota</p>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Función para crear tarjeta de producto en la sección pública (mantenida para compatibilidad)
+function crearTarjetaProductoPublico(producto) {
+    const card = document.createElement('div');
+    card.className = 'producto-card';
     
     // Mapeo de imágenes de productos
     const imagenesProductos = {
