@@ -701,11 +701,21 @@ function loadOrdersList() {
 }
 
 function loadClientOrders() {
+    console.log('loadClientOrders called, currentUser:', currentUser);
     const list = document.getElementById('clientOrdersList');
     list.innerHTML = '';
     
     // Cargar pedidos reales del cliente desde localStorage
-    const clientOrders = getClientOrders();
+    let clientOrders = getClientOrders();
+    console.log('clientOrders found:', clientOrders);
+    
+    // Si no hay pedidos, crear algunos de ejemplo para testing
+    if (clientOrders.length === 0) {
+        console.log('No orders found, creating sample orders');
+        createSampleOrders();
+        clientOrders = getClientOrders();
+        console.log('After creating samples, clientOrders:', clientOrders);
+    }
     
     if (clientOrders.length === 0) {
         list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
@@ -723,10 +733,35 @@ function loadClientOrders() {
 
 // Función para obtener pedidos del cliente desde localStorage
 function getClientOrders() {
-    const storedOrders = localStorage.getItem('clientOrders');
-    if (storedOrders) {
-        return JSON.parse(storedOrders).filter(order => order.client_email === currentUser.email);
+    console.log('getClientOrders called, currentUser:', currentUser);
+    
+    if (!currentUser || !currentUser.email) {
+        console.log('No currentUser or email found');
+        return [];
     }
+    
+    const storedOrders = localStorage.getItem('clientOrders');
+    console.log('storedOrders from localStorage:', storedOrders);
+    
+    if (storedOrders) {
+        try {
+            const allOrders = JSON.parse(storedOrders);
+            console.log('All orders from localStorage:', allOrders);
+            
+            const clientOrders = allOrders.filter(order => {
+                console.log(`Comparing ${order.client_email} with ${currentUser.email}`);
+                return order.client_email === currentUser.email;
+            });
+            
+            console.log('Filtered client orders:', clientOrders);
+            return clientOrders;
+        } catch (error) {
+            console.error('Error parsing stored orders:', error);
+            return [];
+        }
+    }
+    
+    console.log('No stored orders found');
     return [];
 }
 
@@ -740,6 +775,47 @@ function saveClientOrder(order) {
     
     // Guardar de vuelta en localStorage
     localStorage.setItem('clientOrders', JSON.stringify(orders));
+    console.log('Order saved to localStorage:', order);
+}
+
+// Función para crear pedidos de ejemplo (solo para testing)
+function createSampleOrders() {
+    if (!currentUser) return;
+    
+    const sampleOrders = [
+        {
+            id: Date.now() + 1,
+            client_name: currentUser.name,
+            client_email: currentUser.email,
+            total: 45000,
+            status: 'pending',
+            payment_method: 'online',
+            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            items: [
+                { product_id: 1, product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
+                { product_id: 2, product_name: 'Galletas de Pollo', quantity: 1, price: 15000 }
+            ]
+        },
+        {
+            id: Date.now() + 2,
+            client_name: currentUser.name,
+            client_email: currentUser.email,
+            total: 30000,
+            status: 'confirmed',
+            payment_method: 'contraentrega',
+            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            items: [
+                { product_id: 3, product_name: 'Galletas de Salmón', quantity: 2, price: 15000 }
+            ]
+        }
+    ];
+    
+    // Guardar pedidos de ejemplo
+    sampleOrders.forEach(order => {
+        saveClientOrder(order);
+    });
+    
+    console.log('Sample orders created');
 }
 
 function createOrderCard(order) {
