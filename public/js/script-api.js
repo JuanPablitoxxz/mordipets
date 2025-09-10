@@ -1,4 +1,4 @@
-// Variables globales
+// Global Variables
 let currentUser = null;
 let isAdmin = false;
 let products = [];
@@ -6,220 +6,113 @@ let ingredients = [];
 let orders = [];
 let cart = [];
 
-// URL base de la API
-const API_BASE = window.location.origin;
+// Sample data based on the Excel image
+const sampleProducts = [
+    { id: 1, code: '10', name: 'Galleta Leche x 1000 gr', price: 15500, stock: 25, weight: 1000, description: 'Deliciosas galletas de leche para perros' },
+    { id: 2, code: '20', name: 'Galleta Carne x 1000 gr', price: 16000, stock: 30, weight: 1000, description: 'Galletas con sabor a carne' },
+    { id: 3, code: '30', name: 'Galleta Pollo x 1000 gr', price: 15750, stock: 20, weight: 1000, description: 'Galletas de pollo nutritivas' },
+    { id: 4, code: '40', name: 'Galleta Higado x 1000 gr', price: 17000, stock: 15, weight: 1000, description: 'Galletas de hígado ricas en hierro' },
+    { id: 5, code: '50', name: 'Galleta Espinaca x 1000 gr', price: 16250, stock: 18, weight: 1000, description: 'Galletas con espinaca para perros' },
+    { id: 6, code: '60', name: 'Galleta Zanahoria x 1000 gr', price: 15000, stock: 22, weight: 1000, description: 'Galletas de zanahoria saludables' },
+    { id: 7, code: '70', name: 'Galleta Avena x 1000 gr', price: 14750, stock: 28, weight: 1000, description: 'Galletas de avena energéticas' },
+    { id: 8, code: '80', name: 'Galleta Linaza x 1000 gr', price: 16500, stock: 12, weight: 1000, description: 'Galletas de linaza con omega-3' },
+    { id: 9, code: '90', name: 'Galleta Monedita Leche x 1000 gr', price: 18000, stock: 20, weight: 1000, description: 'Galletas monedita de leche' },
+    { id: 10, code: '100', name: 'Galleta Monedita Carne x 1000 gr', price: 18500, stock: 15, weight: 1000, description: 'Galletas monedita de carne' },
+    { id: 11, code: '101', name: 'Galleta Mixta x 1000 gr', price: 17250, stock: 25, weight: 1000, description: 'Mezcla de sabores' },
+    { id: 12, code: '102', name: 'Galleta Polvorosa x 1000 gr', price: 16750, stock: 18, weight: 1000, description: 'Galletas polvorosas especiales' },
+    { id: 13, code: '103', name: 'Huesito 3/4 Paquete x2 X 85 grm', price: 8500, stock: 40, weight: 85, description: 'Huesitos pequeños para perros' },
+    { id: 14, code: '104', name: 'Paquete pequeño x 12 unds X 35 gr', price: 12000, stock: 35, weight: 35, description: 'Paquete pequeño de galletas' },
+    { id: 15, code: '105', name: 'Paquete x 8 Unds X 40 gr', price: 10500, stock: 30, weight: 40, description: 'Paquete de 8 galletas' }
+];
 
-// Inicializar la aplicación
+const sampleIngredients = [
+    { id: 1, name: 'Harina de Trigo', type: 'carbohidrato', quantity: 50, unit: 'kg' },
+    { id: 2, name: 'Carne de Res', type: 'proteina', quantity: 25, unit: 'kg' },
+    { id: 3, name: 'Leche en Polvo', type: 'proteina', quantity: 15, unit: 'kg' },
+    { id: 4, name: 'Hígado de Pollo', type: 'proteina', quantity: 10, unit: 'kg' },
+    { id: 5, name: 'Espinaca', type: 'vitamina', quantity: 8, unit: 'kg' },
+    { id: 6, name: 'Zanahoria', type: 'vitamina', quantity: 12, unit: 'kg' },
+    { id: 7, name: 'Avena', type: 'carbohidrato', quantity: 20, unit: 'kg' },
+    { id: 8, name: 'Linaza', type: 'vitamina', quantity: 5, unit: 'kg' },
+    { id: 9, name: 'Conservante Natural', type: 'conservante', quantity: 2, unit: 'kg' },
+    { id: 10, name: 'Saborizante Carne', type: 'saborizante', quantity: 3, unit: 'lt' }
+];
+
+// Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     setupEventListeners();
-    loadDataFromAPI();
+    loadSampleData();
+    loadPublicProducts();
 });
 
-async function initializeApp() {
-    // Cargar datos desde la API en lugar de localStorage
-    await loadDataFromAPI();
-}
-
-async function loadDataFromAPI() {
-    try {
-        // Cargar products
-        const respuestaProductos = await fetch(`${API_BASE}/api/products`);
-        if (respuestaProductos.ok) {
-            products = await respuestaProductos.json();
-        }
-
-        // Cargar ingredients
-        const respuestaIngredientes = await fetch(`${API_BASE}/api/ingredients`);
-        if (respuestaIngredientes.ok) {
-            ingredients = await respuestaIngredientes.json();
-        }
-
-        // Cargar orders
-        const respuestaPedidos = await fetch(`${API_BASE}/api/orders`);
-        if (respuestaPedidos.ok) {
-            orders = await respuestaPedidos.json();
-        }
-
-        console.log('✅ Datos cargados desde la API');
-        
-        // Cargar products en la sección pública
-        cargarProductosPublicos();
-    } catch (error) {
-        console.error('❌ Error cargando datos desde la API:', error);
-        // Fallback a localStorage si la API falla
-        loadFromLocalStorage();
-        cargarProductosPublicos();
+function initializeApp() {
+    // Load data from localStorage if available
+    const savedProducts = localStorage.getItem('mordipets_products');
+    const savedIngredients = localStorage.getItem('mordipets_ingredients');
+    const savedOrders = localStorage.getItem('mordipets_orders');
+    
+    if (savedProducts) {
+        products = JSON.parse(savedProducts);
+    }
+    
+    if (savedIngredients) {
+        ingredients = JSON.parse(savedIngredients);
+    }
+    
+    if (savedOrders) {
+        orders = JSON.parse(savedOrders);
     }
 }
 
-function loadFromLocalStorage() {
-    // Fallback a localStorage si la API no está disponible
-    const productosGuardados = localStorage.getItem('mordipets_productos');
-    const ingredientesGuardados = localStorage.getItem('mordipets_ingredientes');
-    const pedidosGuardados = localStorage.getItem('mordipets_pedidos');
-    
-    if (productosGuardados) {
-        products = JSON.parse(productosGuardados);
+function loadSampleData() {
+    if (products.length === 0) {
+        products = [...sampleProducts];
+        saveToLocalStorage('mordipets_products', products);
     }
     
-    if (ingredientesGuardados) {
-        ingredients = JSON.parse(ingredientesGuardados);
-    }
-    
-    if (pedidosGuardados) {
-        orders = JSON.parse(pedidosGuardados);
+    if (ingredients.length === 0) {
+        ingredients = [...sampleIngredients];
+        saveToLocalStorage('mordipets_ingredients', ingredients);
     }
 }
 
-// Función para cargar products en la sección pública
-function cargarProductosPublicos() {
-    const productosGrid = document.getElementById('productosGrid');
-    if (!productosGrid) return;
+function loadPublicProducts() {
+    const grid = document.getElementById('productosGrid');
+    if (!grid) return;
     
-    productosGrid.innerHTML = '';
+    grid.innerHTML = '';
     
-    // Lista de todas las galletas disponibles con sus imágenes
-    const galletasDisponibles = [
-        { name: 'Galleta Leche', imagen: 'images/GalletasLechee.jpg' },
-        { name: 'Galleta Carne', imagen: 'images/galletasCarne.jpg' },
-        { name: 'Galleta Pollo', imagen: 'images/galletasPollo.jpg' },
-        { name: 'Galleta Hígado', imagen: 'images/galletasHigado.jpg' },
-        { name: 'Galleta Espinaca', imagen: 'images/galletasEspinaca.jpg' },
-        { name: 'Galleta Zanahoria', imagen: 'images/galletasZanahoria.jpg' },
-        { name: 'Galleta Avena', imagen: 'images/galletasAvena.jpg' },
-        { name: 'Galleta Mixta', imagen: 'images/galletasMixtas.jpg' }
-    ];
-    
-    galletasDisponibles.forEach(galleta => {
-        const productoCard = crearTarjetaGalleta(galleta);
-        productosGrid.appendChild(productoCard);
+    products.forEach(product => {
+        const productCard = createPublicProductCard(product);
+        grid.appendChild(productCard);
     });
 }
 
-// Función para crear tarjeta de galleta en la sección pública
-function crearTarjetaGalleta(galleta) {
+function createPublicProductCard(product) {
     const card = document.createElement('div');
-    card.className = 'product-card';
+    card.className = 'producto-card';
+    
+    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
+    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
     
     card.innerHTML = `
-        <img src="${galleta.imagen}" alt="${galleta.name}" class="product-image" onerror="this.src='images/logo.jpg'">
-        <div class="product-info">
-            <h3>${galleta.name}</h3>
-            <p class="product-description">Deliciosa galleta para tu mascota</p>
+        <div class="producto-image">
+            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="product-placeholder" style="display:none;">🍪</div>
+        </div>
+        <div class="producto-info">
+            <h4>${product.name}</h4>
+            <p class="producto-description">${product.description}</p>
+            <div class="producto-stock ${stockClass}">${stockText}</div>
         </div>
     `;
     
     return card;
-}
-
-// Función para crear tarjeta de product en la sección pública (mantenida para compatibilidad)
-function crearTarjetaProductoPublico(product) {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    
-    // Mapeo de imágenes de products
-    const imagenesProductos = {
-        'Galleta Leche': 'images/GalletasLechee.jpg',
-        'Galleta Carne': 'images/galletasCarne.jpg',
-        'Galleta Pollo': 'images/galletasPollo.jpg',
-        'Galleta Hígado': 'images/galletasHigado.jpg',
-        'Galleta Espinaca': 'images/galletasEspinaca.jpg',
-        'Galleta Zanahoria': 'images/galletasZanahoria.jpg',
-        'Galleta Avena': 'images/galletasAvena.jpg',
-        'Galleta Mixta': 'images/galletasMixtas.jpg'
-    };
-    
-    const imagenSrc = imagenesProductos[product.name] || 'images/logo.jpg';
-    
-    card.innerHTML = `
-        <img src="${imagenSrc}" alt="${product.name}" class="product-image" onerror="this.src='images/logo.jpg'">
-        <div class="product-info">
-            <h3>${product.name}</h3>
-            <p class="product-description">${product.description || 'Deliciosa galleta para tu mascota'}</p>
-        </div>
-    `;
-    
-    return card;
-}
-
-// Función para agregar product al cart desde la sección pública
-function agregarAlCarritoPublico(productoId) {
-    const product = products.find(p => p.id === productoId);
-    if (!product) return;
-    
-    if (product.stock === 0) {
-        alert('Este product está agotado');
-        return;
-    }
-    
-    // Verificar si el user está logueado
-    if (!currentUser) {
-        alert('Debes iniciar sesión para agregar products al cart');
-        document.getElementById('loginBtn').click();
-        return;
-    }
-    
-    // Agregar al cart
-    const itemExistente = cart.find(item => item.id === productoId);
-    if (itemExistente) {
-        itemExistente.quantity += 1;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: 1
-        });
-    }
-    
-    alert(`${product.name} agregado al cart`);
-}
-
-// Función para manejar el formulario de contacto
-async function manejarContacto(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('contactoNombre').value;
-    const correo = document.getElementById('contactoEmail').value;
-    const phone = document.getElementById('contactoTelefono').value;
-    const asunto = document.getElementById('contactoAsunto').value;
-    const mensaje = document.getElementById('contactoMensaje').value;
-    
-    if (!name || !correo || !asunto || !mensaje) {
-        alert('Por favor, completa todos los campos obligatorios');
-        return;
-    }
-    
-    try {
-        // Simular envío del formulario (en una aplicación real, esto enviaría a un servidor)
-        const datosContacto = {
-            name,
-            correo,
-            phone,
-            asunto,
-            mensaje,
-            fecha: new Date().toISOString()
-        };
-        
-        // Guardar en localStorage como ejemplo
-        const contactos = JSON.parse(localStorage.getItem('mordipets_contactos') || '[]');
-        contactos.push(datosContacto);
-        localStorage.setItem('mordipets_contactos', JSON.stringify(contactos));
-        
-        alert('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
-        
-        // Limpiar formulario
-        document.getElementById('contactoForm').reset();
-        
-    } catch (error) {
-        console.error('Error al enviar mensaje:', error);
-        alert('Error al enviar el mensaje. Inténtalo de nuevo.');
-    }
 }
 
 function setupEventListeners() {
-    // Controles de modales
+    // Modal controls
     const loginBtn = document.getElementById('loginBtn');
     const registerBtn = document.getElementById('registerBtn');
     const loginModal = document.getElementById('loginModal');
@@ -228,198 +121,118 @@ function setupEventListeners() {
     const addIngredientModal = document.getElementById('addIngredientModal');
     const orderModal = document.getElementById('orderModal');
     
-    // Botones de inicio de sesión y registro
-    loginBtn.addEventListener('click', () => openModal(loginModal));
-    registerBtn.addEventListener('click', () => openModal(registerModal));
+    // Login/Register buttons
+    if (loginBtn) loginBtn.addEventListener('click', () => openModal(loginModal));
+    if (registerBtn) registerBtn.addEventListener('click', () => openModal(registerModal));
     
-    // Cerrar modales
-    document.querySelectorAll('.close').forEach(botonCerrar => {
-        botonCerrar.addEventListener('click', (e) => {
+    // Close modals
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', (e) => {
             const modal = e.target.closest('.modal');
             closeModal(modal);
         });
     });
     
-    // Cerrar modales al hacer clic fuera
+    // Close modals when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             closeModal(e.target);
         }
     });
     
-    // Formularios
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('registerForm').addEventListener('submit', handleRegister);
-    document.getElementById('contactoForm').addEventListener('submit', manejarContacto);
-    document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
-    document.getElementById('addIngredientForm').addEventListener('submit', handleAddIngredient);
+    // Forms
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const addProductForm = document.getElementById('addProductForm');
+    const addIngredientForm = document.getElementById('addIngredientForm');
     
-    // Navegación de administrador
-    document.querySelectorAll('.admin-nav-btn').forEach(boton => {
-        boton.addEventListener('click', (e) => {
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (registerForm) registerForm.addEventListener('submit', handleRegister);
+    if (addProductForm) addProductForm.addEventListener('submit', handleAddProduct);
+    if (addIngredientForm) addIngredientForm.addEventListener('submit', handleAddIngredient);
+    
+    // Admin navigation
+    document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
             switchAdminSection(e.target.dataset.section);
         });
     });
     
-    // Navegación de cliente
-    document.querySelectorAll('.client-nav-btn').forEach(boton => {
-        boton.addEventListener('click', (e) => {
+    // Client navigation
+    document.querySelectorAll('.client-nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
             switchClientSection(e.target.dataset.section);
         });
     });
     
-    // Botones de cerrar sesión
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-    document.getElementById('clientLogoutBtn').addEventListener('click', handleLogout);
+    // Logout buttons
+    const logoutBtn = document.getElementById('logoutBtn');
+    const clientLogoutBtn = document.getElementById('clientLogoutBtn');
     
-    // Botón agregar product
-    document.getElementById('addProductBtn').addEventListener('click', () => openModal(addProductModal));
-    document.getElementById('addIngredientBtn').addEventListener('click', () => openModal(addIngredientModal));
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+    if (clientLogoutBtn) clientLogoutBtn.addEventListener('click', handleLogout);
     
-    // Funcionalidad de búsqueda
-    document.getElementById('searchProducts').addEventListener('input', handleProductSearch);
+    // Add product button
+    const addProductBtn = document.getElementById('addProductBtn');
+    const addIngredientBtn = document.getElementById('addIngredientBtn');
     
-    // Funcionalidad de filtros
-    document.getElementById('stockFilter').addEventListener('change', handleProductFilter);
-    document.getElementById('sortProducts').addEventListener('change', handleProductSort);
-    document.getElementById('clearFiltersBtn').addEventListener('click', clearProductFilters);
+    if (addProductBtn) addProductBtn.addEventListener('click', () => openModal(addProductModal));
+    if (addIngredientBtn) addIngredientBtn.addEventListener('click', () => openModal(addIngredientModal));
     
-    // Funcionalidad de filtros del catálogo
-    document.getElementById('availabilityFilter').addEventListener('change', handleCatalogFilter);
-    document.getElementById('sortCatalog').addEventListener('change', handleCatalogSort);
+    // Search functionality
+    const searchProducts = document.getElementById('searchProducts');
+    if (searchProducts) searchProducts.addEventListener('input', handleSearch);
     
-    // Botones de order
-    document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
-    document.getElementById('payOnDeliveryBtn').addEventListener('click', () => handlePayment('delivery'));
+    // Order buttons
+    const payNowBtn = document.getElementById('payNowBtn');
+    const payOnDeliveryBtn = document.getElementById('payOnDeliveryBtn');
     
-    // Navegación suave para enlaces del menú
-    document.querySelectorAll('.nav-link').forEach(enlace => {
-        enlace.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = enlace.getAttribute('href').substring(1);
-            const targetElement = document.getElementById(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
+    if (payNowBtn) payNowBtn.addEventListener('click', () => handlePayment('online'));
+    if (payOnDeliveryBtn) payOnDeliveryBtn.addEventListener('click', () => handlePayment('delivery'));
 }
 
 function openModal(modal) {
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 function closeModal(modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
-async function handleLogin(e) {
+function handleLogin(e) {
     e.preventDefault();
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
+    const isAdminCheck = document.getElementById('isAdmin') ? document.getElementById('isAdmin').checked : false;
     
+    // Simple validation (in a real app, this would be server-side)
     if (email && password) {
-        try {
-            // Intentar con la API primero
-            const response = await fetch(`${API_BASE}/api/users/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            });
-            
-            if (response.ok) {
-                const user = await response.json();
-                
-                currentUser = {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone,
-                    location: user.location,
-                    isAdmin: user.is_admin
-                };
-                
-                isAdmin = user.is_admin;
-                
-                console.log('Login successful, isAdmin:', isAdmin);
-                closeModal(document.getElementById('loginModal'));
-                showUserPanel();
-                
-                // Limpiar formulario
-                document.getElementById('loginForm').reset();
-                
-                alert(`¡Bienvenido ${user.name}!`);
-            } else {
-                const error = await response.json();
-                alert(`Error al iniciar sesión: ${error.error || 'Credenciales incorrectas'}`);
-            }
-        } catch (error) {
-            console.error('Error con la API:', error);
-            
-            // Fallback: verificar credenciales por defecto
-            if (email === 'admin@mordipets.com' && password === 'admin123') {
-                // Usuario administrador por defecto
-                currentUser = {
-                    id: 1,
-                    name: 'Administrador',
-                    email: 'admin@mordipets.com',
-                    phone: '123456789',
-                    location: 'Madrid, Cundinamarca',
-                    isAdmin: true
-                };
-                
-                isAdmin = true;
-                
-                console.log('Fallback login successful, isAdmin:', isAdmin);
-                closeModal(document.getElementById('loginModal'));
-                showUserPanel();
-                
-                // Limpiar formulario
-                document.getElementById('loginForm').reset();
-                
-                alert('¡Bienvenido Administrador!');
-            } else if (email === 'cliente@test.com' && password === 'cliente123') {
-                // Usuario cliente de prueba
-                currentUser = {
-                    id: 2,
-                    name: 'Cliente Prueba',
-                    email: 'cliente@test.com',
-                    phone: '987654321',
-                    location: 'Madrid, Cundinamarca',
-                    isAdmin: false
-                };
-                
-                isAdmin = false;
-                
-                closeModal(document.getElementById('loginModal'));
-                showUserPanel();
-                
-                // Limpiar formulario
-                document.getElementById('loginForm').reset();
-                
-                alert('¡Bienvenido Cliente!');
-            } else {
-                alert('Credenciales incorrectas. Usa:\nAdmin: admin@mordipets.com / admin123\nCliente: cliente@test.com / cliente123');
-            }
-        }
+        currentUser = {
+            email: email,
+            name: email.split('@')[0],
+            isAdmin: isAdminCheck
+        };
+        
+        isAdmin = isAdminCheck;
+        
+        closeModal(document.getElementById('loginModal'));
+        showUserPanel();
+        
+        // Clear form
+        document.getElementById('loginForm').reset();
     } else {
         alert('Por favor, completa todos los campos');
     }
 }
 
-async function handleRegister(e) {
+function handleRegister(e) {
     e.preventDefault();
     
     const name = document.getElementById('regName').value;
@@ -435,52 +248,23 @@ async function handleRegister(e) {
     }
     
     if (name && email && phone && location && password) {
-        try {
-            // Crear user en la base de datos
-            const response = await fetch(`${API_BASE}/api/users`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    location: location,
-                    password: password,
-                    isAdmin: false
-                })
-            });
-            
-            if (response.ok) {
-                const newUser = await response.json();
-                
-                currentUser = {
-                    id: newUser.id,
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    location: location,
-                    isAdmin: false
-                };
-                
-                isAdmin = false;
-                
-                closeModal(document.getElementById('registerModal'));
-                showUserPanel();
-                
-                // Clear form
-                document.getElementById('registerForm').reset();
-                
-                alert('¡Registro exitoso! Bienvenido a Mordipets');
-            } else {
-                const error = await response.json();
-                alert(`Error al registrarse: ${error.error || 'Error desconocido'}`);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al registrarse. Inténtalo de nuevo.');
-        }
+        currentUser = {
+            name: name,
+            email: email,
+            phone: phone,
+            location: location,
+            isAdmin: false
+        };
+        
+        isAdmin = false;
+        
+        closeModal(document.getElementById('registerModal'));
+        showUserPanel();
+        
+        // Clear form
+        document.getElementById('registerForm').reset();
+        
+        alert('¡Registro exitoso! Bienvenido a Mordipets');
     } else {
         alert('Por favor, completa todos los campos');
     }
@@ -491,38 +275,35 @@ function handleLogout() {
     isAdmin = false;
     cart = [];
     
-    document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('clientPanel').style.display = 'none';
+    const adminPanel = document.getElementById('adminPanel');
+    const clientPanel = document.getElementById('clientPanel');
     
-    // Show main content sections
-    document.getElementById('products').style.display = 'block';
-    document.getElementById('nosotros').style.display = 'block';
-    document.getElementById('contacto').style.display = 'block';
+    if (adminPanel) adminPanel.style.display = 'none';
+    if (clientPanel) clientPanel.style.display = 'none';
     
     // Show login/register buttons
-    document.getElementById('loginBtn').style.display = 'flex';
-    document.getElementById('registerBtn').style.display = 'flex';
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'flex';
+    if (registerBtn) registerBtn.style.display = 'flex';
 }
 
 function showUserPanel() {
-    console.log('showUserPanel called, isAdmin:', isAdmin);
-    
     // Hide login/register buttons
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('registerBtn').style.display = 'none';
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
     
-    // Hide main content sections
-    document.getElementById('productos').style.display = 'none';
-    document.getElementById('nosotros').style.display = 'none';
-    document.getElementById('contacto').style.display = 'none';
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (registerBtn) registerBtn.style.display = 'none';
     
     if (isAdmin) {
-        console.log('Showing admin panel');
-        document.getElementById('adminPanel').style.display = 'block';
+        const adminPanel = document.getElementById('adminPanel');
+        if (adminPanel) adminPanel.style.display = 'block';
         loadAdminData();
     } else {
-        console.log('Showing client panel');
-        document.getElementById('clientPanel').style.display = 'block';
+        const clientPanel = document.getElementById('clientPanel');
+        if (clientPanel) clientPanel.style.display = 'block';
         loadClientData();
     }
 }
@@ -540,6 +321,8 @@ function loadClientData() {
 
 function loadProductsGrid() {
     const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     products.forEach(product => {
@@ -550,6 +333,8 @@ function loadProductsGrid() {
 
 function loadIngredientsGrid() {
     const grid = document.getElementById('ingredientsGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     ingredients.forEach(ingredient => {
@@ -560,6 +345,8 @@ function loadIngredientsGrid() {
 
 function loadCatalogGrid() {
     const grid = document.getElementById('catalogGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
     products.forEach(product => {
@@ -572,31 +359,8 @@ function createProductCard(product, isAdmin = false) {
     const card = document.createElement('div');
     card.className = isAdmin ? 'product-card' : 'catalog-card';
     
-    // Para admin: mostrar stock exacto
-    // Para cliente: mostrar estado más amigable
-    let stockClass, stockText;
-    
-    if (isAdmin) {
-        stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
-        stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock';
-    } else {
-        // Para clientes: mostrar estado más amigable
-        if (product.stock > 10) {
-            stockClass = 'stock';
-            stockText = 'Disponible';
-        } else if (product.stock > 0) {
-            stockClass = 'stock low';
-            stockText = 'Pocas unidades';
-        } else {
-            stockClass = 'stock out';
-            stockText = 'Agotada';
-        }
-    }
-    
-    // Agregar clase especial para products agotados en el catálogo
-    if (!isAdmin && product.stock === 0) {
-        card.classList.add('out-of-stock');
-    }
+    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
+    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock';
     
     card.innerHTML = `
         <h4>${product.name}</h4>
@@ -617,15 +381,12 @@ function createProductCard(product, isAdmin = false) {
                 </button>
             ` : `
                 <div class="quantity-controls">
-                    <label for="quantity-${product.id}">Cantidad:</label>
-                    <div class="quantity-input">
-                        <button type="button" onclick="decreaseQuantity(${product.id})" class="quantity-btn">-</button>
-                        <input type="number" id="quantity-${product.id}" value="1" min="1" max="${product.stock}" class="quantity-number">
-                        <button type="button" onclick="increaseQuantity(${product.id})" class="quantity-btn">+</button>
-                    </div>
+                    <button class="quantity-btn" onclick="decreaseQuantity(${product.id})">-</button>
+                    <input type="number" class="quantity-input" id="qty-${product.id}" value="1" min="1" max="${product.stock}">
+                    <button class="quantity-btn" onclick="increaseQuantity(${product.id})">+</button>
                 </div>
                 <button class="btn-small btn-add-to-cart" onclick="addToCartWithQuantity(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-cart-plus"></i> ${product.stock === 0 ? 'Agotada' : 'Agregar al Carrito'}
+                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
                 </button>
             `}
         </div>
@@ -670,31 +431,16 @@ function createIngredientCard(ingredient) {
 
 function loadOrdersList() {
     const list = document.getElementById('ordersList');
+    if (!list) return;
+    
     list.innerHTML = '';
     
-    // Cargar pedidos desde localStorage también
-    const storedOrders = localStorage.getItem('clientOrders');
-    let allOrders = [...orders];
-    
-    if (storedOrders) {
-        const localOrders = JSON.parse(storedOrders);
-        // Agregar pedidos locales que no estén ya en orders
-        localOrders.forEach(localOrder => {
-            if (!allOrders.find(o => o.id === localOrder.id)) {
-                allOrders.push(localOrder);
-            }
-        });
-    }
-    
-    if (allOrders.length === 0) {
+    if (orders.length === 0) {
         list.innerHTML = '<p class="text-center">No hay pedidos registrados</p>';
         return;
     }
     
-    // Ordenar por fecha (más recientes primero)
-    allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    allOrders.forEach(order => {
+    orders.forEach(order => {
         const orderCard = createOrderCard(order);
         list.appendChild(orderCard);
     });
@@ -702,163 +448,141 @@ function loadOrdersList() {
 
 function loadClientOrders() {
     console.log('=== loadClientOrders START ===');
-    console.log('loadClientOrders called, currentUser:', currentUser);
     
     const list = document.getElementById('clientOrdersList');
     console.log('clientOrdersList element:', list);
     
     if (!list) {
-        console.error('clientOrdersList element not found!');
+        console.log('❌ clientOrdersList element not found!');
         return;
     }
     
     list.innerHTML = '';
     
-    // Cargar pedidos reales del cliente desde localStorage
-    let clientOrders = getClientOrders();
+    // Get client orders from localStorage
+    const clientOrders = getClientOrders();
     console.log('clientOrders found:', clientOrders);
     
-    // Si no hay pedidos, crear algunos de ejemplo para testing
     if (clientOrders.length === 0) {
-        console.log('No orders found, creating sample orders');
+        console.log('No client orders found, creating sample orders...');
         createSampleOrders();
-        clientOrders = getClientOrders();
-        console.log('After creating samples, clientOrders:', clientOrders);
+        const newClientOrders = getClientOrders();
+        console.log('New client orders after creating samples:', newClientOrders);
+        
+        if (newClientOrders.length === 0) {
+            list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
+            return;
+        }
+        
+        newClientOrders.forEach(order => {
+            console.log('Processing orders:', newClientOrders.length);
+            console.log('Creating card for order', order.id, ':', order);
+            const orderCard = createOrderCard(order);
+            list.appendChild(orderCard);
+        });
+    } else {
+        clientOrders.forEach(order => {
+            console.log('Processing orders:', clientOrders.length);
+            console.log('Creating card for order', order.id, ':', order);
+            const orderCard = createOrderCard(order);
+            list.appendChild(orderCard);
+        });
     }
-    
-    if (clientOrders.length === 0) {
-        console.log('Still no orders, showing empty message');
-        list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
-        return;
-    }
-    
-    console.log('Processing orders:', clientOrders.length);
-    
-    // Ordenar por fecha (más recientes primero)
-    clientOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    clientOrders.forEach((order, index) => {
-        console.log(`Creating card for order ${index + 1}:`, order);
-        const orderCard = createOrderCard(order);
-        list.appendChild(orderCard);
-    });
     
     console.log('=== loadClientOrders END ===');
 }
 
-// Función para obtener pedidos del cliente desde localStorage
 function getClientOrders() {
-    console.log('getClientOrders called, currentUser:', currentUser);
+    console.log('Getting client orders for:', currentUser?.email);
     
-    if (!currentUser || !currentUser.email) {
-        console.log('No currentUser or email found');
+    try {
+        const allOrders = JSON.parse(localStorage.getItem('mordipets_orders') || '[]');
+        console.log('All orders from localStorage:', allOrders);
+        
+        const clientOrders = allOrders.filter(order => {
+            console.log('Comparing', order.client_email || order.clientEmail, 'with', currentUser?.email);
+            return (order.client_email || order.clientEmail) === currentUser?.email;
+        });
+        
+        console.log('Filtered client orders:', clientOrders);
+        return clientOrders;
+    } catch (error) {
+        console.error('Error parsing orders from localStorage:', error);
         return [];
     }
-    
-    const storedOrders = localStorage.getItem('clientOrders');
-    console.log('storedOrders from localStorage:', storedOrders);
-    
-    if (storedOrders) {
-        try {
-            const allOrders = JSON.parse(storedOrders);
-            console.log('All orders from localStorage:', allOrders);
-            
-            const clientOrders = allOrders.filter(order => {
-                console.log(`Comparing ${order.client_email} with ${currentUser.email}`);
-                return order.client_email === currentUser.email;
-            });
-            
-            console.log('Filtered client orders:', clientOrders);
-            return clientOrders;
-        } catch (error) {
-            console.error('Error parsing stored orders:', error);
-            return [];
-        }
-    }
-    
-    console.log('No stored orders found');
-    return [];
 }
 
-// Función para guardar pedidos en localStorage
-function saveClientOrder(order) {
-    const storedOrders = localStorage.getItem('clientOrders');
-    let orders = storedOrders ? JSON.parse(storedOrders) : [];
-    
-    // Agregar el nuevo pedido
-    orders.push(order);
-    
-    // Guardar de vuelta en localStorage
-    localStorage.setItem('clientOrders', JSON.stringify(orders));
-    console.log('Order saved to localStorage:', order);
-}
-
-// Función para crear pedidos de ejemplo (solo para testing)
 function createSampleOrders() {
-    console.log('createSampleOrders called, currentUser:', currentUser);
     if (!currentUser) return;
     
     const sampleOrders = [
         {
-            id: Date.now() + 1,
+            id: 1,
             client_name: currentUser.name,
             client_email: currentUser.email,
             total: 45000,
             status: 'pending',
             payment_method: 'online',
-            created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date().toISOString(),
             items: [
-                { product_id: 1, product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
-                { product_id: 2, product_name: 'Galletas de Pollo', quantity: 1, price: 15000 }
+                { product_id: 1, product_name: 'Galleta Leche x 1000 gr', quantity: 2, price: 15500 },
+                { product_id: 2, product_name: 'Galleta Carne x 1000 gr', quantity: 1, price: 16000 }
             ]
         },
         {
-            id: Date.now() + 2,
+            id: 2,
             client_name: currentUser.name,
             client_email: currentUser.email,
             total: 30000,
             status: 'confirmed',
             payment_method: 'contraentrega',
-            created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
             items: [
-                { product_id: 3, product_name: 'Galletas de Salmón', quantity: 2, price: 15000 }
+                { product_id: 3, product_name: 'Galleta Pollo x 1000 gr', quantity: 2, price: 15000 }
             ]
         }
     ];
     
-    // Guardar pedidos de ejemplo
-    sampleOrders.forEach(order => {
-        saveClientOrder(order);
-    });
+    // Save to localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('mordipets_orders') || '[]');
+    const newOrders = [...existingOrders, ...sampleOrders];
+    localStorage.setItem('mordipets_orders', JSON.stringify(newOrders));
     
-    console.log('Sample orders created');
+    // Update global orders array
+    orders = newOrders;
 }
 
 function createOrderCard(order) {
     console.log('createOrderCard called with order:', order);
+    
     const card = document.createElement('div');
     card.className = 'order-card';
     
     const statusClass = `status-${order.status}`;
     const statusText = {
         'pending': 'Pendiente',
-        'confirmed': 'Confirmado',
+        'confirmed': 'Aceptado',
         'delivered': 'Entregado'
     };
+    
+    const orderDate = new Date(order.created_at || order.date);
+    const clientName = order.client_name || order.clientName;
+    const clientEmail = order.client_email || order.clientEmail;
+    const paymentMethod = order.payment_method || order.paymentMethod;
     
     card.innerHTML = `
         <div class="order-header">
             <span class="order-id">Pedido #${order.id}</span>
-            <span class="order-status ${statusClass}">${statusText[order.status]}</span>
+            <span class="order-status ${statusClass}">${statusText[order.status] || 'Desconocido'}</span>
         </div>
         <div class="order-details">
             <div class="order-detail">
                 <label>Cliente</label>
-                <span>${order.client_name}</span>
+                <span>${clientName}</span>
             </div>
             <div class="order-detail">
                 <label>Fecha</label>
-                <span>${new Date(order.created_at).toLocaleDateString()}</span>
+                <span>${orderDate.toLocaleDateString()}</span>
             </div>
             <div class="order-detail">
                 <label>Total</label>
@@ -866,40 +590,28 @@ function createOrderCard(order) {
             </div>
             <div class="order-detail">
                 <label>Método de Pago</label>
-                <span>${order.payment_method === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
+                <span>${paymentMethod === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
             </div>
         </div>
         <div class="order-items">
             <h5>Productos:</h5>
-            ${order.items ? order.items.map(item => `
+            ${order.items.map(item => `
                 <div class="order-item">
-                    <span>${item.product_name} x${item.quantity}</span>
-                    <span>$${(item.price * item.quantity).toLocaleString('es-CO')}</span>
+                    <span>${item.product_name || item.name} x${item.quantity}</span>
+                    <span>$${((item.price || 0) * item.quantity).toLocaleString('es-CO')}</span>
                 </div>
-            `).join('') : ''}
+            `).join('')}
         </div>
-        ${isAdmin ? `
-            <div class="order-actions mt-20">
-                <button class="btn-small btn-edit" onclick="updateOrderStatus(${order.id}, 'confirmed')">
-                    <i class="fas fa-check"></i> Confirmar
-                </button>
-                <button class="btn-small btn-delete" onclick="updateOrderStatus(${order.id}, 'delivered')">
-                    <i class="fas fa-truck"></i> Marcar Entregado
-                </button>
-            </div>
-        ` : ''}
     `;
     
     return card;
 }
 
-async function handleAddProduct(e) {
+function handleAddProduct(e) {
     e.preventDefault();
     
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const isEditing = submitBtn.dataset.productId;
-    
-    const productData = {
+    const newProduct = {
+        id: Date.now(),
         code: document.getElementById('productCode').value,
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
@@ -908,142 +620,59 @@ async function handleAddProduct(e) {
         weight: parseInt(document.getElementById('productWeight').value)
     };
     
-    try {
-        let response;
-        if (isEditing) {
-            // Update existing product
-            response = await fetch(`${API_BASE}/api/products/${isEditing}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData)
-            });
-        } else {
-            // Create new product
-            response = await fetch(`${API_BASE}/api/products`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData)
-            });
-        }
-        
-        if (response.ok) {
-            const updatedProduct = await response.json();
-            
-            if (isEditing) {
-                // Update existing product in array
-                const index = products.findIndex(p => p.id === parseInt(isEditing));
-                if (index !== -1) {
-                    products[index] = updatedProduct;
-                }
-                alert('Producto actualizado exitosamente');
-            } else {
-                // Add new product to array
-                products.push(updatedProduct);
-                alert('Producto añadido exitosamente');
-            }
-            
-            closeModal(document.getElementById('addProductModal'));
-            loadProductsGrid();
-            
-            // Reset form and button
-            document.getElementById('addProductForm').reset();
-            resetProductForm();
-        } else {
-            throw new Error(isEditing ? 'Error al actualizar product' : 'Error al crear product');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert(isEditing ? 'Error al actualizar el product' : 'Error al añadir el product');
-    }
-}
-
-function resetProductForm() {
-    const modal = document.getElementById('addProductModal');
-    const title = modal.querySelector('h2');
-    const submitBtn = modal.querySelector('button[type="submit"]');
+    products.push(newProduct);
+    saveToLocalStorage('mordipets_products', products);
     
-    title.textContent = 'Añadir Nuevo Producto';
-    submitBtn.textContent = 'Añadir Producto';
-    delete submitBtn.dataset.productId;
+    closeModal(document.getElementById('addProductModal'));
+    loadProductsGrid();
+    
+    // Clear form
+    document.getElementById('addProductForm').reset();
+    
+    alert('Producto añadido exitosamente');
 }
 
-async function handleAddIngredient(e) {
+function handleAddIngredient(e) {
     e.preventDefault();
     
     const newIngredient = {
+        id: Date.now(),
         name: document.getElementById('ingredientName').value,
         type: document.getElementById('ingredientType').value,
         quantity: parseInt(document.getElementById('ingredientQuantity').value),
         unit: document.getElementById('ingredientUnit').value
     };
     
-    try {
-        const response = await fetch(`${API_BASE}/api/ingredients`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newIngredient)
-        });
-        
-        if (response.ok) {
-            const createdIngredient = await response.json();
-            ingredients.push(createdIngredient);
-            
-            closeModal(document.getElementById('addIngredientModal'));
-            loadIngredientsGrid();
-            
-            // Clear form
-            document.getElementById('addIngredientForm').reset();
-            
-            alert('Insumo añadido exitosamente');
-        } else {
-            throw new Error('Error al crear ingredient');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Error al añadir el insumo');
-    }
+    ingredients.push(newIngredient);
+    saveToLocalStorage('mordipets_ingredients', ingredients);
+    
+    closeModal(document.getElementById('addIngredientModal'));
+    loadIngredientsGrid();
+    
+    // Clear form
+    document.getElementById('addIngredientForm').reset();
+    
+    alert('Insumo añadido exitosamente');
 }
 
-function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    if (product && product.stock > 0) {
-        const existingItem = cart.find(item => item.id === productId);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                quantity: 1
-            });
-        }
-        
-        alert(`${product.name} agregado al cart`);
-        updateCartDisplay();
-    }
-}
-
-// Funciones para manejar cantidades
 function increaseQuantity(productId) {
-    const input = document.getElementById(`quantity-${productId}`);
-    const product = products.find(p => p.id === productId);
-    if (input && product && parseInt(input.value) < product.stock) {
-        input.value = parseInt(input.value) + 1;
+    const input = document.getElementById(`qty-${productId}`);
+    if (input) {
+        const max = parseInt(input.getAttribute('max'));
+        const current = parseInt(input.value);
+        if (current < max) {
+            input.value = current + 1;
+        }
     }
 }
 
 function decreaseQuantity(productId) {
-    const input = document.getElementById(`quantity-${productId}`);
-    if (input && parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
+    const input = document.getElementById(`qty-${productId}`);
+    if (input) {
+        const current = parseInt(input.value);
+        if (current > 1) {
+            input.value = current - 1;
+        }
     }
 }
 
@@ -1051,28 +680,21 @@ function addToCartWithQuantity(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
     
-    if (product.stock === 0) {
-        alert('Este producto está agotado');
+    const quantityInput = document.getElementById(`qty-${productId}`);
+    const quantity = quantityInput ? parseInt(quantityInput.value) : 1;
+    
+    if (product.stock < quantity) {
+        alert('No hay suficiente stock disponible');
         return;
     }
     
-    // Verificar si el usuario está logueado
     if (!currentUser) {
         alert('Debes iniciar sesión para agregar productos al carrito');
-        document.getElementById('loginBtn').click();
         return;
     }
     
-    const quantityInput = document.getElementById(`quantity-${productId}`);
-    const quantity = parseInt(quantityInput.value) || 1;
-    
-    if (quantity > product.stock) {
-        alert(`Solo hay ${product.stock} unidades disponibles`);
-        return;
-    }
-    
-    // Agregar al carrito
     const existingItem = cart.find(item => item.id === productId);
+    
     if (existingItem) {
         existingItem.quantity += quantity;
     } else {
@@ -1084,37 +706,34 @@ function addToCartWithQuantity(productId) {
         });
     }
     
-    alert(`${quantity} ${product.name} agregado(s) al carrito`);
+    // Update stock
+    product.stock -= quantity;
+    saveToLocalStorage('mordipets_products', products);
+    
     updateCartDisplay();
+    alert(`${product.name} (${quantity} unidades) agregado al carrito`);
 }
 
-// Función para actualizar la visualización del carrito
 function updateCartDisplay() {
     const cartButton = document.querySelector('.cart-button');
     if (cartButton) {
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartButton.innerHTML = `<i class="fas fa-shopping-cart"></i> Carrito (${totalItems})`;
+        cartButton.innerHTML = `<i class="fas fa-shopping-cart"></i> Ver Carrito (${totalItems})`;
     }
 }
 
-// Función para quitar producto del carrito
 function removeFromCart(productId) {
-    const itemIndex = cart.findIndex(item => item.id === productId);
-    if (itemIndex > -1) {
-        cart.splice(itemIndex, 1);
-        updateCartDisplay();
-        alert('Producto eliminado del carrito');
-    }
+    cart = cart.filter(item => item.id !== productId);
+    updateCartDisplay();
 }
 
-// Función para actualizar cantidad en el carrito
 function updateCartQuantity(productId, newQuantity) {
     const item = cart.find(item => item.id === productId);
     if (item) {
+        item.quantity = newQuantity;
         if (newQuantity <= 0) {
             removeFromCart(productId);
         } else {
-            item.quantity = newQuantity;
             updateCartDisplay();
         }
     }
@@ -1139,18 +758,12 @@ function showOrderModal() {
                         <span class="item-price">$${item.price.toLocaleString('es-CO')} c/u</span>
                     </div>
                     <div class="item-controls">
-                        <div class="quantity-controls">
-                            <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" class="quantity-btn">-</button>
-                            <span class="quantity-display">${item.quantity}</span>
-                            <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" class="quantity-btn">+</button>
-                        </div>
-                        <button onclick="removeFromCart(${item.id})" class="btn-remove" title="Eliminar">
+                        <button class="btn-small btn-remove" onclick="removeFromCart(${item.id})">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <input type="number" class="quantity-input" value="${item.quantity}" min="1" onchange="updateCartQuantity(${item.id}, parseInt(this.value))">
                     </div>
-                    <div class="item-total">
-                        $${(item.price * item.quantity).toLocaleString('es-CO')}
-                    </div>
+                    <div class="item-total">$${(item.price * item.quantity).toLocaleString('es-CO')}</div>
                 </div>
             `).join('')}
         </div>
@@ -1162,73 +775,53 @@ function showOrderModal() {
     openModal(document.getElementById('orderModal'));
 }
 
-async function handlePayment(method) {
+function handlePayment(method) {
     if (cart.length === 0) {
         alert('Tu carrito está vacío');
+        return;
+    }
+    
+    if (!currentUser) {
+        alert('Debes iniciar sesión para realizar un pedido');
         return;
     }
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     const newOrder = {
-        id: Date.now(), // ID único temporal
+        id: Date.now(),
         client_name: currentUser.name,
         client_email: currentUser.email,
         client_phone: currentUser.phone,
         client_location: currentUser.location,
-        items: cart.map(item => ({
-            product_id: item.id,
-            product_name: item.name,
-            quantity: item.quantity,
-            price: item.price
-        })),
+        items: [...cart],
         total: total,
         payment_method: method,
         status: 'pending',
         created_at: new Date().toISOString()
     };
     
-    try {
-        // Intentar con la API primero
-        const response = await fetch(`${API_BASE}/api/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newOrder)
-        });
-        
-        if (response.ok) {
-            const createdOrder = await response.json();
-            orders.push(createdOrder);
-            saveClientOrder(createdOrder);
-        } else {
-            throw new Error('Error al crear pedido en la API');
-        }
-    } catch (error) {
-        console.error('Error con la API:', error);
-        
-        // Fallback: guardar en localStorage
-        console.log('Guardando pedido en localStorage como fallback');
-        saveClientOrder(newOrder);
-        orders.push(newOrder);
-    }
+    // Save to localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('mordipets_orders') || '[]');
+    const updatedOrders = [...existingOrders, newOrder];
+    localStorage.setItem('mordipets_orders', JSON.stringify(updatedOrders));
     
-    // Limpiar carrito
+    // Update global orders array
+    orders = updatedOrders;
+    
+    // Clear cart
     cart = [];
     updateCartDisplay();
     
-    // Cerrar modal
     closeModal(document.getElementById('orderModal'));
     
-    // Mostrar mensaje de confirmación
     if (method === 'online') {
-        alert('Pedido realizado exitosamente. Te contactaremos para coordinar el pago y la entrega.');
+        alert('Redirigiendo al sistema de pago...');
     } else {
         alert('Pedido realizado exitosamente. Te contactaremos para coordinar la entrega.');
     }
     
-    // Recargar datos del cliente
+    // Reload client data
     loadClientData();
 }
 
@@ -1237,99 +830,44 @@ function switchAdminSection(section) {
     document.querySelectorAll('.admin-nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector(`[data-section="${section}"]`).classList.add('active');
+    const activeBtn = document.querySelector(`[data-section="${section}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
     
-    // Show/hide sections with animation
+    // Show/hide sections
     document.querySelectorAll('.admin-section').forEach(sec => {
         sec.classList.add('hidden');
     });
-    
     const targetSection = document.getElementById(`${section}Section`);
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-        
-        // Add loading state and refresh data
-        showSectionLoading(section);
-        
-        // Load section-specific data
-        setTimeout(() => {
-            loadSectionData(section);
-            hideSectionLoading(section);
-        }, 300);
-    }
-}
-
-function showSectionLoading(section) {
-    const targetSection = document.getElementById(`${section}Section`);
-    if (targetSection) {
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'section-loading';
-        loadingDiv.innerHTML = `
-            <div class="loading-spinner">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span>Cargando ${section}...</span>
-            </div>
-        `;
-        targetSection.appendChild(loadingDiv);
-    }
-}
-
-function hideSectionLoading(section) {
-    const targetSection = document.getElementById(`${section}Section`);
-    if (targetSection) {
-        const loadingDiv = targetSection.querySelector('.section-loading');
-        if (loadingDiv) {
-            loadingDiv.remove();
-        }
-    }
-}
-
-function loadSectionData(section) {
-    switch(section) {
-        case 'inventario':
-            loadProductsGrid();
-            break;
-        case 'insumos':
-            loadIngredientsGrid();
-            break;
-        case 'orders':
-            loadOrdersList();
-            break;
-    }
+    if (targetSection) targetSection.classList.remove('hidden');
 }
 
 function switchClientSection(section) {
     console.log('=== switchClientSection START ===');
-    console.log('switchClientSection called with section:', section);
+    console.log('Switching to section:', section);
     
     // Update navigation
     document.querySelectorAll('.client-nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     const activeBtn = document.querySelector(`[data-section="${section}"]`);
-    if (activeBtn) {
-        activeBtn.classList.add('active');
-        console.log('Active button set:', activeBtn);
-    } else {
-        console.error('Button not found for section:', section);
-    }
+    console.log('Active button found:', activeBtn);
+    if (activeBtn) activeBtn.classList.add('active');
     
     // Show/hide sections
     document.querySelectorAll('.client-section').forEach(sec => {
         sec.style.display = 'none';
     });
-    
     const targetSection = document.getElementById(`${section}Section`);
+    console.log('Target section found:', targetSection);
     if (targetSection) {
         targetSection.style.display = 'block';
-        console.log('Section displayed:', targetSection);
+        console.log('Target section displayed');
         
-        // Si es la sección de pedidos, cargar los pedidos
+        // Load client orders if switching to pedidosCliente
         if (section === 'pedidosCliente') {
+            console.log('Loading client orders...');
             loadClientOrders();
         }
-    } else {
-        console.error('Section not found:', `${section}Section`);
     }
     
     console.log('=== switchClientSection END ===');
@@ -1349,359 +887,52 @@ function handleSearch(e) {
     });
 }
 
-function handleProductSearch(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const cards = document.querySelectorAll('.product-card');
-    
-    cards.forEach(card => {
-        const productName = card.querySelector('h4').textContent.toLowerCase();
-        const productCode = card.querySelector('p').textContent.toLowerCase();
-        
-        if (productName.includes(searchTerm) || productCode.includes(searchTerm)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-function handleProductFilter(e) {
-    const filterValue = e.target.value;
-    const cards = document.querySelectorAll('.product-card');
-    
-    cards.forEach(card => {
-        const stockElement = card.querySelector('.stock');
-        const stockText = stockElement.textContent.toLowerCase();
-        
-        let shouldShow = true;
-        
-        switch(filterValue) {
-            case 'in-stock':
-                shouldShow = !stockText.includes('sin stock') && !stockText.includes('stock bajo');
-                break;
-            case 'low-stock':
-                shouldShow = stockText.includes('stock bajo');
-                break;
-            case 'out-of-stock':
-                shouldShow = stockText.includes('sin stock');
-                break;
-            case 'all':
-            default:
-                shouldShow = true;
-                break;
-        }
-        
-        card.style.display = shouldShow ? 'block' : 'none';
-    });
-}
-
-function handleProductSort(e) {
-    const sortValue = e.target.value;
-    const grid = document.getElementById('productsGrid');
-    const cards = Array.from(grid.querySelectorAll('.product-card'));
-    
-    cards.sort((a, b) => {
-        switch(sortValue) {
-            case 'name':
-                return a.querySelector('h4').textContent.localeCompare(b.querySelector('h4').textContent);
-            case 'price':
-                const priceA = parseFloat(a.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
-                const priceB = parseFloat(b.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
-                return priceA - priceB;
-            case 'stock':
-                const stockA = parseInt(a.querySelector('.stock').textContent.replace(/[^0-9]+/g, '') || 0);
-                const stockB = parseInt(b.querySelector('.stock').textContent.replace(/[^0-9]+/g, '') || 0);
-                return stockB - stockA;
-            case 'date':
-                // For now, just return 0 since we don't have date info
-                return 0;
-            default:
-                return 0;
-        }
-    });
-    
-    // Re-append sorted cards
-    cards.forEach(card => grid.appendChild(card));
-}
-
-function clearProductFilters() {
-    // Reset search input
-    document.getElementById('searchProducts').value = '';
-    
-    // Reset filter selects
-    document.getElementById('stockFilter').value = 'all';
-    document.getElementById('sortProducts').value = 'name';
-    
-    // Show all products
-    const cards = document.querySelectorAll('.product-card');
-    cards.forEach(card => {
-        card.style.display = 'block';
-    });
-    
-    // Reload products grid to reset order
-    loadProductsGrid();
-}
-
-function handleCatalogFilter(e) {
-    const filterValue = e.target.value;
-    const cards = document.querySelectorAll('.catalog-card');
-    
-    cards.forEach(card => {
-        const stockElement = card.querySelector('.stock');
-        const stockText = stockElement.textContent.toLowerCase();
-        
-        let shouldShow = true;
-        
-        switch(filterValue) {
-            case 'available':
-                shouldShow = stockText.includes('disponible');
-                break;
-            case 'low-stock':
-                shouldShow = stockText.includes('pocas unidades');
-                break;
-            case 'out-of-stock':
-                shouldShow = stockText.includes('agotada');
-                break;
-            case 'all':
-            default:
-                shouldShow = true;
-                break;
-        }
-        
-        card.style.display = shouldShow ? 'block' : 'none';
-    });
-}
-
-function handleCatalogSort(e) {
-    const sortValue = e.target.value;
-    const grid = document.getElementById('catalogGrid');
-    const cards = Array.from(grid.querySelectorAll('.catalog-card'));
-    
-    cards.sort((a, b) => {
-        switch(sortValue) {
-            case 'name':
-                return a.querySelector('h4').textContent.localeCompare(b.querySelector('h4').textContent);
-            case 'price':
-                const priceA = parseFloat(a.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
-                const priceB = parseFloat(b.querySelector('.price').textContent.replace(/[^0-9.-]+/g, ''));
-                return priceA - priceB;
-            case 'availability':
-                const stockA = a.querySelector('.stock').textContent.toLowerCase();
-                const stockB = b.querySelector('.stock').textContent.toLowerCase();
-                
-                // Disponible primero, luego pocas unidades, luego agotadas
-                if (stockA.includes('disponible') && !stockB.includes('disponible')) return -1;
-                if (!stockA.includes('disponible') && stockB.includes('disponible')) return 1;
-                if (stockA.includes('pocas') && stockB.includes('agotada')) return -1;
-                if (stockA.includes('agotada') && stockB.includes('pocas')) return 1;
-                return 0;
-            default:
-                return 0;
-        }
-    });
-    
-    // Re-append sorted cards
-    cards.forEach(card => grid.appendChild(card));
-}
-
-async function updateOrderStatus(orderId, newStatus) {
-    try {
-        // Buscar el pedido
-        const order = orders.find(o => o.id === orderId);
-        if (!order) {
-            alert('Pedido no encontrado');
-            return;
-        }
-        
-        // Si el nuevo estado es 'confirmed' (aceptado), descontar stock
-        if (newStatus === 'confirmed' && order.status === 'pending') {
-            await updateStockForOrder(order);
-        }
-        
-        // Intentar actualizar con la API
-        const response = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ status: newStatus })
-        });
-        
-        if (response.ok) {
-            const updatedOrder = await response.json();
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex !== -1) {
-                orders[orderIndex] = updatedOrder;
-            }
-            
-            // Actualizar también en localStorage
-            updateOrderInLocalStorage(updatedOrder);
-            
-            loadOrdersList();
-            loadProductsGrid(); // Recargar productos para mostrar stock actualizado
-            alert(`Estado del pedido actualizado a: ${getStatusText(newStatus)}`);
-        } else {
-            throw new Error('Error al actualizar pedido en la API');
-        }
-    } catch (error) {
-        console.error('Error con la API:', error);
-        
-        // Fallback: actualizar localmente
-        const orderIndex = orders.findIndex(o => o.id === orderId);
-        if (orderIndex !== -1) {
-            orders[orderIndex].status = newStatus;
-            updateOrderInLocalStorage(orders[orderIndex]);
-            
-            // Si se acepta el pedido, descontar stock localmente
-            if (newStatus === 'confirmed' && orders[orderIndex].status === 'pending') {
-                updateStockForOrder(orders[orderIndex]);
-            }
-            
-            loadOrdersList();
-            loadProductsGrid();
-            alert(`Estado del pedido actualizado a: ${getStatusText(newStatus)} (modo offline)`);
-        }
+function updateOrderStatus(orderId, newStatus) {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+        order.status = newStatus;
+        saveToLocalStorage('mordipets_orders', orders);
+        loadOrdersList();
+        alert(`Estado del pedido actualizado a: ${newStatus}`);
     }
-}
-
-// Función para descontar stock cuando se acepta un pedido
-async function updateStockForOrder(order) {
-    if (!order.items || order.items.length === 0) return;
-    
-    for (const item of order.items) {
-        const product = products.find(p => p.id === item.product_id);
-        if (product) {
-            // Descontar la cantidad del stock
-            product.stock = Math.max(0, product.stock - item.quantity);
-            
-            // Actualizar en localStorage
-            updateProductInLocalStorage(product);
-            
-            console.log(`Stock actualizado para ${product.name}: ${product.stock} unidades`);
-        }
-    }
-}
-
-// Función para actualizar un producto en localStorage
-function updateProductInLocalStorage(product) {
-    const storedProducts = localStorage.getItem('products');
-    if (storedProducts) {
-        let products = JSON.parse(storedProducts);
-        const index = products.findIndex(p => p.id === product.id);
-        if (index !== -1) {
-            products[index] = product;
-            localStorage.setItem('products', JSON.stringify(products));
-        }
-    }
-}
-
-// Función para actualizar un pedido en localStorage
-function updateOrderInLocalStorage(order) {
-    const storedOrders = localStorage.getItem('clientOrders');
-    if (storedOrders) {
-        let orders = JSON.parse(storedOrders);
-        const index = orders.findIndex(o => o.id === order.id);
-        if (index !== -1) {
-            orders[index] = order;
-            localStorage.setItem('clientOrders', JSON.stringify(orders));
-        }
-    }
-}
-
-// Función para obtener el texto del estado
-function getStatusText(status) {
-    const statusTexts = {
-        'pending': 'Pendiente',
-        'confirmed': 'Aceptado',
-        'delivered': 'Entregado'
-    };
-    return statusTexts[status] || status;
 }
 
 function editProduct(productId) {
-    const product = products.find(p => p.id === productId);
-    if (!product) {
-        alert('Producto no encontrado');
-        return;
-    }
-    
-    // Fill the form with existing data
-    document.getElementById('productCode').value = product.code;
-    document.getElementById('productName').value = product.name;
-    document.getElementById('productDescription').value = product.description;
-    document.getElementById('productPrice').value = product.price;
-    document.getElementById('productStock').value = product.stock;
-    document.getElementById('productWeight').value = product.weight;
-    
-    // Change form title and button
-    const modal = document.getElementById('addProductModal');
-    const title = modal.querySelector('h2');
-    const submitBtn = modal.querySelector('button[type="submit"]');
-    
-    title.textContent = 'Editar Producto';
-    submitBtn.textContent = 'Actualizar Producto';
-    
-    // Store the product ID for updating
-    submitBtn.dataset.productId = productId;
-    
-    // Open modal
-    openModal(modal);
+    alert('Funcionalidad de edición en desarrollo');
 }
 
-async function deleteProduct(productId) {
-    if (confirm('¿Estás seguro de que quieres eliminar este product?')) {
-        try {
-            const response = await fetch(`${API_BASE}/api/products/${productId}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                products = products.filter(p => p.id !== productId);
-                loadProductsGrid();
-                alert('Producto eliminado exitosamente');
-            } else {
-                throw new Error('Error al eliminar product');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar el product');
-        }
+function deleteProduct(productId) {
+    if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        products = products.filter(p => p.id !== productId);
+        saveToLocalStorage('mordipets_products', products);
+        loadProductsGrid();
+        alert('Producto eliminado exitosamente');
     }
 }
 
 function editIngredient(ingredientId) {
-    // In a real application, this would open an edit modal
     alert('Funcionalidad de edición en desarrollo');
 }
 
-async function deleteIngredient(ingredientId) {
+function deleteIngredient(ingredientId) {
     if (confirm('¿Estás seguro de que quieres eliminar este insumo?')) {
-        try {
-            const response = await fetch(`${API_BASE}/api/ingredients/${ingredientId}`, {
-                method: 'DELETE'
-            });
-            
-            if (response.ok) {
-                ingredients = ingredients.filter(i => i.id !== ingredientId);
-                loadIngredientsGrid();
-                alert('Insumo eliminado exitosamente');
-            } else {
-                throw new Error('Error al eliminar ingredient');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al eliminar el insumo');
-        }
+        ingredients = ingredients.filter(i => i.id !== ingredientId);
+        saveToLocalStorage('mordipets_ingredients', ingredients);
+        loadIngredientsGrid();
+        alert('Insumo eliminado exitosamente');
     }
 }
 
-// Add cart functionality to client panel
+function saveToLocalStorage(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+}
+
+// Add cart button to client panel
 document.addEventListener('DOMContentLoaded', function() {
-    // Add cart button to client panel
     const clientHeader = document.querySelector('.client-header');
     if (clientHeader) {
         const cartButton = document.createElement('button');
-        cartButton.className = 'btn-primary';
+        cartButton.className = 'btn-primary cart-button';
         cartButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Ver Carrito';
         cartButton.onclick = showOrderModal;
         clientHeader.appendChild(cartButton);
