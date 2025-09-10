@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     setupEventListeners();
     loadSampleData();
-    loadPublicProducts();
 });
 
 function initializeApp() {
@@ -75,6 +74,9 @@ function loadSampleData() {
         ingredients = [...sampleIngredients];
         saveToLocalStorage('mordipets_ingredients', ingredients);
     }
+    
+    // Load public products after data is loaded
+    loadPublicProducts();
 }
 
 function setupEventListeners() {
@@ -157,10 +159,12 @@ function handleLogin(e) {
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    const isAdminCheck = document.getElementById('isAdmin').checked;
     
     // Simple validation (in a real app, this would be server-side)
     if (email && password) {
+        // Check if it's admin login (simple check)
+        const isAdminCheck = email === 'admin@mordipets.com' || email === 'admin@admin.com';
+        
         currentUser = {
             email: email,
             name: email.split('@')[0],
@@ -174,6 +178,8 @@ function handleLogin(e) {
         
         // Clear form
         document.getElementById('loginForm').reset();
+        
+        alert(`¡Bienvenido ${isAdminCheck ? 'Administrador' : 'Cliente'}!`);
     } else {
         alert('Por favor, completa todos los campos');
     }
