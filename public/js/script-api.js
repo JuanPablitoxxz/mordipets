@@ -96,9 +96,30 @@ function createPublicProductCard(product) {
     const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
     const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
     
+    // Map product names to actual image filenames
+    const imageMap = {
+        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
+        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
+        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
+        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
+        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
+        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasLinaza.jpg',
+        'Galleta Monedita Leche x 1000 gr': 'galletasMoneditaLeche.jpg',
+        'Galleta Monedita Carne x 1000 gr': 'galletasMoneditaCarne.jpg',
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Polvorosa x 1000 gr': 'galletasPolvorosa.jpg',
+        'Huesito 3/4 Paquete x2 X 85 grm': 'huesitos.jpg',
+        'Paquete pequeño x 12 unds X 35 gr': 'paquetePequeño.jpg',
+        'Paquete x 8 Unds X 40 gr': 'paquete8unds.jpg'
+    };
+    
+    const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
+    
     card.innerHTML = `
         <div class="producto-image">
-            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <img src="images/${imageName}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <div class="product-placeholder" style="display:none;">🍪</div>
         </div>
         <div class="producto-info">
@@ -210,10 +231,12 @@ function handleLogin(e) {
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    const isAdminCheck = document.getElementById('isAdmin') ? document.getElementById('isAdmin').checked : false;
     
     // Simple validation (in a real app, this would be server-side)
     if (email && password) {
+        // Check if it's admin login (simple check)
+        const isAdminCheck = email === 'admin@mordipets.com' || email === 'admin@admin.com';
+        
         currentUser = {
             email: email,
             name: email.split('@')[0],
@@ -227,6 +250,8 @@ function handleLogin(e) {
         
         // Clear form
         document.getElementById('loginForm').reset();
+        
+        alert(`¡Bienvenido ${isAdminCheck ? 'Administrador' : 'Cliente'}!`);
     } else {
         alert('Por favor, completa todos los campos');
     }
