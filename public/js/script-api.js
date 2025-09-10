@@ -353,6 +353,7 @@ async function handleLogin(e) {
                 
                 isAdmin = user.is_admin;
                 
+                console.log('Login successful, isAdmin:', isAdmin);
                 closeModal(document.getElementById('loginModal'));
                 showUserPanel();
                 
@@ -381,6 +382,7 @@ async function handleLogin(e) {
                 
                 isAdmin = true;
                 
+                console.log('Fallback login successful, isAdmin:', isAdmin);
                 closeModal(document.getElementById('loginModal'));
                 showUserPanel();
                 
@@ -503,19 +505,23 @@ function handleLogout() {
 }
 
 function showUserPanel() {
+    console.log('showUserPanel called, isAdmin:', isAdmin);
+    
     // Hide login/register buttons
     document.getElementById('loginBtn').style.display = 'none';
     document.getElementById('registerBtn').style.display = 'none';
     
     // Hide main content sections
-    document.getElementById('products').style.display = 'none';
+    document.getElementById('productos').style.display = 'none';
     document.getElementById('nosotros').style.display = 'none';
     document.getElementById('contacto').style.display = 'none';
     
     if (isAdmin) {
+        console.log('Showing admin panel');
         document.getElementById('adminPanel').style.display = 'block';
         loadAdminData();
     } else {
+        console.log('Showing client panel');
         document.getElementById('clientPanel').style.display = 'block';
         loadClientData();
     }
