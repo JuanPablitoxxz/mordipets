@@ -74,12 +74,8 @@ function loadPublicProducts() {
     const grid = document.getElementById('productosGrid');
     if (!grid) return;
     
-    grid.innerHTML = '';
-    
-    products.forEach(product => {
-        const productCard = createPublicProductCard(product);
-        grid.appendChild(productCard);
-    });
+    // Mostrar mensaje en lugar de productos
+    grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
 }
 
 function createPublicProductCard(product) {
@@ -278,12 +274,19 @@ function handleLogout() {
     isAdmin = false;
     cart = [];
     
-    document.getElementById('adminPanel').classList.add('hidden');
-    document.getElementById('clientPanel').classList.add('hidden');
+    // Hide both panels
+    const adminPanel = document.getElementById('adminPanel');
+    const clientPanel = document.getElementById('clientPanel');
+    
+    if (adminPanel) adminPanel.style.display = 'none';
+    if (clientPanel) clientPanel.style.display = 'none';
     
     // Show login/register buttons
-    document.getElementById('loginBtn').style.display = 'flex';
-    document.getElementById('registerBtn').style.display = 'flex';
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    
+    if (loginBtn) loginBtn.style.display = 'flex';
+    if (registerBtn) registerBtn.style.display = 'flex';
 }
 
 function showUserPanel() {
@@ -299,20 +302,25 @@ function showUserPanel() {
     if (loginBtn) loginBtn.style.display = 'none';
     if (registerBtn) registerBtn.style.display = 'none';
     
+    // Hide both panels first
+    const adminPanel = document.getElementById('adminPanel');
+    const clientPanel = document.getElementById('clientPanel');
+    
+    if (adminPanel) adminPanel.style.display = 'none';
+    if (clientPanel) clientPanel.style.display = 'none';
+    
     if (isAdmin) {
         console.log('Showing admin panel');
-        const adminPanel = document.getElementById('adminPanel');
         console.log('Admin panel element:', adminPanel);
         if (adminPanel) {
-            adminPanel.classList.remove('hidden');
+            adminPanel.style.display = 'block';
             loadAdminData();
         }
     } else {
         console.log('Showing client panel');
-        const clientPanel = document.getElementById('clientPanel');
         console.log('Client panel element:', clientPanel);
         if (clientPanel) {
-            clientPanel.classList.remove('hidden');
+            clientPanel.style.display = 'block';
             loadClientData();
         }
     }
