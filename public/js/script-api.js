@@ -485,12 +485,17 @@ async function manejarRegistro(e) {
 }
 
 function handleLogout() {
-    currentUser = null;
-    isAdmin = false;
-    cart = [];
+    usuarioActual = null;
+    esAdministrador = false;
+    carrito = [];
     
-    document.getElementById('adminPanel').classList.add('hidden');
-    document.getElementById('clientPanel').classList.add('hidden');
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('clientPanel').style.display = 'none';
+    
+    // Show main content sections
+    document.getElementById('productos').style.display = 'block';
+    document.getElementById('nosotros').style.display = 'block';
+    document.getElementById('contacto').style.display = 'block';
     
     // Show login/register buttons
     document.getElementById('loginBtn').style.display = 'flex';
@@ -502,11 +507,16 @@ function showUserPanel() {
     document.getElementById('loginBtn').style.display = 'none';
     document.getElementById('registerBtn').style.display = 'none';
     
-    if (isAdmin) {
-        document.getElementById('adminPanel').classList.remove('hidden');
+    // Hide main content sections
+    document.getElementById('productos').style.display = 'none';
+    document.getElementById('nosotros').style.display = 'none';
+    document.getElementById('contacto').style.display = 'none';
+    
+    if (esAdministrador) {
+        document.getElementById('adminPanel').style.display = 'block';
         loadAdminData();
     } else {
-        document.getElementById('clientPanel').classList.remove('hidden');
+        document.getElementById('clientPanel').style.display = 'block';
         loadClientData();
     }
 }
