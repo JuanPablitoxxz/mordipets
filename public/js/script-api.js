@@ -701,8 +701,17 @@ function loadOrdersList() {
 }
 
 function loadClientOrders() {
+    console.log('=== loadClientOrders START ===');
     console.log('loadClientOrders called, currentUser:', currentUser);
+    
     const list = document.getElementById('clientOrdersList');
+    console.log('clientOrdersList element:', list);
+    
+    if (!list) {
+        console.error('clientOrdersList element not found!');
+        return;
+    }
+    
     list.innerHTML = '';
     
     // Cargar pedidos reales del cliente desde localStorage
@@ -718,17 +727,23 @@ function loadClientOrders() {
     }
     
     if (clientOrders.length === 0) {
+        console.log('Still no orders, showing empty message');
         list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
         return;
     }
     
+    console.log('Processing orders:', clientOrders.length);
+    
     // Ordenar por fecha (más recientes primero)
     clientOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     
-    clientOrders.forEach(order => {
+    clientOrders.forEach((order, index) => {
+        console.log(`Creating card for order ${index + 1}:`, order);
         const orderCard = createOrderCard(order);
         list.appendChild(orderCard);
     });
+    
+    console.log('=== loadClientOrders END ===');
 }
 
 // Función para obtener pedidos del cliente desde localStorage
@@ -819,6 +834,7 @@ function createSampleOrders() {
 }
 
 function createOrderCard(order) {
+    console.log('createOrderCard called with order:', order);
     const card = document.createElement('div');
     card.className = 'order-card';
     
