@@ -1,0 +1,10 @@
+[33m722cd3d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Simplify and clean up JavaScript code, remove duplicate code and debug logs
+[33mef62903[m Fix JavaScript syntax error and improve product loading with retry mechanism and debug logs
+[33mc6467f9[m Fix products display and login functionality - ensure products load after data initialization and fix admin detection
+[33m071033d[m Revert to original script.js - remove script-api.js and restore basic functionality
+[33mdf14534[m Fix product display and login functionality - map product names to correct images and fix admin login detection
+[33m3c3d869[m Fix client orders display - create script-api.js with complete functionality
+[33mee1697e[m debug: Agregar console.log a createSampleOrders para Railway testing
+[33m8dd2bdb[m debug: Agregar console.log detallados a switchClientSection para debuggear navegación
+[33m1332fd6[m debug: Agregar console.log detallados para debuggear loadClientOrders y createOrderCard
+[33m84e5930[m fix: Corregir navegación del cliente - Arreglar data-section del botón Mis Pedidos - Usar style.display en lugar de classList para mostrar/ocultar - Agregar console.log para debuggear navegación

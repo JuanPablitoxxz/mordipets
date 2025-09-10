@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     setupEventListeners();
     loadSampleData();
+    loadPublicProducts();
 });
 
 function initializeApp() {
@@ -74,9 +75,40 @@ function loadSampleData() {
         ingredients = [...sampleIngredients];
         saveToLocalStorage('mordipets_ingredients', ingredients);
     }
+}
+
+function loadPublicProducts() {
+    const grid = document.getElementById('productosGrid');
+    if (!grid) return;
     
-    // Load public products after data is loaded
-    loadPublicProducts();
+    grid.innerHTML = '';
+    
+    products.forEach(product => {
+        const productCard = createPublicProductCard(product);
+        grid.appendChild(productCard);
+    });
+}
+
+function createPublicProductCard(product) {
+    const card = document.createElement('div');
+    card.className = 'producto-card';
+    
+    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
+    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
+    
+    card.innerHTML = `
+        <div class="producto-image">
+            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div class="product-placeholder" style="display:none;">🍪</div>
+        </div>
+        <div class="producto-info">
+            <h4>${product.name}</h4>
+            <p class="producto-description">${product.description}</p>
+            <div class="producto-stock ${stockClass}">${stockText}</div>
+        </div>
+    `;
+    
+    return card;
 }
 
 function setupEventListeners() {
@@ -673,38 +705,3 @@ function deleteIngredient(ingredientId) {
 function saveToLocalStorage(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
 }
-
-function loadPublicProducts() {
-    const grid = document.getElementById('productosGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    products.forEach(product => {
-        const productCard = createPublicProductCard(product);
-        grid.appendChild(productCard);
-    });
-}
-
-function createPublicProductCard(product) {
-    const card = document.createElement('div');
-    card.className = 'producto-card';
-    
-    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
-    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
-    
-    card.innerHTML = `
-        <div class="producto-image">
-            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-            <div class="product-placeholder" style="display:none;">🍪</div>
-        </div>
-        <div class="producto-info">
-            <h4>${product.name}</h4>
-            <p class="producto-description">${product.description}</p>
-            <div class="producto-stock ${stockClass}">${stockText}</div>
-        </div>
-    `;
-    
-    return card;
-}
-
