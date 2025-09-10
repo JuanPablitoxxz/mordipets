@@ -672,12 +672,29 @@ function loadOrdersList() {
     const list = document.getElementById('ordersList');
     list.innerHTML = '';
     
-    if (orders.length === 0) {
-        list.innerHTML = '<p class="text-center">No hay orders registrados</p>';
+    // Cargar pedidos desde localStorage también
+    const storedOrders = localStorage.getItem('clientOrders');
+    let allOrders = [...orders];
+    
+    if (storedOrders) {
+        const localOrders = JSON.parse(storedOrders);
+        // Agregar pedidos locales que no estén ya en orders
+        localOrders.forEach(localOrder => {
+            if (!allOrders.find(o => o.id === localOrder.id)) {
+                allOrders.push(localOrder);
+            }
+        });
+    }
+    
+    if (allOrders.length === 0) {
+        list.innerHTML = '<p class="text-center">No hay pedidos registrados</p>';
         return;
     }
     
-    orders.forEach(order => {
+    // Ordenar por fecha (más recientes primero)
+    allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    allOrders.forEach(order => {
         const orderCard = createOrderCard(order);
         list.appendChild(orderCard);
     });
@@ -687,54 +704,8 @@ function loadClientOrders() {
     const list = document.getElementById('clientOrdersList');
     list.innerHTML = '';
     
-    // Si no hay orders en la base de datos, mostrar datos de ejemplo
-    let clientOrders = orders.filter(order => order.client_email === currentUser.email);
-    
-    if (clientOrders.length === 0) {
-        // Crear algunos pedidos de ejemplo para el cliente
-        const exampleOrders = [
-            {
-                id: 1,
-                client_name: currentUser.name,
-                client_email: currentUser.email,
-                total: 45000,
-                status: 'pending',
-                payment_method: 'online',
-                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 días atrás
-                items: [
-                    { product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
-                    { product_name: 'Galletas de Pollo', quantity: 1, price: 15000 }
-                ]
-            },
-            {
-                id: 2,
-                client_name: currentUser.name,
-                client_email: currentUser.email,
-                total: 30000,
-                status: 'confirmed',
-                payment_method: 'contraentrega',
-                created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 días atrás
-                items: [
-                    { product_name: 'Galletas de Salmón', quantity: 2, price: 15000 }
-                ]
-            },
-            {
-                id: 3,
-                client_name: currentUser.name,
-                client_email: currentUser.email,
-                total: 60000,
-                status: 'delivered',
-                payment_method: 'online',
-                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 días atrás
-                items: [
-                    { product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
-                    { product_name: 'Galletas de Pollo', quantity: 2, price: 15000 }
-                ]
-            }
-        ];
-        
-        clientOrders = exampleOrders;
-    }
+    // Cargar pedidos reales del cliente desde localStorage
+    const clientOrders = getClientOrders();
     
     if (clientOrders.length === 0) {
         list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
@@ -748,6 +719,27 @@ function loadClientOrders() {
         const orderCard = createOrderCard(order);
         list.appendChild(orderCard);
     });
+}
+
+// Función para obtener pedidos del cliente desde localStorage
+function getClientOrders() {
+    const storedOrders = localStorage.getItem('clientOrders');
+    if (storedOrders) {
+        return JSON.parse(storedOrders).filter(order => order.client_email === currentUser.email);
+    }
+    return [];
+}
+
+// Función para guardar pedidos en localStorage
+function saveClientOrder(order) {
+    const storedOrders = localStorage.getItem('clientOrders');
+    let orders = storedOrders ? JSON.parse(storedOrders) : [];
+    
+    // Agregar el nuevo pedido
+    orders.push(order);
+    
+    // Guardar de vuelta en localStorage
+    localStorage.setItem('clientOrders', JSON.stringify(orders));
 }
 
 function createOrderCard(order) {
@@ -1079,23 +1071,32 @@ function showOrderModal() {
 
 async function handlePayment(method) {
     if (cart.length === 0) {
-        alert('Tu cart está vacío');
+        alert('Tu carrito está vacío');
         return;
     }
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     const newOrder = {
-        clientName: currentUser.name,
-        clientEmail: currentUser.email,
-        clientPhone: currentUser.phone,
-        clientLocation: currentUser.location,
-        items: [...cart],
+        id: Date.now(), // ID único temporal
+        client_name: currentUser.name,
+        client_email: currentUser.email,
+        client_phone: currentUser.phone,
+        client_location: currentUser.location,
+        items: cart.map(item => ({
+            product_id: item.id,
+            product_name: item.name,
+            quantity: item.quantity,
+            price: item.price
+        })),
         total: total,
-        paymentMethod: method
+        payment_method: method,
+        status: 'pending',
+        created_at: new Date().toISOString()
     };
     
     try {
+        // Intentar con la API primero
         const response = await fetch(`${API_BASE}/api/orders`, {
             method: 'POST',
             headers: {
@@ -1107,27 +1108,35 @@ async function handlePayment(method) {
         if (response.ok) {
             const createdOrder = await response.json();
             orders.push(createdOrder);
-            
-            // Clear cart
-            cart = [];
-            
-            closeModal(document.getElementById('orderModal'));
-            
-            if (method === 'online') {
-                alert('Redirigiendo al sistema de pago...');
-            } else {
-                alert('Pedido realizado exitosamente. Te contactaremos para coordinar la entrega.');
-            }
-            
-            // Reload client data
-            loadClientData();
+            saveClientOrder(createdOrder);
         } else {
-            throw new Error('Error al crear order');
+            throw new Error('Error al crear pedido en la API');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al realizar el order');
+        console.error('Error con la API:', error);
+        
+        // Fallback: guardar en localStorage
+        console.log('Guardando pedido en localStorage como fallback');
+        saveClientOrder(newOrder);
+        orders.push(newOrder);
     }
+    
+    // Limpiar carrito
+    cart = [];
+    updateCartDisplay();
+    
+    // Cerrar modal
+    closeModal(document.getElementById('orderModal'));
+    
+    // Mostrar mensaje de confirmación
+    if (method === 'online') {
+        alert('Pedido realizado exitosamente. Te contactaremos para coordinar el pago y la entrega.');
+    } else {
+        alert('Pedido realizado exitosamente. Te contactaremos para coordinar la entrega.');
+    }
+    
+    // Recargar datos del cliente
+    loadClientData();
 }
 
 function switchAdminSection(section) {
@@ -1381,6 +1390,19 @@ function handleCatalogSort(e) {
 
 async function updateOrderStatus(orderId, newStatus) {
     try {
+        // Buscar el pedido
+        const order = orders.find(o => o.id === orderId);
+        if (!order) {
+            alert('Pedido no encontrado');
+            return;
+        }
+        
+        // Si el nuevo estado es 'confirmed' (aceptado), descontar stock
+        if (newStatus === 'confirmed' && order.status === 'pending') {
+            await updateStockForOrder(order);
+        }
+        
+        // Intentar actualizar con la API
         const response = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
@@ -1396,15 +1418,88 @@ async function updateOrderStatus(orderId, newStatus) {
                 orders[orderIndex] = updatedOrder;
             }
             
+            // Actualizar también en localStorage
+            updateOrderInLocalStorage(updatedOrder);
+            
             loadOrdersList();
-            alert(`Estado del order actualizado a: ${newStatus}`);
+            loadProductsGrid(); // Recargar productos para mostrar stock actualizado
+            alert(`Estado del pedido actualizado a: ${getStatusText(newStatus)}`);
         } else {
-            throw new Error('Error al actualizar order');
+            throw new Error('Error al actualizar pedido en la API');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Error al actualizar el estado del order');
+        console.error('Error con la API:', error);
+        
+        // Fallback: actualizar localmente
+        const orderIndex = orders.findIndex(o => o.id === orderId);
+        if (orderIndex !== -1) {
+            orders[orderIndex].status = newStatus;
+            updateOrderInLocalStorage(orders[orderIndex]);
+            
+            // Si se acepta el pedido, descontar stock localmente
+            if (newStatus === 'confirmed' && orders[orderIndex].status === 'pending') {
+                updateStockForOrder(orders[orderIndex]);
+            }
+            
+            loadOrdersList();
+            loadProductsGrid();
+            alert(`Estado del pedido actualizado a: ${getStatusText(newStatus)} (modo offline)`);
+        }
     }
+}
+
+// Función para descontar stock cuando se acepta un pedido
+async function updateStockForOrder(order) {
+    if (!order.items || order.items.length === 0) return;
+    
+    for (const item of order.items) {
+        const product = products.find(p => p.id === item.product_id);
+        if (product) {
+            // Descontar la cantidad del stock
+            product.stock = Math.max(0, product.stock - item.quantity);
+            
+            // Actualizar en localStorage
+            updateProductInLocalStorage(product);
+            
+            console.log(`Stock actualizado para ${product.name}: ${product.stock} unidades`);
+        }
+    }
+}
+
+// Función para actualizar un producto en localStorage
+function updateProductInLocalStorage(product) {
+    const storedProducts = localStorage.getItem('products');
+    if (storedProducts) {
+        let products = JSON.parse(storedProducts);
+        const index = products.findIndex(p => p.id === product.id);
+        if (index !== -1) {
+            products[index] = product;
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+    }
+}
+
+// Función para actualizar un pedido en localStorage
+function updateOrderInLocalStorage(order) {
+    const storedOrders = localStorage.getItem('clientOrders');
+    if (storedOrders) {
+        let orders = JSON.parse(storedOrders);
+        const index = orders.findIndex(o => o.id === order.id);
+        if (index !== -1) {
+            orders[index] = order;
+            localStorage.setItem('clientOrders', JSON.stringify(orders));
+        }
+    }
+}
+
+// Función para obtener el texto del estado
+function getStatusText(status) {
+    const statusTexts = {
+        'pending': 'Pendiente',
+        'confirmed': 'Aceptado',
+        'delivered': 'Entregado'
+    };
+    return statusTexts[status] || status;
 }
 
 function editProduct(productId) {
