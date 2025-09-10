@@ -795,6 +795,7 @@ function saveClientOrder(order) {
 
 // Función para crear pedidos de ejemplo (solo para testing)
 function createSampleOrders() {
+    console.log('createSampleOrders called, currentUser:', currentUser);
     if (!currentUser) return;
     
     const sampleOrders = [
