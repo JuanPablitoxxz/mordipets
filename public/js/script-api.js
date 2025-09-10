@@ -1,78 +1,78 @@
 // Variables globales
-let usuarioActual = null;
-let esAdministrador = false;
-let productos = [];
-let ingredientes = [];
-let pedidos = [];
-let carrito = [];
+let currentUser = null;
+let isAdmin = false;
+let products = [];
+let ingredients = [];
+let orders = [];
+let cart = [];
 
 // URL base de la API
-const URL_BASE_API = window.location.origin;
+const API_BASE = window.location.origin;
 
 // Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', function() {
-    inicializarAplicacion();
-    configurarEventos();
-    cargarDatosDesdeAPI();
+    initializeApp();
+    setupEventListeners();
+    loadDataFromAPI();
 });
 
-async function inicializarAplicacion() {
+async function initializeApp() {
     // Cargar datos desde la API en lugar de localStorage
-    await cargarDatosDesdeAPI();
+    await loadDataFromAPI();
 }
 
-async function cargarDatosDesdeAPI() {
+async function loadDataFromAPI() {
     try {
-        // Cargar productos
-        const respuestaProductos = await fetch(`${URL_BASE_API}/api/products`);
+        // Cargar products
+        const respuestaProductos = await fetch(`${API_BASE}/api/products`);
         if (respuestaProductos.ok) {
-            productos = await respuestaProductos.json();
+            products = await respuestaProductos.json();
         }
 
-        // Cargar ingredientes
-        const respuestaIngredientes = await fetch(`${URL_BASE_API}/api/ingredients`);
+        // Cargar ingredients
+        const respuestaIngredientes = await fetch(`${API_BASE}/api/ingredients`);
         if (respuestaIngredientes.ok) {
-            ingredientes = await respuestaIngredientes.json();
+            ingredients = await respuestaIngredientes.json();
         }
 
-        // Cargar pedidos
-        const respuestaPedidos = await fetch(`${URL_BASE_API}/api/orders`);
+        // Cargar orders
+        const respuestaPedidos = await fetch(`${API_BASE}/api/orders`);
         if (respuestaPedidos.ok) {
-            pedidos = await respuestaPedidos.json();
+            orders = await respuestaPedidos.json();
         }
 
         console.log('✅ Datos cargados desde la API');
         
-        // Cargar productos en la sección pública
+        // Cargar products en la sección pública
         cargarProductosPublicos();
     } catch (error) {
         console.error('❌ Error cargando datos desde la API:', error);
         // Fallback a localStorage si la API falla
-        cargarDesdeLocalStorage();
+        loadFromLocalStorage();
         cargarProductosPublicos();
     }
 }
 
-function cargarDesdeLocalStorage() {
+function loadFromLocalStorage() {
     // Fallback a localStorage si la API no está disponible
     const productosGuardados = localStorage.getItem('mordipets_productos');
     const ingredientesGuardados = localStorage.getItem('mordipets_ingredientes');
     const pedidosGuardados = localStorage.getItem('mordipets_pedidos');
     
     if (productosGuardados) {
-        productos = JSON.parse(productosGuardados);
+        products = JSON.parse(productosGuardados);
     }
     
     if (ingredientesGuardados) {
-        ingredientes = JSON.parse(ingredientesGuardados);
+        ingredients = JSON.parse(ingredientesGuardados);
     }
     
     if (pedidosGuardados) {
-        pedidos = JSON.parse(pedidosGuardados);
+        orders = JSON.parse(pedidosGuardados);
     }
 }
 
-// Función para cargar productos en la sección pública
+// Función para cargar products en la sección pública
 function cargarProductosPublicos() {
     const productosGrid = document.getElementById('productosGrid');
     if (!productosGrid) return;
@@ -81,14 +81,14 @@ function cargarProductosPublicos() {
     
     // Lista de todas las galletas disponibles con sus imágenes
     const galletasDisponibles = [
-        { nombre: 'Galleta Leche', imagen: 'images/GalletasLechee.jpg' },
-        { nombre: 'Galleta Carne', imagen: 'images/galletasCarne.jpg' },
-        { nombre: 'Galleta Pollo', imagen: 'images/galletasPollo.jpg' },
-        { nombre: 'Galleta Hígado', imagen: 'images/galletasHigado.jpg' },
-        { nombre: 'Galleta Espinaca', imagen: 'images/galletasEspinaca.jpg' },
-        { nombre: 'Galleta Zanahoria', imagen: 'images/galletasZanahoria.jpg' },
-        { nombre: 'Galleta Avena', imagen: 'images/galletasAvena.jpg' },
-        { nombre: 'Galleta Mixta', imagen: 'images/galletasMixtas.jpg' }
+        { name: 'Galleta Leche', imagen: 'images/GalletasLechee.jpg' },
+        { name: 'Galleta Carne', imagen: 'images/galletasCarne.jpg' },
+        { name: 'Galleta Pollo', imagen: 'images/galletasPollo.jpg' },
+        { name: 'Galleta Hígado', imagen: 'images/galletasHigado.jpg' },
+        { name: 'Galleta Espinaca', imagen: 'images/galletasEspinaca.jpg' },
+        { name: 'Galleta Zanahoria', imagen: 'images/galletasZanahoria.jpg' },
+        { name: 'Galleta Avena', imagen: 'images/galletasAvena.jpg' },
+        { name: 'Galleta Mixta', imagen: 'images/galletasMixtas.jpg' }
     ];
     
     galletasDisponibles.forEach(galleta => {
@@ -100,25 +100,25 @@ function cargarProductosPublicos() {
 // Función para crear tarjeta de galleta en la sección pública
 function crearTarjetaGalleta(galleta) {
     const card = document.createElement('div');
-    card.className = 'producto-card';
+    card.className = 'product-card';
     
     card.innerHTML = `
-        <img src="${galleta.imagen}" alt="${galleta.nombre}" class="producto-image" onerror="this.src='images/logo.jpg'">
-        <div class="producto-info">
-            <h3>${galleta.nombre}</h3>
-            <p class="producto-description">Deliciosa galleta para tu mascota</p>
+        <img src="${galleta.imagen}" alt="${galleta.name}" class="product-image" onerror="this.src='images/logo.jpg'">
+        <div class="product-info">
+            <h3>${galleta.name}</h3>
+            <p class="product-description">Deliciosa galleta para tu mascota</p>
         </div>
     `;
     
     return card;
 }
 
-// Función para crear tarjeta de producto en la sección pública (mantenida para compatibilidad)
-function crearTarjetaProductoPublico(producto) {
+// Función para crear tarjeta de product en la sección pública (mantenida para compatibilidad)
+function crearTarjetaProductoPublico(product) {
     const card = document.createElement('div');
-    card.className = 'producto-card';
+    card.className = 'product-card';
     
-    // Mapeo de imágenes de productos
+    // Mapeo de imágenes de products
     const imagenesProductos = {
         'Galleta Leche': 'images/GalletasLechee.jpg',
         'Galleta Carne': 'images/galletasCarne.jpg',
@@ -130,63 +130,63 @@ function crearTarjetaProductoPublico(producto) {
         'Galleta Mixta': 'images/galletasMixtas.jpg'
     };
     
-    const imagenSrc = imagenesProductos[producto.name] || 'images/logo.jpg';
+    const imagenSrc = imagenesProductos[product.name] || 'images/logo.jpg';
     
     card.innerHTML = `
-        <img src="${imagenSrc}" alt="${producto.name}" class="producto-image" onerror="this.src='images/logo.jpg'">
-        <div class="producto-info">
-            <h3>${producto.name}</h3>
-            <p class="producto-description">${producto.description || 'Deliciosa galleta para tu mascota'}</p>
+        <img src="${imagenSrc}" alt="${product.name}" class="product-image" onerror="this.src='images/logo.jpg'">
+        <div class="product-info">
+            <h3>${product.name}</h3>
+            <p class="product-description">${product.description || 'Deliciosa galleta para tu mascota'}</p>
         </div>
     `;
     
     return card;
 }
 
-// Función para agregar producto al carrito desde la sección pública
+// Función para agregar product al cart desde la sección pública
 function agregarAlCarritoPublico(productoId) {
-    const producto = productos.find(p => p.id === productoId);
-    if (!producto) return;
+    const product = products.find(p => p.id === productoId);
+    if (!product) return;
     
-    if (producto.stock === 0) {
-        alert('Este producto está agotado');
+    if (product.stock === 0) {
+        alert('Este product está agotado');
         return;
     }
     
-    // Verificar si el usuario está logueado
-    if (!usuarioActual) {
-        alert('Debes iniciar sesión para agregar productos al carrito');
+    // Verificar si el user está logueado
+    if (!currentUser) {
+        alert('Debes iniciar sesión para agregar products al cart');
         document.getElementById('loginBtn').click();
         return;
     }
     
-    // Agregar al carrito
-    const itemExistente = carrito.find(item => item.id === productoId);
+    // Agregar al cart
+    const itemExistente = cart.find(item => item.id === productoId);
     if (itemExistente) {
         itemExistente.quantity += 1;
     } else {
-        carrito.push({
-            id: producto.id,
-            name: producto.name,
-            price: producto.price,
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
             quantity: 1
         });
     }
     
-    alert(`${producto.name} agregado al carrito`);
+    alert(`${product.name} agregado al cart`);
 }
 
 // Función para manejar el formulario de contacto
 async function manejarContacto(e) {
     e.preventDefault();
     
-    const nombre = document.getElementById('contactoNombre').value;
+    const name = document.getElementById('contactoNombre').value;
     const correo = document.getElementById('contactoEmail').value;
-    const telefono = document.getElementById('contactoTelefono').value;
+    const phone = document.getElementById('contactoTelefono').value;
     const asunto = document.getElementById('contactoAsunto').value;
     const mensaje = document.getElementById('contactoMensaje').value;
     
-    if (!nombre || !correo || !asunto || !mensaje) {
+    if (!name || !correo || !asunto || !mensaje) {
         alert('Por favor, completa todos los campos obligatorios');
         return;
     }
@@ -194,9 +194,9 @@ async function manejarContacto(e) {
     try {
         // Simular envío del formulario (en una aplicación real, esto enviaría a un servidor)
         const datosContacto = {
-            nombre,
+            name,
             correo,
-            telefono,
+            phone,
             asunto,
             mensaje,
             fecha: new Date().toISOString()
@@ -218,38 +218,38 @@ async function manejarContacto(e) {
     }
 }
 
-function configurarEventos() {
+function setupEventListeners() {
     // Controles de modales
-    const botonIniciarSesion = document.getElementById('loginBtn');
-    const botonRegistrarse = document.getElementById('registerBtn');
-    const modalIniciarSesion = document.getElementById('loginModal');
-    const modalRegistrarse = document.getElementById('registerModal');
-    const modalAgregarProducto = document.getElementById('addProductModal');
-    const modalAgregarIngrediente = document.getElementById('addIngredientModal');
-    const modalPedido = document.getElementById('orderModal');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const loginModal = document.getElementById('loginModal');
+    const registerModal = document.getElementById('registerModal');
+    const addProductModal = document.getElementById('addProductModal');
+    const addIngredientModal = document.getElementById('addIngredientModal');
+    const orderModal = document.getElementById('orderModal');
     
     // Botones de inicio de sesión y registro
-    botonIniciarSesion.addEventListener('click', () => abrirModal(modalIniciarSesion));
-    botonRegistrarse.addEventListener('click', () => abrirModal(modalRegistrarse));
+    loginBtn.addEventListener('click', () => openModal(loginModal));
+    registerBtn.addEventListener('click', () => openModal(registerModal));
     
     // Cerrar modales
     document.querySelectorAll('.close').forEach(botonCerrar => {
         botonCerrar.addEventListener('click', (e) => {
             const modal = e.target.closest('.modal');
-            cerrarModal(modal);
+            closeModal(modal);
         });
     });
     
     // Cerrar modales al hacer clic fuera
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
-            cerrarModal(e.target);
+            closeModal(e.target);
         }
     });
     
     // Formularios
-    document.getElementById('loginForm').addEventListener('submit', manejarInicioSesion);
-    document.getElementById('registerForm').addEventListener('submit', manejarRegistro);
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    document.getElementById('registerForm').addEventListener('submit', handleRegister);
     document.getElementById('contactoForm').addEventListener('submit', manejarContacto);
     document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
     document.getElementById('addIngredientForm').addEventListener('submit', handleAddIngredient);
@@ -272,9 +272,9 @@ function configurarEventos() {
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('clientLogoutBtn').addEventListener('click', handleLogout);
     
-    // Botón agregar producto
-    document.getElementById('addProductBtn').addEventListener('click', () => abrirModal(modalAgregarProducto));
-    document.getElementById('addIngredientBtn').addEventListener('click', () => abrirModal(modalAgregarIngrediente));
+    // Botón agregar product
+    document.getElementById('addProductBtn').addEventListener('click', () => openModal(addProductModal));
+    document.getElementById('addIngredientBtn').addEventListener('click', () => openModal(addIngredientModal));
     
     // Funcionalidad de búsqueda
     document.getElementById('searchProducts').addEventListener('input', handleProductSearch);
@@ -288,7 +288,7 @@ function configurarEventos() {
     document.getElementById('availabilityFilter').addEventListener('change', handleCatalogFilter);
     document.getElementById('sortCatalog').addEventListener('change', handleCatalogSort);
     
-    // Botones de pedido
+    // Botones de order
     document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
     document.getElementById('payOnDeliveryBtn').addEventListener('click', () => handlePayment('delivery'));
     
@@ -309,68 +309,68 @@ function configurarEventos() {
     });
 }
 
-function abrirModal(modal) {
+function openModal(modal) {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-function cerrarModal(modal) {
+function closeModal(modal) {
     modal.style.display = 'none';
     document.body.style.overflow = 'auto';
 }
 
-async function manejarInicioSesion(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
-    const correoElectronico = document.getElementById('loginEmail').value;
-    const contrasena = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
     
-    if (correoElectronico && contrasena) {
+    if (email && password) {
         try {
             // Intentar con la API primero
-            const respuesta = await fetch(`${URL_BASE_API}/api/users/login`, {
+            const response = await fetch(`${API_BASE}/api/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: correoElectronico,
-                    password: contrasena
+                    email: email,
+                    password: password
                 })
             });
             
-            if (respuesta.ok) {
-                const usuario = await respuesta.json();
+            if (response.ok) {
+                const user = await response.json();
                 
-                usuarioActual = {
-                    id: usuario.id,
-                    name: usuario.name,
-                    email: usuario.email,
-                    phone: usuario.phone,
-                    location: usuario.location,
-                    isAdmin: usuario.is_admin
+                currentUser = {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    location: user.location,
+                    isAdmin: user.is_admin
                 };
                 
-                esAdministrador = usuario.is_admin;
+                isAdmin = user.is_admin;
                 
-                cerrarModal(document.getElementById('loginModal'));
+                closeModal(document.getElementById('loginModal'));
                 showUserPanel();
                 
                 // Limpiar formulario
                 document.getElementById('loginForm').reset();
                 
-                alert(`¡Bienvenido ${usuario.name}!`);
+                alert(`¡Bienvenido ${user.name}!`);
             } else {
-                const error = await respuesta.json();
+                const error = await response.json();
                 alert(`Error al iniciar sesión: ${error.error || 'Credenciales incorrectas'}`);
             }
         } catch (error) {
             console.error('Error con la API:', error);
             
             // Fallback: verificar credenciales por defecto
-            if (correoElectronico === 'admin@mordipets.com' && contrasena === 'admin123') {
+            if (email === 'admin@mordipets.com' && password === 'admin123') {
                 // Usuario administrador por defecto
-                usuarioActual = {
+                currentUser = {
                     id: 1,
                     name: 'Administrador',
                     email: 'admin@mordipets.com',
@@ -379,18 +379,18 @@ async function manejarInicioSesion(e) {
                     isAdmin: true
                 };
                 
-                esAdministrador = true;
+                isAdmin = true;
                 
-                cerrarModal(document.getElementById('loginModal'));
+                closeModal(document.getElementById('loginModal'));
                 showUserPanel();
                 
                 // Limpiar formulario
                 document.getElementById('loginForm').reset();
                 
                 alert('¡Bienvenido Administrador!');
-            } else if (correoElectronico === 'cliente@test.com' && contrasena === 'cliente123') {
+            } else if (email === 'cliente@test.com' && password === 'cliente123') {
                 // Usuario cliente de prueba
-                usuarioActual = {
+                currentUser = {
                     id: 2,
                     name: 'Cliente Prueba',
                     email: 'cliente@test.com',
@@ -399,9 +399,9 @@ async function manejarInicioSesion(e) {
                     isAdmin: false
                 };
                 
-                esAdministrador = false;
+                isAdmin = false;
                 
-                cerrarModal(document.getElementById('loginModal'));
+                closeModal(document.getElementById('loginModal'));
                 showUserPanel();
                 
                 // Limpiar formulario
@@ -417,35 +417,35 @@ async function manejarInicioSesion(e) {
     }
 }
 
-async function manejarRegistro(e) {
+async function handleRegister(e) {
     e.preventDefault();
     
-    const nombre = document.getElementById('regName').value;
-    const correoElectronico = document.getElementById('regEmail').value;
-    const telefono = document.getElementById('regPhone').value;
-    const ubicacion = document.getElementById('regLocation').value;
-    const contrasena = document.getElementById('regPassword').value;
-    const confirmarContrasena = document.getElementById('regConfirmPassword').value;
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const phone = document.getElementById('regPhone').value;
+    const location = document.getElementById('regLocation').value;
+    const password = document.getElementById('regPassword').value;
+    const confirmPassword = document.getElementById('regConfirmPassword').value;
     
-    if (contrasena !== confirmarContrasena) {
+    if (password !== confirmPassword) {
         alert('Las contraseñas no coinciden');
         return;
     }
     
-    if (nombre && correoElectronico && telefono && ubicacion && contrasena) {
+    if (name && email && phone && location && password) {
         try {
-            // Crear usuario en la base de datos
-            const respuesta = await fetch(`${URL_BASE_API}/api/users`, {
+            // Crear user en la base de datos
+            const response = await fetch(`${API_BASE}/api/users`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    name: nombre,
-                    email: correoElectronico,
-                    phone: telefono,
-                    location: ubicacion,
-                    password: contrasena,
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    location: location,
+                    password: password,
                     isAdmin: false
                 })
             });
@@ -485,15 +485,15 @@ async function manejarRegistro(e) {
 }
 
 function handleLogout() {
-    usuarioActual = null;
-    esAdministrador = false;
-    carrito = [];
+    currentUser = null;
+    isAdmin = false;
+    cart = [];
     
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('clientPanel').style.display = 'none';
     
     // Show main content sections
-    document.getElementById('productos').style.display = 'block';
+    document.getElementById('products').style.display = 'block';
     document.getElementById('nosotros').style.display = 'block';
     document.getElementById('contacto').style.display = 'block';
     
@@ -508,11 +508,11 @@ function showUserPanel() {
     document.getElementById('registerBtn').style.display = 'none';
     
     // Hide main content sections
-    document.getElementById('productos').style.display = 'none';
+    document.getElementById('products').style.display = 'none';
     document.getElementById('nosotros').style.display = 'none';
     document.getElementById('contacto').style.display = 'none';
     
-    if (esAdministrador) {
+    if (isAdmin) {
         document.getElementById('adminPanel').style.display = 'block';
         loadAdminData();
     } else {
@@ -587,7 +587,7 @@ function createProductCard(product, isAdmin = false) {
         }
     }
     
-    // Agregar clase especial para productos agotados en el catálogo
+    // Agregar clase especial para products agotados en el catálogo
     if (!isAdmin && product.stock === 0) {
         card.classList.add('out-of-stock');
     }
@@ -659,7 +659,7 @@ function loadOrdersList() {
     list.innerHTML = '';
     
     if (orders.length === 0) {
-        list.innerHTML = '<p class="text-center">No hay pedidos registrados</p>';
+        list.innerHTML = '<p class="text-center">No hay orders registrados</p>';
         return;
     }
     
@@ -676,7 +676,7 @@ function loadClientOrders() {
     const clientOrders = orders.filter(order => order.client_email === currentUser.email);
     
     if (clientOrders.length === 0) {
-        list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
+        list.innerHTML = '<p class="text-center">No tienes orders registrados</p>';
         return;
     }
     
@@ -804,11 +804,11 @@ async function handleAddProduct(e) {
             document.getElementById('addProductForm').reset();
             resetProductForm();
         } else {
-            throw new Error(isEditing ? 'Error al actualizar producto' : 'Error al crear producto');
+            throw new Error(isEditing ? 'Error al actualizar product' : 'Error al crear product');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert(isEditing ? 'Error al actualizar el producto' : 'Error al añadir el producto');
+        alert(isEditing ? 'Error al actualizar el product' : 'Error al añadir el product');
     }
 }
 
@@ -853,7 +853,7 @@ async function handleAddIngredient(e) {
             
             alert('Insumo añadido exitosamente');
         } else {
-            throw new Error('Error al crear ingrediente');
+            throw new Error('Error al crear ingredient');
         }
     } catch (error) {
         console.error('Error:', error);
@@ -877,13 +877,13 @@ function addToCart(productId) {
             });
         }
         
-        alert(`${product.name} agregado al carrito`);
+        alert(`${product.name} agregado al cart`);
     }
 }
 
 function showOrderModal() {
     if (cart.length === 0) {
-        alert('Tu carrito está vacío');
+        alert('Tu cart está vacío');
         return;
     }
     
@@ -910,7 +910,7 @@ function showOrderModal() {
 
 async function handlePayment(method) {
     if (cart.length === 0) {
-        alert('Tu carrito está vacío');
+        alert('Tu cart está vacío');
         return;
     }
     
@@ -953,11 +953,11 @@ async function handlePayment(method) {
             // Reload client data
             loadClientData();
         } else {
-            throw new Error('Error al crear pedido');
+            throw new Error('Error al crear order');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al realizar el pedido');
+        alert('Error al realizar el order');
     }
 }
 
@@ -1021,7 +1021,7 @@ function loadSectionData(section) {
         case 'insumos':
             loadIngredientsGrid();
             break;
-        case 'pedidos':
+        case 'orders':
             loadOrdersList();
             break;
     }
@@ -1228,13 +1228,13 @@ async function updateOrderStatus(orderId, newStatus) {
             }
             
             loadOrdersList();
-            alert(`Estado del pedido actualizado a: ${newStatus}`);
+            alert(`Estado del order actualizado a: ${newStatus}`);
         } else {
-            throw new Error('Error al actualizar pedido');
+            throw new Error('Error al actualizar order');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Error al actualizar el estado del pedido');
+        alert('Error al actualizar el estado del order');
     }
 }
 
@@ -1269,7 +1269,7 @@ function editProduct(productId) {
 }
 
 async function deleteProduct(productId) {
-    if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+    if (confirm('¿Estás seguro de que quieres eliminar este product?')) {
         try {
             const response = await fetch(`${API_BASE}/api/products/${productId}`, {
                 method: 'DELETE'
@@ -1280,11 +1280,11 @@ async function deleteProduct(productId) {
                 loadProductsGrid();
                 alert('Producto eliminado exitosamente');
             } else {
-                throw new Error('Error al eliminar producto');
+                throw new Error('Error al eliminar product');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al eliminar el producto');
+            alert('Error al eliminar el product');
         }
     }
 }
@@ -1306,7 +1306,7 @@ async function deleteIngredient(ingredientId) {
                 loadIngredientsGrid();
                 alert('Insumo eliminado exitosamente');
             } else {
-                throw new Error('Error al eliminar ingrediente');
+                throw new Error('Error al eliminar ingredient');
             }
         } catch (error) {
             console.error('Error:', error);
