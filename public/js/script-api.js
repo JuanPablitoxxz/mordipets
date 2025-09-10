@@ -251,46 +251,46 @@ function configurarEventos() {
     document.getElementById('loginForm').addEventListener('submit', manejarInicioSesion);
     document.getElementById('registerForm').addEventListener('submit', manejarRegistro);
     document.getElementById('contactoForm').addEventListener('submit', manejarContacto);
-    document.getElementById('addProductForm').addEventListener('submit', manejarAgregarProducto);
-    document.getElementById('addIngredientForm').addEventListener('submit', manejarAgregarIngrediente);
+    document.getElementById('addProductForm').addEventListener('submit', handleAddProduct);
+    document.getElementById('addIngredientForm').addEventListener('submit', handleAddIngredient);
     
     // Navegación de administrador
     document.querySelectorAll('.admin-nav-btn').forEach(boton => {
         boton.addEventListener('click', (e) => {
-            cambiarSeccionAdmin(e.target.dataset.section);
+            switchAdminSection(e.target.dataset.section);
         });
     });
     
     // Navegación de cliente
     document.querySelectorAll('.client-nav-btn').forEach(boton => {
         boton.addEventListener('click', (e) => {
-            cambiarSeccionCliente(e.target.dataset.section);
+            switchClientSection(e.target.dataset.section);
         });
     });
     
     // Botones de cerrar sesión
-    document.getElementById('logoutBtn').addEventListener('click', manejarCerrarSesion);
-    document.getElementById('clientLogoutBtn').addEventListener('click', manejarCerrarSesion);
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('clientLogoutBtn').addEventListener('click', handleLogout);
     
     // Botón agregar producto
     document.getElementById('addProductBtn').addEventListener('click', () => abrirModal(modalAgregarProducto));
     document.getElementById('addIngredientBtn').addEventListener('click', () => abrirModal(modalAgregarIngrediente));
     
     // Funcionalidad de búsqueda
-    document.getElementById('searchProducts').addEventListener('input', manejarBusquedaProductos);
+    document.getElementById('searchProducts').addEventListener('input', handleProductSearch);
     
     // Funcionalidad de filtros
-    document.getElementById('stockFilter').addEventListener('change', manejarFiltroProductos);
-    document.getElementById('sortProducts').addEventListener('change', manejarOrdenamientoProductos);
-    document.getElementById('clearFiltersBtn').addEventListener('click', limpiarFiltrosProductos);
+    document.getElementById('stockFilter').addEventListener('change', handleProductFilter);
+    document.getElementById('sortProducts').addEventListener('change', handleProductSort);
+    document.getElementById('clearFiltersBtn').addEventListener('click', clearProductFilters);
     
     // Funcionalidad de filtros del catálogo
-    document.getElementById('availabilityFilter').addEventListener('change', manejarFiltroCatalogo);
-    document.getElementById('sortCatalog').addEventListener('change', manejarOrdenamientoCatalogo);
+    document.getElementById('availabilityFilter').addEventListener('change', handleCatalogFilter);
+    document.getElementById('sortCatalog').addEventListener('change', handleCatalogSort);
     
     // Botones de pedido
-    document.getElementById('payNowBtn').addEventListener('click', () => manejarPago('online'));
-    document.getElementById('payOnDeliveryBtn').addEventListener('click', () => manejarPago('delivery'));
+    document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
+    document.getElementById('payOnDeliveryBtn').addEventListener('click', () => handlePayment('delivery'));
     
     // Navegación suave para enlaces del menú
     document.querySelectorAll('.nav-link').forEach(enlace => {
@@ -354,7 +354,7 @@ async function manejarInicioSesion(e) {
                 esAdministrador = usuario.is_admin;
                 
                 cerrarModal(document.getElementById('loginModal'));
-                mostrarPanelUsuario();
+                showUserPanel();
                 
                 // Limpiar formulario
                 document.getElementById('loginForm').reset();
@@ -382,7 +382,7 @@ async function manejarInicioSesion(e) {
                 esAdministrador = true;
                 
                 cerrarModal(document.getElementById('loginModal'));
-                mostrarPanelUsuario();
+                showUserPanel();
                 
                 // Limpiar formulario
                 document.getElementById('loginForm').reset();
@@ -402,7 +402,7 @@ async function manejarInicioSesion(e) {
                 esAdministrador = false;
                 
                 cerrarModal(document.getElementById('loginModal'));
-                mostrarPanelUsuario();
+                showUserPanel();
                 
                 // Limpiar formulario
                 document.getElementById('loginForm').reset();
