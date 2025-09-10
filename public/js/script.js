@@ -93,18 +93,35 @@ function createPublicProductCard(product) {
     const card = document.createElement('div');
     card.className = 'producto-card';
     
-    const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
-    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Agotadas';
+    // Mapeo de nombres de productos a archivos de imagen
+    const imageMap = {
+        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
+        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
+        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
+        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
+        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
+        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasLinaza.jpg',
+        'Galleta Monedita Leche x 1000 gr': 'galletasMoneditaLeche.jpg',
+        'Galleta Monedita Carne x 1000 gr': 'galletasMoneditaCarne.jpg',
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Polvorosa x 1000 gr': 'galletasPolvorosa.jpg',
+        'Huesito 3/4 Paquete x2 X 85 grm': 'huesitos.jpg',
+        'Paquete pequeño x 12 unds X 35 gr': 'paquetePequeño.jpg',
+        'Paquete x 8 Unds X 40 gr': 'paquete8unds.jpg'
+    };
+    
+    const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
     
     card.innerHTML = `
         <div class="producto-image">
-            <img src="images/${product.name.toLowerCase().replace(/\s+/g, '')}.jpg" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <img src="images/${imageName}" alt="${product.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
             <div class="product-placeholder" style="display:none;">🍪</div>
         </div>
         <div class="producto-info">
             <h4>${product.name}</h4>
             <p class="producto-description">${product.description}</p>
-            <div class="producto-stock ${stockClass}">${stockText}</div>
         </div>
     `;
     
@@ -121,9 +138,25 @@ function setupEventListeners() {
     const addIngredientModal = document.getElementById('addIngredientModal');
     const orderModal = document.getElementById('orderModal');
     
+    console.log('Login button found:', loginBtn);
+    console.log('Register button found:', registerBtn);
+    console.log('Login modal found:', loginModal);
+    console.log('Register modal found:', registerModal);
+    
     // Login/Register buttons
-    loginBtn.addEventListener('click', () => openModal(loginModal));
-    registerBtn.addEventListener('click', () => openModal(registerModal));
+    if (loginBtn && loginModal) {
+        loginBtn.addEventListener('click', () => {
+            console.log('Login button clicked');
+            openModal(loginModal);
+        });
+    }
+    
+    if (registerBtn && registerModal) {
+        registerBtn.addEventListener('click', () => {
+            console.log('Register button clicked');
+            openModal(registerModal);
+        });
+    }
     
     // Close modals
     document.querySelectorAll('.close').forEach(closeBtn => {
