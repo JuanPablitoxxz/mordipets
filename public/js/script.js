@@ -178,6 +178,12 @@ function setupEventListeners() {
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('clientLogoutBtn').addEventListener('click', handleLogout);
     
+    // Cart button
+    const cartBtn = document.getElementById('cartBtn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', showCart);
+    }
+    
     // Add product button
     document.getElementById('addProductBtn').addEventListener('click', () => openModal(addProductModal));
     document.getElementById('addIngredientBtn').addEventListener('click', () => openModal(addIngredientModal));
@@ -335,6 +341,7 @@ function loadAdminData() {
 function loadClientData() {
     loadCatalogGrid();
     loadClientOrders();
+    updateCartCount();
 }
 
 function loadProductsGrid() {
@@ -748,4 +755,115 @@ function deleteIngredient(ingredientId) {
 
 function saveToLocalStorage(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
+}
+
+function showCart() {
+    if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    let cartContent = `
+        <h3>Tu Carrito</h3>
+        <div class="cart-items">
+    `;
+    
+    cart.forEach(item => {
+        cartContent += `
+            <div class="cart-item" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                <div>
+                    <h4 style="margin: 0;">${item.name}</h4>
+                    <p style="margin: 0; color: #666;">Cantidad: ${item.quantity}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin: 0; font-weight: bold;">$${(item.price * item.quantity).toLocaleString('es-CO')}</p>
+                    <button onclick="removeFromCart(${item.id})" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Eliminar</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    cartContent += `
+        </div>
+        <div class="cart-total" style="padding: 20px; background: #f8f9fa; margin-top: 20px; border-radius: 8px;">
+            <h3 style="margin: 0; text-align: center;">Total: $${total.toLocaleString('es-CO')}</h3>
+        </div>
+        <div class="cart-actions" style="margin-top: 20px; text-align: center;">
+            <button onclick="checkout()" class="btn-primary" style="margin-right: 10px;">Proceder al Pago</button>
+            <button onclick="closeCart()" class="btn-secondary">Cerrar</button>
+        </div>
+    `;
+    
+    // Crear modal del carrito
+    const cartModal = document.createElement('div');
+    cartModal.id = 'cartModal';
+    cartModal.className = 'modal';
+    cartModal.style.display = 'block';
+    cartModal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close" onclick="closeCart()">&times;</span>
+            ${cartContent}
+        </div>
+    `;
+    
+    document.body.appendChild(cartModal);
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+    const cartModal = document.getElementById('cartModal');
+    if (cartModal) {
+        cartModal.remove();
+    }
+    document.body.style.overflow = 'auto';
+}
+
+function removeFromCart(productId) {
+    cart = cart.filter(item => item.id !== productId);
+    updateCartCount();
+    showCart(); // Refrescar el carrito
+}
+
+function updateCartCount() {
+    const cartCount = document.getElementById('cartCount');
+    if (cartCount) {
+        cartCount.textContent = cart.length;
+    }
+}
+
+function checkout() {
+    if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    const newOrder = {
+        id: Date.now(),
+        clientName: currentUser.name,
+        clientEmail: currentUser.email,
+        clientPhone: currentUser.phone || 'No especificado',
+        clientLocation: currentUser.location || 'No especificado',
+        items: [...cart],
+        total: total,
+        paymentMethod: 'contraentrega',
+        status: 'pending',
+        date: new Date().toISOString()
+    };
+    
+    orders.push(newOrder);
+    saveToLocalStorage('mordipets_orders', orders);
+    
+    // Clear cart
+    cart = [];
+    updateCartCount();
+    closeCart();
+    
+    alert('¡Pedido realizado exitosamente! Te contactaremos para coordinar la entrega.');
+    
+    // Reload client data
+    loadClientData();
 }
