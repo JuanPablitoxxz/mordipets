@@ -208,9 +208,15 @@ function handleLogin(e) {
         // Check if it's admin login (simple check)
         const isAdminCheck = email === 'admin@mordipets.com' || email === 'admin@admin.com';
         
+        // Try to get user data from localStorage if exists
+        const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+        const existingUser = savedUsers.find(user => user.email === email);
+        
         currentUser = {
             email: email,
-            name: email.split('@')[0],
+            name: existingUser ? existingUser.name : email.split('@')[0],
+            phone: existingUser ? existingUser.phone : '',
+            location: existingUser ? existingUser.location : '',
             isAdmin: isAdminCheck
         };
         
@@ -251,6 +257,20 @@ function handleRegister(e) {
             location: location,
             isAdmin: false
         };
+        
+        // Save user data to localStorage
+        const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+        const existingUserIndex = savedUsers.findIndex(user => user.email === email);
+        
+        if (existingUserIndex !== -1) {
+            // Update existing user
+            savedUsers[existingUserIndex] = currentUser;
+        } else {
+            // Add new user
+            savedUsers.push(currentUser);
+        }
+        
+        localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
         
         isAdmin = false;
         
@@ -815,7 +835,7 @@ function deleteIngredient(ingredientId) {
 
 function saveToLocalStorage(key, data) {
     localStorage.setItem(key, JSON.stringify(data));
- }
+}
 
 function showCart() {
     if (cart.length === 0) {
