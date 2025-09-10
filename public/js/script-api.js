@@ -123,14 +123,6 @@ function crearTarjetaProductoPublico(producto) {
         <div class="producto-info">
             <h3>${producto.name}</h3>
             <p class="producto-description">${producto.description || 'Deliciosa galleta para tu mascota'}</p>
-            <div class="producto-price">$${producto.price.toLocaleString('es-CO')}</div>
-            <span class="producto-stock ${claseStock}">${estadoStock}</span>
-            <div class="producto-actions">
-                <button class="btn-primary" onclick="agregarAlCarritoPublico(${producto.id})" ${producto.stock === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-shopping-cart"></i> 
-                    ${producto.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
-                </button>
-            </div>
         </div>
     `;
     
