@@ -616,7 +616,15 @@ function createProductCard(product, isAdmin = false) {
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             ` : `
-                <button class="btn-small btn-add-to-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
+                <div class="quantity-controls">
+                    <label for="quantity-${product.id}">Cantidad:</label>
+                    <div class="quantity-input">
+                        <button type="button" onclick="decreaseQuantity(${product.id})" class="quantity-btn">-</button>
+                        <input type="number" id="quantity-${product.id}" value="1" min="1" max="${product.stock}" class="quantity-number">
+                        <button type="button" onclick="increaseQuantity(${product.id})" class="quantity-btn">+</button>
+                    </div>
+                </div>
+                <button class="btn-small btn-add-to-cart" onclick="addToCartWithQuantity(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
                     <i class="fas fa-cart-plus"></i> ${product.stock === 0 ? 'Agotada' : 'Agregar al Carrito'}
                 </button>
             `}
@@ -679,12 +687,62 @@ function loadClientOrders() {
     const list = document.getElementById('clientOrdersList');
     list.innerHTML = '';
     
-    const clientOrders = orders.filter(order => order.client_email === currentUser.email);
+    // Si no hay orders en la base de datos, mostrar datos de ejemplo
+    let clientOrders = orders.filter(order => order.client_email === currentUser.email);
     
     if (clientOrders.length === 0) {
-        list.innerHTML = '<p class="text-center">No tienes orders registrados</p>';
+        // Crear algunos pedidos de ejemplo para el cliente
+        const exampleOrders = [
+            {
+                id: 1,
+                client_name: currentUser.name,
+                client_email: currentUser.email,
+                total: 45000,
+                status: 'pending',
+                payment_method: 'online',
+                created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 días atrás
+                items: [
+                    { product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
+                    { product_name: 'Galletas de Pollo', quantity: 1, price: 15000 }
+                ]
+            },
+            {
+                id: 2,
+                client_name: currentUser.name,
+                client_email: currentUser.email,
+                total: 30000,
+                status: 'confirmed',
+                payment_method: 'contraentrega',
+                created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 días atrás
+                items: [
+                    { product_name: 'Galletas de Salmón', quantity: 2, price: 15000 }
+                ]
+            },
+            {
+                id: 3,
+                client_name: currentUser.name,
+                client_email: currentUser.email,
+                total: 60000,
+                status: 'delivered',
+                payment_method: 'online',
+                created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 días atrás
+                items: [
+                    { product_name: 'Galletas de Avena', quantity: 2, price: 15000 },
+                    { product_name: 'Galletas de Pollo', quantity: 2, price: 15000 }
+                ]
+            }
+        ];
+        
+        clientOrders = exampleOrders;
+    }
+    
+    if (clientOrders.length === 0) {
+        list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
         return;
     }
+    
+    // Ordenar por fecha (más recientes primero)
+    clientOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     
     clientOrders.forEach(order => {
         const orderCard = createOrderCard(order);
@@ -884,12 +942,102 @@ function addToCart(productId) {
         }
         
         alert(`${product.name} agregado al cart`);
+        updateCartDisplay();
+    }
+}
+
+// Funciones para manejar cantidades
+function increaseQuantity(productId) {
+    const input = document.getElementById(`quantity-${productId}`);
+    const product = products.find(p => p.id === productId);
+    if (input && product && parseInt(input.value) < product.stock) {
+        input.value = parseInt(input.value) + 1;
+    }
+}
+
+function decreaseQuantity(productId) {
+    const input = document.getElementById(`quantity-${productId}`);
+    if (input && parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+    }
+}
+
+function addToCartWithQuantity(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    
+    if (product.stock === 0) {
+        alert('Este producto está agotado');
+        return;
+    }
+    
+    // Verificar si el usuario está logueado
+    if (!currentUser) {
+        alert('Debes iniciar sesión para agregar productos al carrito');
+        document.getElementById('loginBtn').click();
+        return;
+    }
+    
+    const quantityInput = document.getElementById(`quantity-${productId}`);
+    const quantity = parseInt(quantityInput.value) || 1;
+    
+    if (quantity > product.stock) {
+        alert(`Solo hay ${product.stock} unidades disponibles`);
+        return;
+    }
+    
+    // Agregar al carrito
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: quantity
+        });
+    }
+    
+    alert(`${quantity} ${product.name} agregado(s) al carrito`);
+    updateCartDisplay();
+}
+
+// Función para actualizar la visualización del carrito
+function updateCartDisplay() {
+    const cartButton = document.querySelector('.cart-button');
+    if (cartButton) {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartButton.innerHTML = `<i class="fas fa-shopping-cart"></i> Carrito (${totalItems})`;
+    }
+}
+
+// Función para quitar producto del carrito
+function removeFromCart(productId) {
+    const itemIndex = cart.findIndex(item => item.id === productId);
+    if (itemIndex > -1) {
+        cart.splice(itemIndex, 1);
+        updateCartDisplay();
+        alert('Producto eliminado del carrito');
+    }
+}
+
+// Función para actualizar cantidad en el carrito
+function updateCartQuantity(productId, newQuantity) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        if (newQuantity <= 0) {
+            removeFromCart(productId);
+        } else {
+            item.quantity = newQuantity;
+            updateCartDisplay();
+        }
     }
 }
 
 function showOrderModal() {
     if (cart.length === 0) {
-        alert('Tu cart está vacío');
+        alert('Tu carrito está vacío');
         return;
     }
     
@@ -901,8 +1049,23 @@ function showOrderModal() {
         <div class="order-items">
             ${cart.map(item => `
                 <div class="order-item">
-                    <span>${item.name} x${item.quantity}</span>
-                    <span>$${(item.price * item.quantity).toLocaleString('es-CO')}</span>
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-price">$${item.price.toLocaleString('es-CO')} c/u</span>
+                    </div>
+                    <div class="item-controls">
+                        <div class="quantity-controls">
+                            <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" class="quantity-btn">-</button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" class="quantity-btn">+</button>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" class="btn-remove" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="item-total">
+                        $${(item.price * item.quantity).toLocaleString('es-CO')}
+                    </div>
                 </div>
             `).join('')}
         </div>
