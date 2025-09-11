@@ -43,34 +43,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Load data from localStorage if available
-    const savedProducts = localStorage.getItem('mordipets_products');
-    const savedIngredients = localStorage.getItem('mordipets_ingredients');
-    const savedOrders = localStorage.getItem('mordipets_orders');
-    
-    if (savedProducts) {
-        products = JSON.parse(savedProducts);
-    }
-    
-    if (savedIngredients) {
-        ingredients = JSON.parse(savedIngredients);
-    }
-    
-    if (savedOrders) {
-        orders = JSON.parse(savedOrders);
-    }
+    // Los datos ahora se cargan desde la base de datos PostgreSQL
+    // No necesitamos localStorage
 }
 
 function loadSampleData() {
-    if (products.length === 0) {
-        products = [...sampleProducts];
-        saveToLocalStorage('mordipets_products', products);
-    }
-    
-    if (ingredients.length === 0) {
-        ingredients = [...sampleIngredients];
-        saveToLocalStorage('mordipets_ingredients', ingredients);
-    }
+    // Los datos se cargan desde la base de datos PostgreSQL
+    // No necesitamos datos de muestra en localStorage
 }
 
 function loadPublicProducts() {
@@ -252,53 +231,74 @@ function closeModal(modal) {
     document.body.style.overflow = 'auto';
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     
-    // Simple validation (in a real app, this would be server-side)
-    if (email && password) {
-        // Check if it's admin login (simple check)
-        const isAdminCheck = email === 'admin@mordipets.com' || email === 'admin@admin.com';
+    if (!email || !password) {
+        alert('Por favor, completa todos los campos');
+        return;
+    }
+    
+    try {
+        // Mostrar indicador de carga
+        const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Iniciando sesión...';
+        submitBtn.disabled = true;
         
-        // Try to get user data from localStorage if exists
-        const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-        const existingUser = savedUsers.find(user => user.email === email);
+        // Llamar a la API del servidor
+        const response = await fetch('/api/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
         
-        // For admin users, skip password check (for demo purposes)
-        // For regular users, check password if it exists
-        if (!isAdminCheck && existingUser && existingUser.password) {
-            if (existingUser.password !== password) {
-                alert('Contraseña incorrecta');
-                return;
-            }
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Login exitoso
+            currentUser = {
+                id: result.id,
+                name: result.name,
+                email: result.email,
+                phone: result.phone,
+                location: result.location,
+                isAdmin: result.is_admin
+            };
+            
+            isAdmin = result.is_admin;
+            
+            closeModal(document.getElementById('loginModal'));
+            showUserPanel();
+            
+            // Clear form
+            document.getElementById('loginForm').reset();
+            
+            alert(`¡Bienvenido ${result.is_admin ? 'Administrador' : 'Cliente'}!`);
+        } else {
+            alert(`❌ Error: ${result.error}`);
         }
         
-        currentUser = {
-            email: email,
-            name: existingUser ? existingUser.name : email.split('@')[0],
-            phone: existingUser ? existingUser.phone : '',
-            location: existingUser ? existingUser.location : '',
-            isAdmin: isAdminCheck
-        };
-        
-        isAdmin = isAdminCheck;
-        
-        closeModal(document.getElementById('loginModal'));
-        showUserPanel();
-        
-        // Clear form
-        document.getElementById('loginForm').reset();
-        
-        alert(`¡Bienvenido ${isAdminCheck ? 'Administrador' : 'Cliente'}!`);
-    } else {
-        alert('Por favor, completa todos los campos');
+    } catch (error) {
+        console.error('Error en login:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    } finally {
+        // Restaurar botón
+        const submitBtn = document.querySelector('#loginForm button[type="submit"]');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     
     const name = document.getElementById('regName').value;
@@ -313,41 +313,67 @@ function handleRegister(e) {
         return;
     }
     
-    if (name && email && phone && location && password) {
-        currentUser = {
-            name: name,
-            email: email,
-            phone: phone,
-            location: location,
-            password: password,
-            isAdmin: false
-        };
+    if (!name || !email || !phone || !location || !password) {
+        alert('Por favor, completa todos los campos');
+        return;
+    }
+    
+    try {
+        // Mostrar indicador de carga
+        const submitBtn = document.querySelector('#registerForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Registrando...';
+        submitBtn.disabled = true;
         
-        // Save user data to localStorage
-        const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-        const existingUserIndex = savedUsers.findIndex(user => user.email === email);
+        // Llamar a la API del servidor
+        const response = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                phone: phone,
+                location: location,
+                password: password,
+                isAdmin: false
+            })
+        });
         
-        if (existingUserIndex !== -1) {
-            // Update existing user
-            savedUsers[existingUserIndex] = currentUser;
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Usuario creado exitosamente
+            currentUser = {
+                name: result.name,
+                email: result.email,
+                phone: result.phone,
+                location: result.location,
+                isAdmin: result.is_admin
+            };
+            
+            isAdmin = false;
+            
+            closeModal(document.getElementById('registerModal'));
+            showUserPanel();
+            
+            // Clear form
+            document.getElementById('registerForm').reset();
+            
+            alert('¡Registro exitoso! Bienvenido a Mordipets');
         } else {
-            // Add new user
-            savedUsers.push(currentUser);
+            alert(`❌ Error: ${result.error}`);
         }
         
-        localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
-        
-        isAdmin = false;
-        
-        closeModal(document.getElementById('registerModal'));
-        showUserPanel();
-        
-        // Clear form
-        document.getElementById('registerForm').reset();
-        
-        alert('¡Registro exitoso! Bienvenido a Mordipets');
-    } else {
-        alert('Por favor, completa todos los campos');
+    } catch (error) {
+        console.error('Error registrando usuario:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    } finally {
+        // Restaurar botón
+        const submitBtn = document.querySelector('#registerForm button[type="submit"]');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -403,13 +429,17 @@ function showUserPanel() {
     }
 }
 
-function loadAdminData() {
+async function loadAdminData() {
+    await loadProductsFromAPI();
+    await loadIngredientsFromAPI();
+    await loadOrdersFromAPI();
     loadProductsGrid();
     loadIngredientsGrid();
     loadOrdersList();
 }
 
-function loadClientData() {
+async function loadClientData() {
+    await loadProductsFromAPI();
     loadCatalogGrid();
     loadClientOrders();
     updateCartCount();
@@ -621,11 +651,10 @@ function createOrderCard(order) {
     return card;
 }
 
-function handleAddProduct(e) {
+async function handleAddProduct(e) {
     e.preventDefault();
     
-    const newProduct = {
-        id: Date.now(),
+    const productData = {
         code: document.getElementById('productCode').value,
         name: document.getElementById('productName').value,
         description: document.getElementById('productDescription').value,
@@ -634,16 +663,34 @@ function handleAddProduct(e) {
         weight: parseInt(document.getElementById('productWeight').value)
     };
     
-    products.push(newProduct);
-    saveToLocalStorage('mordipets_products', products);
-    
-    closeModal(document.getElementById('addProductModal'));
-    loadProductsGrid();
-    
-    // Clear form
-    document.getElementById('addProductForm').reset();
-    
-    alert('Producto añadido exitosamente');
+    try {
+        const response = await fetch('/api/products', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData)
+        });
+        
+        if (response.ok) {
+            const newProduct = await response.json();
+            products.push(newProduct);
+            
+            closeModal(document.getElementById('addProductModal'));
+            loadProductsGrid();
+            
+            // Clear form
+            document.getElementById('addProductForm').reset();
+            
+            alert('Producto añadido exitosamente');
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error agregando producto:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
 }
 
 function handleAddIngredient(e) {
@@ -902,8 +949,38 @@ function deleteIngredient(ingredientId) {
     }
 }
 
-function saveToLocalStorage(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
+// Funciones para cargar datos desde la API
+async function loadProductsFromAPI() {
+    try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+            products = await response.json();
+        }
+    } catch (error) {
+        console.error('Error cargando productos:', error);
+    }
+}
+
+async function loadIngredientsFromAPI() {
+    try {
+        const response = await fetch('/api/ingredients');
+        if (response.ok) {
+            ingredients = await response.json();
+        }
+    } catch (error) {
+        console.error('Error cargando ingredientes:', error);
+    }
+}
+
+async function loadOrdersFromAPI() {
+    try {
+        const response = await fetch('/api/orders');
+        if (response.ok) {
+            orders = await response.json();
+        }
+    } catch (error) {
+        console.error('Error cargando pedidos:', error);
+    }
 }
 
 function showCart() {
@@ -1092,14 +1169,8 @@ function handleForgotPassword(e) {
         return;
     }
     
-    // Check if email exists in users
-    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-    const userExists = savedUsers.some(user => user.email === email);
-    
-    if (!userExists) {
-        alert('No existe una cuenta con este correo electrónico');
-        return;
-    }
+    // La verificación de email se hace en el servidor
+    // No necesitamos verificar aquí
     
     passwordRecoveryEmail = email;
     sendVerificationCode(email);
