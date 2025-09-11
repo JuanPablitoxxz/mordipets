@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin } = require('./database');
+const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -321,6 +322,88 @@ app.put('/api/orders/:id/status', async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Error actualizando pedido:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Enviar código de verificación por email
+app.post('/api/auth/send-verification-code', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email es requerido' });
+    }
+    
+    // Verificar si el email existe en la base de datos
+    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+    const userExists = savedUsers.some(user => user.email === email);
+    
+    if (!userExists) {
+      return res.status(404).json({ error: 'No existe una cuenta con este correo electrónico' });
+    }
+    
+    // Generar código de verificación
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Enviar email
+    const emailResult = await sendVerificationCode(email, verificationCode);
+    
+    if (emailResult.success) {
+      // En una aplicación real, guardarías el código en la base de datos con expiración
+      res.json({ 
+        success: true, 
+        message: 'Código de verificación enviado exitosamente',
+        code: verificationCode // Solo para desarrollo, en producción no enviar
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Error enviando el código de verificación',
+        details: emailResult.error
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error enviando código de verificación:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Verificar código y cambiar contraseña
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: 'Todos los campos son requeridos' });
+    }
+    
+    // En una aplicación real, verificarías el código desde la base de datos
+    // Por ahora, asumimos que el código es válido si se proporciona
+    
+    // Actualizar contraseña en localStorage (simulando base de datos)
+    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+    const userIndex = savedUsers.findIndex(user => user.email === email);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    // Actualizar contraseña
+    savedUsers[userIndex].password = newPassword;
+    localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
+    
+    // Enviar email de confirmación
+    const emailResult = await sendPasswordChangedConfirmation(email, savedUsers[userIndex].name);
+    
+    res.json({ 
+      success: true, 
+      message: 'Contraseña actualizada exitosamente',
+      emailSent: emailResult.success
+    });
+    
+  } catch (error) {
+    console.error('Error actualizando contraseña:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

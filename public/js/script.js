@@ -1106,20 +1106,51 @@ function handleForgotPassword(e) {
     sendVerificationCode(email);
 }
 
-function sendVerificationCode(email) {
-    // Generate a 6-digit verification code
-    verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // In a real application, this would send an email
-    // For demo purposes, we'll show the code in an alert
-    alert(`Código de verificación enviado a ${email}\n\nCódigo: ${verificationCode}\n\n(En una aplicación real, esto se enviaría por correo electrónico)`);
-    
-    // Close forgot password modal and open verification modal
-    closeModal(document.getElementById('forgotPasswordModal'));
-    openModal(document.getElementById('verifyCodeModal'));
-    
-    // Clear the email input
-    document.getElementById('forgotEmail').value = '';
+async function sendVerificationCode(email) {
+    try {
+        // Mostrar indicador de carga
+        const submitBtn = document.querySelector('#forgotPasswordForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+        
+        // Llamar a la API del servidor
+        const response = await fetch('/api/auth/send-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Guardar el código para verificación
+            verificationCode = result.code;
+            
+            // Mostrar mensaje de éxito
+            alert(`✅ Código de verificación enviado a ${email}\n\nRevisa tu bandeja de entrada (y carpeta de spam) para obtener el código.`);
+            
+            // Close forgot password modal and open verification modal
+            closeModal(document.getElementById('forgotPasswordModal'));
+            openModal(document.getElementById('verifyCodeModal'));
+            
+            // Clear the email input
+            document.getElementById('forgotEmail').value = '';
+        } else {
+            alert(`❌ Error: ${result.error}`);
+        }
+        
+    } catch (error) {
+        console.error('Error enviando código:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    } finally {
+        // Restaurar botón
+        const submitBtn = document.querySelector('#forgotPasswordForm button[type="submit"]');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
 }
 
 function handleVerifyCode(e) {
@@ -1145,7 +1176,7 @@ function handleVerifyCode(e) {
     document.getElementById('verificationCode').value = '';
 }
 
-function handleResetPassword(e) {
+async function handleResetPassword(e) {
     e.preventDefault();
     
     const newPassword = document.getElementById('newPassword').value;
@@ -1166,32 +1197,62 @@ function handleResetPassword(e) {
         return;
     }
     
-    // Update user password in localStorage
-    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-    const userIndex = savedUsers.findIndex(user => user.email === passwordRecoveryEmail);
-    
-    if (userIndex !== -1) {
-        // In a real application, you would hash the password
-        savedUsers[userIndex].password = newPassword;
-        localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
+    try {
+        // Mostrar indicador de carga
+        const submitBtn = document.querySelector('#resetPasswordForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Actualizando...';
+        submitBtn.disabled = true;
         
-        // Close reset password modal and show success
-        closeModal(document.getElementById('resetPasswordModal'));
-        alert('¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión con tu nueva contraseña.');
+        // Llamar a la API del servidor
+        const response = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                email: passwordRecoveryEmail,
+                code: verificationCode,
+                newPassword: newPassword
+            })
+        });
         
-        // Open login modal
-        openModal(document.getElementById('loginModal'));
+        const result = await response.json();
         
-        // Clear all forms
-        document.getElementById('forgotEmail').value = '';
-        document.getElementById('verificationCode').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmNewPassword').value = '';
+        if (result.success) {
+            // Close reset password modal and show success
+            closeModal(document.getElementById('resetPasswordModal'));
+            
+            let successMessage = '¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión con tu nueva contraseña.';
+            if (result.emailSent) {
+                successMessage += '\n\n📧 Se ha enviado un email de confirmación a tu correo.';
+            }
+            
+            alert(successMessage);
+            
+            // Open login modal
+            openModal(document.getElementById('loginModal'));
+            
+            // Clear all forms
+            document.getElementById('forgotEmail').value = '';
+            document.getElementById('verificationCode').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            
+            // Reset variables
+            passwordRecoveryEmail = '';
+            verificationCode = '';
+        } else {
+            alert(`❌ Error: ${result.error}`);
+        }
         
-        // Reset variables
-        passwordRecoveryEmail = '';
-        verificationCode = '';
-    } else {
-        alert('Error: No se pudo actualizar la contraseña');
+    } catch (error) {
+        console.error('Error actualizando contraseña:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    } finally {
+        // Restaurar botón
+        const submitBtn = document.querySelector('#resetPasswordForm button[type="submit"]');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
 }
