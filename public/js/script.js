@@ -728,27 +728,44 @@ async function handleAddProduct(e) {
     }
 }
 
-function handleAddIngredient(e) {
+async function handleAddIngredient(e) {
     e.preventDefault();
     
-    const newIngredient = {
-        id: Date.now(),
+    const ingredientData = {
         name: document.getElementById('ingredientName').value,
         type: document.getElementById('ingredientType').value,
         quantity: parseInt(document.getElementById('ingredientQuantity').value),
         unit: document.getElementById('ingredientUnit').value
     };
     
-    ingredients.push(newIngredient);
-    saveToLocalStorage('mordipets_ingredients', ingredients);
-    
-    closeModal(document.getElementById('addIngredientModal'));
-    loadIngredientsGrid();
-    
-    // Clear form
-    document.getElementById('addIngredientForm').reset();
-    
-    alert('Insumo añadido exitosamente');
+    try {
+        const response = await fetch('/api/ingredients', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ingredientData)
+        });
+        
+        if (response.ok) {
+            const newIngredient = await response.json();
+            ingredients.push(newIngredient);
+            
+            closeModal(document.getElementById('addIngredientModal'));
+            loadIngredientsGrid();
+            
+            // Clear form
+            document.getElementById('addIngredientForm').reset();
+            
+            alert('Insumo añadido exitosamente');
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error agregando ingrediente:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
 }
 
 function increaseQuantity(productId) {
@@ -830,7 +847,7 @@ function showOrderModal() {
     openModal(document.getElementById('orderModal'));
 }
 
-function handlePayment(method) {
+async function handlePayment(method) {
     if (cart.length === 0) {
         alert('Tu carrito está vacío');
         return;
@@ -838,36 +855,51 @@ function handlePayment(method) {
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    const newOrder = {
-        id: Date.now(),
+    const orderData = {
         clientName: currentUser.name,
         clientEmail: currentUser.email,
         clientPhone: currentUser.phone,
         clientLocation: currentUser.location,
         items: [...cart],
         total: total,
-        paymentMethod: method,
-        status: 'pending',
-        date: new Date().toISOString()
+        paymentMethod: method
     };
     
-    orders.push(newOrder);
-    saveToLocalStorage('mordipets_orders', orders);
-    
-    // Clear cart
-    cart = [];
-    updateCartCount();
-    
-    closeModal(document.getElementById('orderModal'));
-    
-    if (method === 'online') {
-        alert('Redirigiendo al sistema de pago...');
-    } else {
-        alert('Pedido realizado exitosamente. Te contactaremos para coordinar la entrega.');
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (response.ok) {
+            const newOrder = await response.json();
+            orders.push(newOrder);
+            
+            // Clear cart
+            cart = [];
+            updateCartCount();
+            
+            closeModal(document.getElementById('orderModal'));
+            
+            if (method === 'online') {
+                alert('Redirigiendo al sistema de pago...');
+            } else {
+                alert('Pedido realizado exitosamente. Te contactaremos para coordinar la entrega.');
+            }
+            
+            // Reload client data
+            loadClientData();
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error creando pedido:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
     }
-    
-    // Reload client data
-    loadClientData();
 }
 
 function switchAdminSection(section) {
@@ -912,25 +944,32 @@ function handleSearch(e) {
     });
 }
 
-function updateOrderStatus(orderId, newStatus) {
-    const order = orders.find(o => o.id === orderId);
-    if (order) {
-        order.status = newStatus;
+async function updateOrderStatus(orderId, newStatus) {
+    try {
+        const response = await fetch(`/api/orders/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
         
-        // If confirming order, reduce stock
-        if (newStatus === 'confirmed') {
-            order.items.forEach(item => {
-                const product = products.find(p => p.id === item.id);
-                if (product) {
-                    product.stock -= item.quantity;
-                }
-            });
-            saveToLocalStorage('mordipets_products', products);
+        if (response.ok) {
+            const updatedOrder = await response.json();
+            const orderIndex = orders.findIndex(o => o.id === orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex] = updatedOrder;
+            }
+            
+            loadOrdersList();
+            alert(`Estado del pedido actualizado a: ${newStatus}`);
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
         }
-        
-        saveToLocalStorage('mordipets_orders', orders);
-        loadOrdersList();
-        alert(`Estado del pedido actualizado a: ${newStatus}`);
+    } catch (error) {
+        console.error('Error actualizando pedido:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
     }
 }
 
@@ -951,12 +990,25 @@ function editProduct(productId) {
     openModal(document.getElementById('editProductModal'));
 }
 
-function deleteProduct(productId) {
+async function deleteProduct(productId) {
     if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-        products = products.filter(p => p.id !== productId);
-        saveToLocalStorage('mordipets_products', products);
-        loadProductsGrid();
-        alert('Producto eliminado exitosamente');
+        try {
+            const response = await fetch(`/api/products/${productId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                products = products.filter(p => p.id !== productId);
+                loadProductsGrid();
+                alert('Producto eliminado exitosamente');
+            } else {
+                const error = await response.json();
+                alert(`❌ Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error eliminando producto:', error);
+            alert('❌ Error de conexión. Intenta nuevamente.');
+        }
     }
 }
 
@@ -975,12 +1027,25 @@ function editIngredient(ingredientId) {
     openModal(document.getElementById('editIngredientModal'));
 }
 
-function deleteIngredient(ingredientId) {
+async function deleteIngredient(ingredientId) {
     if (confirm('¿Estás seguro de que quieres eliminar este insumo?')) {
-        ingredients = ingredients.filter(i => i.id !== ingredientId);
-        saveToLocalStorage('mordipets_ingredients', ingredients);
-        loadIngredientsGrid();
-        alert('Insumo eliminado exitosamente');
+        try {
+            const response = await fetch(`/api/ingredients/${ingredientId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                ingredients = ingredients.filter(i => i.id !== ingredientId);
+                loadIngredientsGrid();
+                alert('Insumo eliminado exitosamente');
+            } else {
+                const error = await response.json();
+                alert(`❌ Error: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('Error eliminando ingrediente:', error);
+            alert('❌ Error de conexión. Intenta nuevamente.');
+        }
     }
 }
 
@@ -1094,7 +1159,7 @@ function updateCartCount() {
     }
 }
 
-function checkout() {
+async function checkout() {
     if (cart.length === 0) {
         alert('Tu carrito está vacío');
         return;
@@ -1102,47 +1167,53 @@ function checkout() {
     
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    const newOrder = {
-        id: Date.now(),
+    const orderData = {
         clientName: currentUser.name,
         clientEmail: currentUser.email,
         clientPhone: currentUser.phone || 'No especificado',
         clientLocation: currentUser.location || 'No especificado',
         items: [...cart],
         total: total,
-        paymentMethod: 'contraentrega',
-        status: 'pending',
-        date: new Date().toISOString()
+        paymentMethod: 'contraentrega'
     };
     
-    orders.push(newOrder);
-    saveToLocalStorage('mordipets_orders', orders);
-    
-    // Clear cart
-    cart = [];
-    updateCartCount();
-    closeCart();
-    
-    alert('¡Pedido realizado exitosamente! Te contactaremos para coordinar la entrega.');
-    
-    // Reload client data
-    loadClientData();
+    try {
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+        
+        if (response.ok) {
+            const newOrder = await response.json();
+            orders.push(newOrder);
+            
+            // Clear cart
+            cart = [];
+            updateCartCount();
+            closeCart();
+            
+            alert('¡Pedido realizado exitosamente! Te contactaremos para coordinar la entrega.');
+            
+            // Reload client data
+            loadClientData();
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error creando pedido:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
 }
 
-function handleEditProduct(e) {
+async function handleEditProduct(e) {
     e.preventDefault();
     
     const productId = parseInt(document.getElementById('editProductId').value);
-    const productIndex = products.findIndex(p => p.id === productId);
-    
-    if (productIndex === -1) {
-        alert('Producto no encontrado');
-        return;
-    }
-    
-    // Update product data
-    products[productIndex] = {
-        id: productId,
+    const productData = {
         code: document.getElementById('editProductCode').value,
         name: document.getElementById('editProductName').value,
         description: document.getElementById('editProductDescription').value,
@@ -1151,46 +1222,81 @@ function handleEditProduct(e) {
         weight: parseInt(document.getElementById('editProductWeight').value)
     };
     
-    saveToLocalStorage('mordipets_products', products);
-    
-    closeModal(document.getElementById('editProductModal'));
-    loadProductsGrid();
-    
-    // Clear form
-    document.getElementById('editProductForm').reset();
-    
-    alert('Producto actualizado exitosamente');
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(productData)
+        });
+        
+        if (response.ok) {
+            const updatedProduct = await response.json();
+            const productIndex = products.findIndex(p => p.id === productId);
+            if (productIndex !== -1) {
+                products[productIndex] = updatedProduct;
+            }
+            
+            closeModal(document.getElementById('editProductModal'));
+            loadProductsGrid();
+            
+            // Clear form
+            document.getElementById('editProductForm').reset();
+            
+            alert('Producto actualizado exitosamente');
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error actualizando producto:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
 }
 
-function handleEditIngredient(e) {
+async function handleEditIngredient(e) {
     e.preventDefault();
     
     const ingredientId = parseInt(document.getElementById('editIngredientId').value);
-    const ingredientIndex = ingredients.findIndex(i => i.id === ingredientId);
-    
-    if (ingredientIndex === -1) {
-        alert('Insumo no encontrado');
-        return;
-    }
-    
-    // Update ingredient data
-    ingredients[ingredientIndex] = {
-        id: ingredientId,
+    const ingredientData = {
         name: document.getElementById('editIngredientName').value,
         type: document.getElementById('editIngredientType').value,
         quantity: parseInt(document.getElementById('editIngredientQuantity').value),
         unit: document.getElementById('editIngredientUnit').value
     };
     
-    saveToLocalStorage('mordipets_ingredients', ingredients);
-    
-    closeModal(document.getElementById('editIngredientModal'));
-    loadIngredientsGrid();
-    
-    // Clear form
-    document.getElementById('editIngredientForm').reset();
-    
-    alert('Insumo actualizado exitosamente');
+    try {
+        const response = await fetch(`/api/ingredients/${ingredientId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ingredientData)
+        });
+        
+        if (response.ok) {
+            const updatedIngredient = await response.json();
+            const ingredientIndex = ingredients.findIndex(i => i.id === ingredientId);
+            if (ingredientIndex !== -1) {
+                ingredients[ingredientIndex] = updatedIngredient;
+            }
+            
+            closeModal(document.getElementById('editIngredientModal'));
+            loadIngredientsGrid();
+            
+            // Clear form
+            document.getElementById('editIngredientForm').reset();
+            
+            alert('Insumo actualizado exitosamente');
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error actualizando ingrediente:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
 }
 
 // Password Recovery Functions
