@@ -245,6 +245,9 @@
                     <label for="loginPassword">Contraseña</label>
                     <input type="password" id="loginPassword" required>
                 </div>
+                <div class="form-group" style="text-align: right; margin-bottom: 20px;">
+                    <a href="#" id="forgotPasswordLink" style="color: #007bff; text-decoration: none; font-size: 14px;">¿Olvidaste tu contraseña?</a>
+                </div>
                 <button type="submit" class="btn-primary">Iniciar Sesión</button>
             </form>
         </div>
@@ -281,6 +284,66 @@
                     <input type="password" id="regConfirmPassword" required>
                 </div>
                 <button type="submit" class="btn-primary">Registrarse</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal - Step 1: Email -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Recuperar Contraseña</h2>
+            <p style="margin-bottom: 20px; color: #666;">Ingresa tu correo electrónico para recibir un código de verificación</p>
+            <form id="forgotPasswordForm">
+                <div class="form-group">
+                    <label for="forgotEmail">Correo Electrónico</label>
+                    <input type="email" id="forgotEmail" required>
+                </div>
+                <button type="submit" class="btn-primary">Enviar Código</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" id="backToLoginLink" style="color: #007bff; text-decoration: none; font-size: 14px;">← Volver al inicio de sesión</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Code Modal - Step 2: Code Verification -->
+    <div id="verifyCodeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Verificar Código</h2>
+            <p style="margin-bottom: 20px; color: #666;">Ingresa el código de 6 dígitos que enviamos a tu correo</p>
+            <form id="verifyCodeForm">
+                <div class="form-group">
+                    <label for="verificationCode">Código de Verificación</label>
+                    <input type="text" id="verificationCode" maxlength="6" required style="text-align: center; font-size: 18px; letter-spacing: 2px;">
+                </div>
+                <button type="submit" class="btn-primary">Verificar Código</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="#" id="resendCodeLink" style="color: #007bff; text-decoration: none; font-size: 14px;">Reenviar código</a>
+                <span style="margin: 0 10px;">|</span>
+                <a href="#" id="backToForgotLink" style="color: #007bff; text-decoration: none; font-size: 14px;">← Cambiar correo</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal - Step 3: New Password -->
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Nueva Contraseña</h2>
+            <p style="margin-bottom: 20px; color: #666;">Ingresa tu nueva contraseña</p>
+            <form id="resetPasswordForm">
+                <div class="form-group">
+                    <label for="newPassword">Nueva Contraseña</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="confirmNewPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Cambiar Contraseña</button>
             </form>
         </div>
     </div>

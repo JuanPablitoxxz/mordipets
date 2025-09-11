@@ -6,6 +6,10 @@ let ingredients = [];
 let orders = [];
 let cart = [];
 
+// Password recovery variables
+let passwordRecoveryEmail = '';
+let verificationCode = '';
+
 // Sample data - Solo productos con imágenes disponibles
 const sampleProducts = [
     { id: 1, code: '10', name: 'Galleta Leche x 1000 gr', price: 15500, stock: 25, weight: 1000, description: 'Deliciosas galletas de leche para perros' },
@@ -174,6 +178,11 @@ function setupEventListeners() {
     document.getElementById('editProductForm').addEventListener('submit', handleEditProduct);
     document.getElementById('editIngredientForm').addEventListener('submit', handleEditIngredient);
     
+    // Password recovery forms
+    document.getElementById('forgotPasswordForm').addEventListener('submit', handleForgotPassword);
+    document.getElementById('verifyCodeForm').addEventListener('submit', handleVerifyCode);
+    document.getElementById('resetPasswordForm').addEventListener('submit', handleResetPassword);
+    
     // Admin navigation
     document.querySelectorAll('.admin-nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -208,6 +217,30 @@ function setupEventListeners() {
     // Order buttons
     document.getElementById('payNowBtn').addEventListener('click', () => handlePayment('online'));
     document.getElementById('payOnDeliveryBtn').addEventListener('click', () => handlePayment('delivery'));
+    
+    // Password recovery navigation links
+    document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal(document.getElementById('loginModal'));
+        openModal(document.getElementById('forgotPasswordModal'));
+    });
+    
+    document.getElementById('backToLoginLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal(document.getElementById('forgotPasswordModal'));
+        openModal(document.getElementById('loginModal'));
+    });
+    
+    document.getElementById('resendCodeLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        sendVerificationCode(passwordRecoveryEmail);
+    });
+    
+    document.getElementById('backToForgotLink').addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal(document.getElementById('verifyCodeModal'));
+        openModal(document.getElementById('forgotPasswordModal'));
+    });
 }
 
 function openModal(modal) {
@@ -234,6 +267,15 @@ function handleLogin(e) {
         // Try to get user data from localStorage if exists
         const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
         const existingUser = savedUsers.find(user => user.email === email);
+        
+        // For admin users, skip password check (for demo purposes)
+        // For regular users, check password if it exists
+        if (!isAdminCheck && existingUser && existingUser.password) {
+            if (existingUser.password !== password) {
+                alert('Contraseña incorrecta');
+                return;
+            }
+        }
         
         currentUser = {
             email: email,
@@ -278,6 +320,7 @@ function handleRegister(e) {
             email: email,
             phone: phone,
             location: location,
+            password: password,
             isAdmin: false
         };
         
@@ -1037,4 +1080,118 @@ function handleEditIngredient(e) {
     document.getElementById('editIngredientForm').reset();
     
     alert('Insumo actualizado exitosamente');
+}
+
+// Password Recovery Functions
+function handleForgotPassword(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('forgotEmail').value;
+    
+    if (!email) {
+        alert('Por favor, ingresa tu correo electrónico');
+        return;
+    }
+    
+    // Check if email exists in users
+    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+    const userExists = savedUsers.some(user => user.email === email);
+    
+    if (!userExists) {
+        alert('No existe una cuenta con este correo electrónico');
+        return;
+    }
+    
+    passwordRecoveryEmail = email;
+    sendVerificationCode(email);
+}
+
+function sendVerificationCode(email) {
+    // Generate a 6-digit verification code
+    verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // In a real application, this would send an email
+    // For demo purposes, we'll show the code in an alert
+    alert(`Código de verificación enviado a ${email}\n\nCódigo: ${verificationCode}\n\n(En una aplicación real, esto se enviaría por correo electrónico)`);
+    
+    // Close forgot password modal and open verification modal
+    closeModal(document.getElementById('forgotPasswordModal'));
+    openModal(document.getElementById('verifyCodeModal'));
+    
+    // Clear the email input
+    document.getElementById('forgotEmail').value = '';
+}
+
+function handleVerifyCode(e) {
+    e.preventDefault();
+    
+    const enteredCode = document.getElementById('verificationCode').value;
+    
+    if (!enteredCode) {
+        alert('Por favor, ingresa el código de verificación');
+        return;
+    }
+    
+    if (enteredCode !== verificationCode) {
+        alert('El código de verificación es incorrecto');
+        return;
+    }
+    
+    // Code is correct, proceed to reset password
+    closeModal(document.getElementById('verifyCodeModal'));
+    openModal(document.getElementById('resetPasswordModal'));
+    
+    // Clear the code input
+    document.getElementById('verificationCode').value = '';
+}
+
+function handleResetPassword(e) {
+    e.preventDefault();
+    
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (!newPassword || !confirmPassword) {
+        alert('Por favor, completa todos los campos');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert('La contraseña debe tener al menos 6 caracteres');
+        return;
+    }
+    
+    // Update user password in localStorage
+    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
+    const userIndex = savedUsers.findIndex(user => user.email === passwordRecoveryEmail);
+    
+    if (userIndex !== -1) {
+        // In a real application, you would hash the password
+        savedUsers[userIndex].password = newPassword;
+        localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
+        
+        // Close reset password modal and show success
+        closeModal(document.getElementById('resetPasswordModal'));
+        alert('¡Contraseña actualizada exitosamente! Ya puedes iniciar sesión con tu nueva contraseña.');
+        
+        // Open login modal
+        openModal(document.getElementById('loginModal'));
+        
+        // Clear all forms
+        document.getElementById('forgotEmail').value = '';
+        document.getElementById('verificationCode').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
+        
+        // Reset variables
+        passwordRecoveryEmail = '';
+        verificationCode = '';
+    } else {
+        alert('Error: No se pudo actualizar la contraseña');
+    }
 }
