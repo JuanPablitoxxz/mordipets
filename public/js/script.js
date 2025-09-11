@@ -8,7 +8,6 @@ let cart = [];
 
 // Password recovery variables
 let passwordRecoveryEmail = '';
-let verificationCode = '';
 
 // Sample data - Solo productos con imágenes disponibles
 const sampleProducts = [
@@ -1126,9 +1125,6 @@ async function sendVerificationCode(email) {
         const result = await response.json();
         
         if (result.success) {
-            // Guardar el código para verificación
-            verificationCode = result.code;
-            
             // Mostrar mensaje de éxito
             alert(`✅ Código de verificación enviado a ${email}\n\nRevisa tu bandeja de entrada (y carpeta de spam) para obtener el código.`);
             
@@ -1153,7 +1149,7 @@ async function sendVerificationCode(email) {
     }
 }
 
-function handleVerifyCode(e) {
+async function handleVerifyCode(e) {
     e.preventDefault();
     
     const enteredCode = document.getElementById('verificationCode').value;
@@ -1163,17 +1159,47 @@ function handleVerifyCode(e) {
         return;
     }
     
-    if (enteredCode !== verificationCode) {
-        alert('El código de verificación es incorrecto');
-        return;
+    try {
+        // Mostrar indicador de carga
+        const submitBtn = document.querySelector('#verifyCodeForm button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Verificando...';
+        submitBtn.disabled = true;
+        
+        // Verificar código con el servidor
+        const response = await fetch('/api/auth/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                email: passwordRecoveryEmail,
+                code: enteredCode
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Code is correct, proceed to reset password
+            closeModal(document.getElementById('verifyCodeModal'));
+            openModal(document.getElementById('resetPasswordModal'));
+            
+            // Clear the code input
+            document.getElementById('verificationCode').value = '';
+        } else {
+            alert(`❌ Error: ${result.error}`);
+        }
+        
+    } catch (error) {
+        console.error('Error verificando código:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    } finally {
+        // Restaurar botón
+        const submitBtn = document.querySelector('#verifyCodeForm button[type="submit"]');
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
-    
-    // Code is correct, proceed to reset password
-    closeModal(document.getElementById('verifyCodeModal'));
-    openModal(document.getElementById('resetPasswordModal'));
-    
-    // Clear the code input
-    document.getElementById('verificationCode').value = '';
 }
 
 async function handleResetPassword(e) {
@@ -1212,7 +1238,7 @@ async function handleResetPassword(e) {
             },
             body: JSON.stringify({ 
                 email: passwordRecoveryEmail,
-                code: verificationCode,
+                code: document.getElementById('verificationCode').value,
                 newPassword: newPassword
             })
         });
@@ -1241,7 +1267,6 @@ async function handleResetPassword(e) {
             
             // Reset variables
             passwordRecoveryEmail = '';
-            verificationCode = '';
         } else {
             alert(`❌ Error: ${result.error}`);
         }

@@ -326,6 +326,9 @@ app.put('/api/orders/:id/status', async (req, res) => {
   }
 });
 
+// Almacenamiento temporal para códigos de verificación (en memoria)
+const verificationCodes = new Map();
+
 // Enviar código de verificación por email
 app.post('/api/auth/send-verification-code', async (req, res) => {
   try {
@@ -336,8 +339,16 @@ app.post('/api/auth/send-verification-code', async (req, res) => {
     }
     
     // Verificar si el email existe en la base de datos
-    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-    const userExists = savedUsers.some(user => user.email === email);
+    let userExists = false;
+    
+    if (await isDatabaseAvailable()) {
+      // Verificar en base de datos real
+      const result = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+      userExists = result.rows.length > 0;
+    } else {
+      // Para desarrollo, aceptar cualquier email que termine en @gmail.com o @hotmail.com
+      userExists = email.includes('@gmail.com') || email.includes('@hotmail.com') || email.includes('@outlook.com');
+    }
     
     if (!userExists) {
       return res.status(404).json({ error: 'No existe una cuenta con este correo electrónico' });
@@ -346,15 +357,19 @@ app.post('/api/auth/send-verification-code', async (req, res) => {
     // Generar código de verificación
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     
+    // Guardar código en memoria con expiración (10 minutos)
+    verificationCodes.set(email, {
+      code: verificationCode,
+      expires: Date.now() + (10 * 60 * 1000) // 10 minutos
+    });
+    
     // Enviar email
     const emailResult = await sendVerificationCode(email, verificationCode);
     
     if (emailResult.success) {
-      // En una aplicación real, guardarías el código en la base de datos con expiración
       res.json({ 
         success: true, 
-        message: 'Código de verificación enviado exitosamente',
-        code: verificationCode // Solo para desarrollo, en producción no enviar
+        message: 'Código de verificación enviado exitosamente'
       });
     } else {
       res.status(500).json({ 
@@ -369,6 +384,42 @@ app.post('/api/auth/send-verification-code', async (req, res) => {
   }
 });
 
+// Verificar código de verificación
+app.post('/api/auth/verify-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email y código son requeridos' });
+    }
+    
+    // Verificar código de verificación
+    const storedCode = verificationCodes.get(email);
+    
+    if (!storedCode) {
+      return res.status(400).json({ error: 'Código de verificación no encontrado o expirado' });
+    }
+    
+    if (storedCode.expires < Date.now()) {
+      verificationCodes.delete(email);
+      return res.status(400).json({ error: 'Código de verificación expirado' });
+    }
+    
+    if (storedCode.code !== code) {
+      return res.status(400).json({ error: 'Código de verificación incorrecto' });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Código verificado correctamente'
+    });
+    
+  } catch (error) {
+    console.error('Error verificando código:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 // Verificar código y cambiar contraseña
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
@@ -378,23 +429,44 @@ app.post('/api/auth/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
     
-    // En una aplicación real, verificarías el código desde la base de datos
-    // Por ahora, asumimos que el código es válido si se proporciona
+    // Verificar código de verificación
+    const storedCode = verificationCodes.get(email);
     
-    // Actualizar contraseña en localStorage (simulando base de datos)
-    const savedUsers = JSON.parse(localStorage.getItem('mordipets_users') || '[]');
-    const userIndex = savedUsers.findIndex(user => user.email === email);
-    
-    if (userIndex === -1) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!storedCode) {
+      return res.status(400).json({ error: 'Código de verificación no encontrado o expirado' });
     }
     
-    // Actualizar contraseña
-    savedUsers[userIndex].password = newPassword;
-    localStorage.setItem('mordipets_users', JSON.stringify(savedUsers));
+    if (storedCode.expires < Date.now()) {
+      verificationCodes.delete(email);
+      return res.status(400).json({ error: 'Código de verificación expirado' });
+    }
+    
+    if (storedCode.code !== code) {
+      return res.status(400).json({ error: 'Código de verificación incorrecto' });
+    }
+    
+    // Código válido, proceder con el cambio de contraseña
+    let userName = email.split('@')[0]; // Nombre por defecto
+    
+    if (await isDatabaseAvailable()) {
+      // Actualizar en base de datos real
+      const result = await pool.query(
+        'UPDATE users SET password = $1 WHERE email = $2 RETURNING name',
+        [newPassword, email]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+      
+      userName = result.rows[0].name;
+    }
+    
+    // Limpiar código usado
+    verificationCodes.delete(email);
     
     // Enviar email de confirmación
-    const emailResult = await sendPasswordChangedConfirmation(email, savedUsers[userIndex].name);
+    const emailResult = await sendPasswordChangedConfirmation(email, userName);
     
     res.json({ 
       success: true, 
