@@ -85,6 +85,10 @@ async function initializeDatabase() {
     `);
 
     console.log('✅ Base de datos inicializada correctamente');
+    
+    // Ejecutar migraciones para tablas existentes
+    await runMigrations();
+    
   } catch (error) {
     console.error('❌ Error inicializando la base de datos:', error);
   }
@@ -230,10 +234,60 @@ async function insertSampleData() {
   }
 }
 
+// Función para ejecutar migraciones en tablas existentes
+async function runMigrations() {
+  try {
+    console.log('🔄 Ejecutando migraciones...');
+    
+    // Verificar si las columnas de pago existen en la tabla orders
+    const columnsCheck = await pool.query(`
+      SELECT column_name 
+      FROM information_schema.columns 
+      WHERE table_name = 'orders' 
+      AND column_name IN ('payment_status', 'payment_reference', 'payment_transaction_id')
+    `);
+    
+    const existingColumns = columnsCheck.rows.map(row => row.column_name);
+    
+    // Agregar columnas faltantes
+    if (!existingColumns.includes('payment_status')) {
+      console.log('➕ Agregando columna payment_status...');
+      await pool.query(`
+        ALTER TABLE orders 
+        ADD COLUMN payment_status VARCHAR(50) DEFAULT 'pending'
+      `);
+    }
+    
+    if (!existingColumns.includes('payment_reference')) {
+      console.log('➕ Agregando columna payment_reference...');
+      await pool.query(`
+        ALTER TABLE orders 
+        ADD COLUMN payment_reference VARCHAR(255)
+      `);
+    }
+    
+    if (!existingColumns.includes('payment_transaction_id')) {
+      console.log('➕ Agregando columna payment_transaction_id...');
+      await pool.query(`
+        ALTER TABLE orders 
+        ADD COLUMN payment_transaction_id VARCHAR(255)
+      `);
+    }
+    
+    console.log('✅ Migraciones completadas correctamente');
+    
+  } catch (error) {
+    console.error('❌ Error ejecutando migraciones:', error);
+    // No lanzar error para no interrumpir el inicio del servidor
+    console.log('⚠️ Continuando sin migraciones...');
+  }
+}
+
 module.exports = {
   pool,
   initializeDatabase,
   insertSampleData,
   createDefaultAdmin,
-  createTestUsers
+  createTestUsers,
+  runMigrations
 };
