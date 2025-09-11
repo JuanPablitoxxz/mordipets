@@ -14,10 +14,26 @@ const createTransporter = () => {
 // Función para enviar código de verificación
 const sendVerificationCode = async (email, code) => {
   try {
+    console.log(`📧 Intentando enviar código de verificación a: ${email}`);
+    
+    // Verificar configuración
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('❌ Variables de entorno de email no configuradas');
+      return { 
+        success: false, 
+        error: 'Variables de entorno de email no configuradas' 
+      };
+    }
+    
     const transporter = createTransporter();
     
+    // Verificar conexión antes de enviar
+    console.log('🔌 Verificando conexión con Gmail...');
+    await transporter.verify();
+    console.log('✅ Conexión con Gmail verificada');
+    
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'mordipets@tudominio.com',
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Código de Verificación - Mordipets',
       html: `
@@ -59,23 +75,59 @@ const sendVerificationCode = async (email, code) => {
       `
     };
 
+    console.log('📤 Enviando email...');
     const result = await transporter.sendMail(mailOptions);
     console.log('✅ Email enviado exitosamente:', result.messageId);
+    console.log(`📧 Destinatario: ${email}`);
+    console.log(`🆔 Message ID: ${result.messageId}`);
+    
     return { success: true, messageId: result.messageId };
     
   } catch (error) {
     console.error('❌ Error enviando email:', error);
-    return { success: false, error: error.message };
+    console.error('🔍 Detalles del error:', {
+      message: error.message,
+      code: error.code,
+      response: error.response
+    });
+    
+    // Mensajes de error más específicos
+    let errorMessage = error.message;
+    if (error.code === 'EAUTH') {
+      errorMessage = 'Error de autenticación. Verifica las credenciales de email.';
+    } else if (error.code === 'ECONNECTION') {
+      errorMessage = 'Error de conexión. Verifica la configuración de red.';
+    } else if (error.responseCode === 535) {
+      errorMessage = 'Error de autenticación. Verifica la App Password de Gmail.';
+    }
+    
+    return { success: false, error: errorMessage };
   }
 };
 
 // Función para enviar confirmación de cambio de contraseña
 const sendPasswordChangedConfirmation = async (email, userName) => {
   try {
+    console.log(`📧 Intentando enviar confirmación de cambio de contraseña a: ${email}`);
+    
+    // Verificar configuración
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('❌ Variables de entorno de email no configuradas');
+      return { 
+        success: false, 
+        error: 'Variables de entorno de email no configuradas' 
+      };
+    }
+    
     const transporter = createTransporter();
     
+    // Verificar conexión antes de enviar
+    console.log('🔌 Verificando conexión con Gmail...');
+    await transporter.verify();
+    console.log('✅ Conexión con Gmail verificada');
+    
     const mailOptions = {
-      from: process.env.EMAIL_USER || 'mordipets@tudominio.com',
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Contraseña Actualizada - Mordipets',
       html: `
@@ -119,13 +171,33 @@ const sendPasswordChangedConfirmation = async (email, userName) => {
       `
     };
 
+    console.log('📤 Enviando email de confirmación...');
     const result = await transporter.sendMail(mailOptions);
     console.log('✅ Email de confirmación enviado:', result.messageId);
+    console.log(`📧 Destinatario: ${email}`);
+    console.log(`🆔 Message ID: ${result.messageId}`);
+    
     return { success: true, messageId: result.messageId };
     
   } catch (error) {
     console.error('❌ Error enviando email de confirmación:', error);
-    return { success: false, error: error.message };
+    console.error('🔍 Detalles del error:', {
+      message: error.message,
+      code: error.code,
+      response: error.response
+    });
+    
+    // Mensajes de error más específicos
+    let errorMessage = error.message;
+    if (error.code === 'EAUTH') {
+      errorMessage = 'Error de autenticación. Verifica las credenciales de email.';
+    } else if (error.code === 'ECONNECTION') {
+      errorMessage = 'Error de conexión. Verifica la configuración de red.';
+    } else if (error.responseCode === 535) {
+      errorMessage = 'Error de autenticación. Verifica la App Password de Gmail.';
+    }
+    
+    return { success: false, error: errorMessage };
   }
 };
 
