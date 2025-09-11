@@ -645,7 +645,18 @@ function createOrderCard(order) {
     const statusText = {
         'pending': 'Pendiente',
         'confirmed': 'Confirmado',
-        'delivered': 'Entregado'
+        'delivered': 'Entregado',
+        'pending_payment': 'Pago Pendiente',
+        'paid': 'Pagado',
+        'failed': 'Pago Fallido'
+    };
+    
+    const paymentStatusClass = `payment-${order.payment_status || 'unknown'}`;
+    const paymentStatusText = {
+        'pending': 'Pago Pendiente',
+        'paid': 'Pagado',
+        'failed': 'Pago Fallido',
+        'unknown': 'Sin información'
     };
     
     card.innerHTML = `
@@ -680,8 +691,14 @@ function createOrderCard(order) {
             </div>
             <div class="order-detail">
                 <label>Método de Pago</label>
-                <span>${order.payment_method === 'online' || order.paymentMethod === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
+                <span>${order.payment_method === 'pse' || order.paymentMethod === 'pse' ? 'PSE' : order.payment_method === 'online' || order.paymentMethod === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
             </div>
+            ${isAdmin ? `
+                <div class="order-detail">
+                    <label>Estado de Pago</label>
+                    <span class="${paymentStatusClass}">${paymentStatusText[order.payment_status || 'unknown']}</span>
+                </div>
+            ` : ''}
         </div>
         <div class="order-items">
             <h5>Productos:</h5>
@@ -1247,12 +1264,59 @@ function redirectToPSEPayment() {
     window.pendingPSEOrder = orderData;
 }
 
-function confirmPSEPayment() {
-    // Simular redirección a PSE (aquí integrarías con la pasarela real)
-    alert('Redirigiendo a la pasarela de pagos PSE...\n\nEn un entorno real, aquí se integraría con PSE, PayU, o similar.');
-    
-    // Por ahora, crear el pedido como "pago pendiente"
-    createPendingPSEOrder();
+async function confirmPSEPayment() {
+    try {
+        // Crear el pedido primero
+        const orderData = window.pendingPSEOrder;
+        
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...orderData,
+                status: 'pending_payment'
+            })
+        });
+        
+        if (response.ok) {
+            const newOrder = await response.json();
+            
+            // Crear pago PSE
+            const paymentResponse = await fetch('/api/payments/create-pse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderId: newOrder.id
+                })
+            });
+            
+            if (paymentResponse.ok) {
+                const paymentData = await paymentResponse.json();
+                
+                if (paymentData.paymentUrl) {
+                    // Redirigir a la pasarela de pagos PSE
+                    window.location.href = paymentData.paymentUrl;
+                } else {
+                    alert('Pago PSE creado exitosamente. ID de transacción: ' + paymentData.transactionId);
+                    closePSEModal();
+                    loadClientData();
+                }
+            } else {
+                const error = await paymentResponse.json();
+                alert('Error creando pago PSE: ' + error.error);
+            }
+        } else {
+            const error = await response.json();
+            alert('Error creando pedido: ' + error.error);
+        }
+    } catch (error) {
+        console.error('Error en pago PSE:', error);
+        alert('Error de conexión. Intenta nuevamente.');
+    }
 }
 
 function createPendingPSEOrder() {

@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
 const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
+const paymentService = require('./paymentService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -494,6 +495,122 @@ app.post('/api/auth/reset-password', async (req, res) => {
     
   } catch (error) {
     console.error('Error actualizando contraseña:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Rutas de pagos PSE
+app.post('/api/payments/create-pse', async (req, res) => {
+  try {
+    const { orderId } = req.body;
+    
+    // Obtener datos del pedido
+    const orderResult = await pool.query(`
+      SELECT o.*, 
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'product_name', oi.product_name,
+                   'price', oi.price,
+                   'quantity', oi.quantity
+                 )
+               ) FILTER (WHERE oi.id IS NOT NULL), 
+               '[]'
+             ) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.id = $1
+      GROUP BY o.id
+    `, [orderId]);
+    
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    
+    const order = orderResult.rows[0];
+    
+    // Crear pago PSE
+    const paymentResult = await paymentService.createPSEPayment(order);
+    
+    if (paymentResult.success) {
+      // Actualizar pedido con información de pago
+      await pool.query(
+        'UPDATE orders SET payment_reference = $1, payment_transaction_id = $2, payment_status = $3 WHERE id = $4',
+        [paymentResult.referenceCode, paymentResult.transactionId, 'pending', orderId]
+      );
+      
+      res.json({
+        success: true,
+        paymentUrl: paymentResult.paymentUrl,
+        transactionId: paymentResult.transactionId,
+        referenceCode: paymentResult.referenceCode
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: paymentResult.error
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error creando pago PSE:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Webhook para confirmación de pagos
+app.post('/api/payments/webhook', async (req, res) => {
+  try {
+    const webhookResult = paymentService.processWebhook(req.body);
+    
+    if (webhookResult.success) {
+      // Actualizar estado del pedido
+      await pool.query(
+        'UPDATE orders SET payment_status = $1, payment_transaction_id = $2 WHERE payment_reference = $3',
+        [webhookResult.status, webhookResult.transactionId, webhookResult.referenceCode]
+      );
+      
+      // Si el pago fue exitoso, actualizar estado del pedido
+      if (webhookResult.status === 'paid') {
+        await pool.query(
+          'UPDATE orders SET status = $1 WHERE payment_reference = $2',
+          ['confirmed', webhookResult.referenceCode]
+        );
+      }
+      
+      res.json({ success: true });
+    } else {
+      res.status(400).json({ error: webhookResult.error });
+    }
+    
+  } catch (error) {
+    console.error('Error procesando webhook:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// Verificar estado de pago
+app.get('/api/payments/status/:transactionId', async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    
+    const statusResult = await paymentService.checkPaymentStatus(transactionId);
+    
+    if (statusResult.success) {
+      // Actualizar estado en la base de datos
+      await pool.query(
+        'UPDATE orders SET payment_status = $1 WHERE payment_transaction_id = $2',
+        [statusResult.status, transactionId]
+      );
+      
+      res.json(statusResult);
+    } else {
+      res.status(400).json({ error: statusResult.error });
+    }
+    
+  } catch (error) {
+    console.error('Error verificando estado de pago:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

@@ -1227,6 +1227,43 @@ body {
     color: #ff6b35;
 }
 
+/* Estilos para estados de pago */
+.payment-pending {
+    color: #f39c12;
+    font-weight: 600;
+}
+
+.payment-paid {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.payment-failed {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.payment-unknown {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/* Estilos para estados de pedidos */
+.status-pending_payment {
+    background: #f39c12;
+    color: white;
+}
+
+.status-paid {
+    background: #27ae60;
+    color: white;
+}
+
+.status-failed {
+    background: #e74c3c;
+    color: white;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;

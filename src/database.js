@@ -62,6 +62,9 @@ async function initializeDatabase() {
         client_location VARCHAR(255),
         total DECIMAL(10,2) NOT NULL,
         payment_method VARCHAR(50) NOT NULL,
+        payment_status VARCHAR(50) DEFAULT 'pending',
+        payment_reference VARCHAR(255),
+        payment_transaction_id VARCHAR(255),
         status VARCHAR(50) DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
