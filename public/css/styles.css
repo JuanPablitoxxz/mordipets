@@ -1157,6 +1157,76 @@ body {
     font-size: 18px;
 }
 
+/* Estilos para tarjetas de pedidos */
+.order-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.order-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b35;
+}
+
+.order-detail label {
+    font-weight: 600;
+    color: #333;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.order-detail span {
+    color: #555;
+    font-size: 14px;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+/* Estilos para items de pedidos */
+.order-items {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.order-items h5 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.order-item span:first-child {
+    font-weight: 500;
+    color: #333;
+}
+
+.order-item span:last-child {
+    font-weight: 600;
+    color: #ff6b35;
+}
+
 /* Utility Classes */
 .hidden {
     display: none !important;

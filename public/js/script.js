@@ -687,7 +687,7 @@ function createOrderCard(order) {
             <h5>Productos:</h5>
             ${order.items.map(item => `
                 <div class="order-item">
-                    <span>${item.name} x${item.quantity}</span>
+                    <span>${item.product_name || item.name} x${item.quantity}</span>
                     <span>$${(item.price * item.quantity).toLocaleString('es-CO')}</span>
                 </div>
             `).join('')}
