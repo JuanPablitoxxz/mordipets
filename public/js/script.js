@@ -521,12 +521,15 @@ function loadCatalogGrid() {
 
 function createProductCard(product, isAdmin = false) {
     const card = document.createElement('div');
-    card.className = isAdmin ? 'product-card' : 'catalog-card';
+    const isOutOfStock = product.stock === 0;
+    
+    card.className = isAdmin ? 'product-card' : `catalog-card ${isOutOfStock ? 'out-of-stock' : ''}`;
     
     const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
-    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock';
+    const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'AGOTADO';
     
     card.innerHTML = `
+        ${isOutOfStock && !isAdmin ? '<div class="out-of-stock-badge">AGOTADO</div>' : ''}
         <h4>${product.name}</h4>
         <div class="product-info">
             <span class="price">$${product.price.toLocaleString('es-CO')}</span>
@@ -544,13 +547,13 @@ function createProductCard(product, isAdmin = false) {
                     <i class="fas fa-trash"></i> Eliminar
                 </button>
             ` : `
-                <div class="quantity-controls">
-                    <button onclick="decreaseQuantity(${product.id})" class="quantity-btn">-</button>
+                <div class="quantity-controls ${isOutOfStock ? 'disabled' : ''}">
+                    <button onclick="decreaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>-</button>
                     <span id="qty-${product.id}" class="quantity-display">1</span>
-                    <button onclick="increaseQuantity(${product.id})" class="quantity-btn">+</button>
+                    <button onclick="increaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>+</button>
                 </div>
-                <button class="btn-small btn-add-to-cart" onclick="addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-cart-plus"></i> Agregar al Carrito
+                <button class="btn-small btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}" onclick="addToCart(${product.id})" ${isOutOfStock ? 'disabled' : ''}>
+                    <i class="fas fa-cart-plus"></i> ${isOutOfStock ? 'Agotado' : 'Agregar al Carrito'}
                 </button>
             `}
         </div>
@@ -1145,7 +1148,19 @@ function showCart() {
             <h3 style="margin: 0; text-align: center;">Total: $${total.toLocaleString('es-CO')}</h3>
         </div>
         <div class="cart-actions" style="margin-top: 20px; text-align: center;">
-            <button onclick="checkout()" class="btn-primary" style="margin-right: 10px;">Proceder al Pago</button>
+            <div class="payment-options" style="margin-bottom: 20px;">
+                <h4 style="margin-bottom: 15px; color: #333;">Selecciona tu método de pago:</h4>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="proceedToPayment('contraentrega')" class="btn-payment" style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s ease;">
+                        <i class="fas fa-truck" style="margin-right: 8px;"></i>
+                        Pago Contraentrega
+                    </button>
+                    <button onclick="proceedToPayment('pse')" class="btn-payment" style="background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s ease;">
+                        <i class="fas fa-credit-card" style="margin-right: 8px;"></i>
+                        Realizar Pago Ahora (PSE)
+                    </button>
+                </div>
+            </div>
             <button onclick="closeCart()" class="btn-secondary">Cerrar</button>
         </div>
     `;
@@ -1172,6 +1187,119 @@ function closeCart() {
         cartModal.remove();
     }
     document.body.style.overflow = 'auto';
+}
+
+function proceedToPayment(paymentMethod) {
+    closeCart();
+    
+    if (paymentMethod === 'contraentrega') {
+        // Usar la función checkout existente para contraentrega
+        checkout();
+    } else if (paymentMethod === 'pse') {
+        // Redirigir a pasarela de pagos PSE
+        redirectToPSEPayment();
+    }
+}
+
+function redirectToPSEPayment() {
+    if (cart.length === 0) {
+        alert('Tu carrito está vacío');
+        return;
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Crear datos del pedido para PSE
+    const orderData = {
+        clientName: currentUser.name,
+        clientEmail: currentUser.email,
+        clientPhone: currentUser.phone || 'No especificado',
+        clientLocation: currentUser.location || 'No especificado',
+        items: [...cart],
+        total: total,
+        paymentMethod: 'pse'
+    };
+    
+    // Mostrar modal de confirmación antes de redirigir
+    const confirmModal = document.createElement('div');
+    confirmModal.className = 'modal';
+    confirmModal.style.display = 'block';
+    confirmModal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <h3>Confirmar Pago con PSE</h3>
+            <p>Total a pagar: <strong>$${total.toLocaleString('es-CO')}</strong></p>
+            <p>Serás redirigido a la pasarela de pagos PSE para completar tu compra.</p>
+            <div style="margin-top: 20px;">
+                <button onclick="confirmPSEPayment()" class="btn-primary" style="margin-right: 10px; background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    Continuar a PSE
+                </button>
+                <button onclick="closePSEModal()" class="btn-secondary" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(confirmModal);
+    document.body.style.overflow = 'hidden';
+    
+    // Guardar datos del pedido globalmente para usar después
+    window.pendingPSEOrder = orderData;
+}
+
+function confirmPSEPayment() {
+    // Simular redirección a PSE (aquí integrarías con la pasarela real)
+    alert('Redirigiendo a la pasarela de pagos PSE...\n\nEn un entorno real, aquí se integraría con PSE, PayU, o similar.');
+    
+    // Por ahora, crear el pedido como "pago pendiente"
+    createPendingPSEOrder();
+}
+
+function createPendingPSEOrder() {
+    // Crear el pedido con estado "pending_payment"
+    const orderData = window.pendingPSEOrder;
+    
+    fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ...orderData,
+            status: 'pending_payment'
+        })
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.id) {
+            alert('Pedido creado exitosamente. Estado: Pago Pendiente\n\nID del pedido: ' + result.id + '\n\nTe contactaremos para coordinar el pago.');
+            
+            // Limpiar carrito
+            cart = [];
+            updateCartCount();
+            
+            // Recargar datos del cliente
+            loadClientData();
+        } else {
+            alert('Error creando el pedido. Intenta nuevamente.');
+        }
+    })
+    .catch(error => {
+        console.error('Error creando pedido PSE:', error);
+        alert('Error de conexión. Intenta nuevamente.');
+    })
+    .finally(() => {
+        closePSEModal();
+    });
+}
+
+function closePSEModal() {
+    const modal = document.querySelector('.modal');
+    if (modal) {
+        modal.remove();
+    }
+    document.body.style.overflow = 'auto';
+    delete window.pendingPSEOrder;
 }
 
 function removeFromCart(productId) {
