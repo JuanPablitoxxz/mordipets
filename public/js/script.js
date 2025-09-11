@@ -345,20 +345,46 @@ async function handleLogin(e) {
 async function handleRegister(e) {
     e.preventDefault();
     
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const phone = document.getElementById('regPhone').value;
-    const location = document.getElementById('regLocation').value;
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const location = document.getElementById('regLocation').value.trim();
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
     
-    if (password !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
+    // Validaciones
+    if (!name || !email || !phone || !location || !password) {
+        alert('❌ Por favor, completa todos los campos');
         return;
     }
     
-    if (!name || !email || !phone || !location || !password) {
-        alert('Por favor, completa todos los campos');
+    if (name.length < 2) {
+        alert('❌ El nombre debe tener al menos 2 caracteres');
+        return;
+    }
+    
+    if (!isValidEmail(email)) {
+        alert('❌ Por favor ingresa un email válido');
+        return;
+    }
+    
+    if (password.length < 6) {
+        alert('❌ La contraseña debe tener al menos 6 caracteres');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        alert('❌ Las contraseñas no coinciden');
+        return;
+    }
+    
+    if (!isValidPhone(phone)) {
+        alert('❌ Por favor ingresa un teléfono válido (10 dígitos)');
+        return;
+    }
+    
+    if (location.length < 5) {
+        alert('❌ La ubicación debe tener al menos 5 caracteres');
         return;
     }
     
@@ -648,7 +674,8 @@ function createOrderCard(order) {
         'delivered': 'Entregado',
         'pending_payment': 'Pago Pendiente',
         'paid': 'Pagado',
-        'failed': 'Pago Fallido'
+        'failed': 'Pago Fallido',
+        'cancelled': 'Cancelado'
     };
     
     const paymentStatusClass = `payment-${order.payment_status || 'unknown'}`;
@@ -711,12 +738,21 @@ function createOrderCard(order) {
         </div>
         ${isAdmin ? `
             <div class="order-actions mt-20">
-                <button class="btn-small btn-edit" onclick="updateOrderStatus(${order.id}, 'confirmed')">
-                    <i class="fas fa-check"></i> Confirmar
-                </button>
-                <button class="btn-small btn-delete" onclick="updateOrderStatus(${order.id}, 'delivered')">
-                    <i class="fas fa-truck"></i> Marcar Entregado
-                </button>
+                ${order.status !== 'cancelled' && order.status !== 'delivered' ? `
+                    <button class="btn-small btn-edit" onclick="updateOrderStatus(${order.id}, 'confirmed')">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                ` : ''}
+                ${order.status === 'confirmed' ? `
+                    <button class="btn-small btn-success" onclick="updateOrderStatus(${order.id}, 'delivered')">
+                        <i class="fas fa-truck"></i> Marcar Entregado
+                    </button>
+                ` : ''}
+                ${order.status !== 'cancelled' && order.status !== 'delivered' ? `
+                    <button class="btn-small btn-danger" onclick="cancelOrder(${order.id})">
+                        <i class="fas fa-times"></i> Cancelar Pedido
+                    </button>
+                ` : ''}
             </div>
         ` : ''}
     `;
@@ -727,13 +763,56 @@ function createOrderCard(order) {
 async function handleAddProduct(e) {
     e.preventDefault();
     
+    const code = document.getElementById('productCode').value.trim();
+    const name = document.getElementById('productName').value.trim();
+    const description = document.getElementById('productDescription').value.trim();
+    const price = document.getElementById('productPrice').value;
+    const stock = document.getElementById('productStock').value;
+    const weight = document.getElementById('productWeight').value;
+    
+    // Validaciones
+    if (!code || !name || !description || !price || !stock || !weight) {
+        alert('❌ Por favor completa todos los campos');
+        return;
+    }
+    
+    if (code.length < 3) {
+        alert('❌ El código debe tener al menos 3 caracteres');
+        return;
+    }
+    
+    if (name.length < 2) {
+        alert('❌ El nombre debe tener al menos 2 caracteres');
+        return;
+    }
+    
+    if (description.length < 10) {
+        alert('❌ La descripción debe tener al menos 10 caracteres');
+        return;
+    }
+    
+    if (!isValidPrice(price)) {
+        alert('❌ Por favor ingresa un precio válido (mayor a 0)');
+        return;
+    }
+    
+    if (!isValidQuantity(stock)) {
+        alert('❌ Por favor ingresa una cantidad válida (mayor a 0)');
+        return;
+    }
+    
+    if (!isValidQuantity(weight)) {
+        alert('❌ Por favor ingresa un peso válido (mayor a 0)');
+        return;
+    }
+    
     const productData = {
-        code: document.getElementById('productCode').value,
-        name: document.getElementById('productName').value,
-        description: document.getElementById('productDescription').value,
-        price: parseFloat(document.getElementById('productPrice').value),
-        stock: parseInt(document.getElementById('productStock').value),
-        weight: parseInt(document.getElementById('productWeight').value)
+        code,
+        name,
+        description,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+        weight: parseInt(weight)
     };
     
     try {
@@ -769,11 +848,37 @@ async function handleAddProduct(e) {
 async function handleAddIngredient(e) {
     e.preventDefault();
     
+    const name = document.getElementById('ingredientName').value.trim();
+    const type = document.getElementById('ingredientType').value;
+    const quantity = document.getElementById('ingredientQuantity').value;
+    const unit = document.getElementById('ingredientUnit').value.trim();
+    
+    // Validaciones
+    if (!name || !type || !quantity || !unit) {
+        alert('❌ Por favor completa todos los campos');
+        return;
+    }
+    
+    if (name.length < 2) {
+        alert('❌ El nombre debe tener al menos 2 caracteres');
+        return;
+    }
+    
+    if (!isValidQuantity(quantity)) {
+        alert('❌ Por favor ingresa una cantidad válida (mayor a 0)');
+        return;
+    }
+    
+    if (unit.length < 1) {
+        alert('❌ Por favor ingresa una unidad válida');
+        return;
+    }
+    
     const ingredientData = {
-        name: document.getElementById('ingredientName').value,
-        type: document.getElementById('ingredientType').value,
-        quantity: parseInt(document.getElementById('ingredientQuantity').value),
-        unit: document.getElementById('ingredientUnit').value
+        name,
+        type,
+        quantity: parseInt(quantity),
+        unit
     };
     
     try {
@@ -1014,6 +1119,43 @@ async function updateOrderStatus(orderId, newStatus) {
         }
     } catch (error) {
         console.error('Error actualizando pedido:', error);
+        alert('❌ Error de conexión. Intenta nuevamente.');
+    }
+}
+
+async function cancelOrder(orderId) {
+    if (!confirm('¿Estás seguro de que quieres cancelar este pedido? Esta acción devolverá los productos al inventario.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/orders/${orderId}/cancel`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const updatedOrder = await response.json();
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
+            if (orderIndex !== -1) {
+                orders[orderIndex] = updatedOrder;
+            }
+            
+            // Recargar productos para actualizar stock
+            await loadProductsFromAPI();
+            loadProductsGrid();
+            loadOrdersList();
+            
+            alert('✅ Pedido cancelado exitosamente. Los productos han sido devueltos al inventario.');
+        } else {
+            const error = await response.json();
+            alert(`❌ Error: ${error.error}`);
+        }
+    } catch (error) {
+        console.error('Error cancelando pedido:', error);
         alert('❌ Error de conexión. Intenta nuevamente.');
     }
 }
@@ -1364,6 +1506,27 @@ function closePSEModal() {
     }
     document.body.style.overflow = 'auto';
     delete window.pendingPSEOrder;
+}
+
+// Funciones de validación
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone.replace(/\D/g, ''));
+}
+
+function isValidPrice(price) {
+    const priceRegex = /^\d+(\.\d{1,2})?$/;
+    return priceRegex.test(price) && parseFloat(price) > 0;
+}
+
+function isValidQuantity(quantity) {
+    const quantityRegex = /^\d+$/;
+    return quantityRegex.test(quantity) && parseInt(quantity) > 0;
 }
 
 function removeFromCart(productId) {

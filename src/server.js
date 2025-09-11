@@ -615,6 +615,98 @@ app.get('/api/payments/status/:transactionId', async (req, res) => {
   }
 });
 
+// Cancelar pedido y devolver inventario
+app.put('/api/orders/:id/cancel', async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    const { id } = req.params;
+    
+    // Obtener el pedido con sus items
+    const orderResult = await client.query(`
+      SELECT o.*, 
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'product_id', oi.product_id,
+                   'product_name', oi.product_name,
+                   'price', oi.price,
+                   'quantity', oi.quantity
+                 )
+               ) FILTER (WHERE oi.id IS NOT NULL), 
+               '[]'
+             ) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.id = $1
+      GROUP BY o.id
+    `, [id]);
+    
+    if (orderResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    
+    const order = orderResult.rows[0];
+    
+    // Verificar que el pedido se puede cancelar
+    if (order.status === 'cancelled') {
+      return res.status(400).json({ error: 'El pedido ya está cancelado' });
+    }
+    
+    if (order.status === 'delivered') {
+      return res.status(400).json({ error: 'No se puede cancelar un pedido ya entregado' });
+    }
+    
+    // Devolver productos al inventario
+    for (const item of order.items) {
+      await client.query(
+        'UPDATE products SET stock = stock + $1 WHERE id = $2',
+        [item.quantity, item.product_id]
+      );
+    }
+    
+    // Actualizar estado del pedido a cancelado
+    await client.query(
+      'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+      ['cancelled', id]
+    );
+    
+    await client.query('COMMIT');
+    
+    // Obtener el pedido actualizado
+    const updatedOrderResult = await pool.query(`
+      SELECT o.*, 
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', oi.id,
+                   'product_name', oi.product_name,
+                   'price', oi.price,
+                   'quantity', oi.quantity
+                 )
+               ) FILTER (WHERE oi.id IS NOT NULL), 
+               '[]'
+             ) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.id = $1
+      GROUP BY o.id
+    `, [id]);
+    
+    res.json(updatedOrderResult.rows[0]);
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error cancelando pedido:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
+  }
+});
+
 // Ruta para servir la aplicación principal
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
