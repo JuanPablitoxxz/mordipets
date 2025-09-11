@@ -475,6 +475,7 @@ async function loadAdminData() {
 
 async function loadClientData() {
     await loadProductsFromAPI();
+    await loadOrdersFromAPI();
     loadCatalogGrid();
     loadClientOrders();
     updateCartCount();
@@ -615,7 +616,12 @@ function loadClientOrders() {
     
     list.innerHTML = '';
     
-    const clientOrders = orders.filter(order => order.clientEmail === currentUser.email);
+    console.log('Total pedidos:', orders.length);
+    console.log('Usuario actual:', currentUser?.email);
+    
+    const clientOrders = orders.filter(order => order.client_email === currentUser.email);
+    
+    console.log('Pedidos del cliente:', clientOrders.length);
     
     if (clientOrders.length === 0) {
         list.innerHTML = '<p class="text-center">No tienes pedidos registrados</p>';
@@ -651,7 +657,7 @@ function createOrderCard(order) {
             </div>
             <div class="order-detail">
                 <label>Fecha</label>
-                <span>${new Date(order.date).toLocaleDateString()}</span>
+                <span>${new Date(order.created_at || order.date).toLocaleDateString()}</span>
             </div>
             <div class="order-detail">
                 <label>Total</label>
@@ -1077,6 +1083,9 @@ async function loadOrdersFromAPI() {
         const response = await fetch('/api/orders');
         if (response.ok) {
             orders = await response.json();
+            console.log('Pedidos cargados:', orders);
+        } else {
+            console.error('Error en respuesta de pedidos:', response.status);
         }
     } catch (error) {
         console.error('Error cargando pedidos:', error);
