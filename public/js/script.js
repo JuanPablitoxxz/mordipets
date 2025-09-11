@@ -40,11 +40,52 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     loadSampleData();
     loadPublicProducts();
+    checkSavedSession();
 });
 
 function initializeApp() {
     // Los datos ahora se cargan desde la base de datos PostgreSQL
     // No necesitamos localStorage
+}
+
+// Funciones para persistencia de sesión
+function saveSession(user) {
+    localStorage.setItem('mordipets_session', JSON.stringify({
+        user: user,
+        isAdmin: user.isAdmin,
+        timestamp: Date.now()
+    }));
+}
+
+function loadSession() {
+    const sessionData = localStorage.getItem('mordipets_session');
+    if (sessionData) {
+        const session = JSON.parse(sessionData);
+        // Verificar que la sesión no sea muy antigua (24 horas)
+        const maxAge = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+        if (Date.now() - session.timestamp < maxAge) {
+            return session;
+        } else {
+            // Sesión expirada, limpiar
+            clearSession();
+        }
+    }
+    return null;
+}
+
+function clearSession() {
+    localStorage.removeItem('mordipets_session');
+    currentUser = null;
+    isAdmin = false;
+}
+
+function checkSavedSession() {
+    const session = loadSession();
+    if (session) {
+        currentUser = session.user;
+        isAdmin = session.isAdmin;
+        showUserPanel();
+    }
 }
 
 function loadSampleData() {
@@ -276,6 +317,9 @@ async function handleLogin(e) {
             
             isAdmin = result.is_admin;
             
+            // Guardar sesión
+            saveSession(currentUser);
+            
             closeModal(document.getElementById('loginModal'));
             showUserPanel();
             
@@ -345,23 +389,12 @@ async function handleRegister(e) {
         
         if (response.ok) {
             // Usuario creado exitosamente
-            currentUser = {
-                name: result.name,
-                email: result.email,
-                phone: result.phone,
-                location: result.location,
-                isAdmin: result.is_admin
-            };
-            
-            isAdmin = false;
-            
             closeModal(document.getElementById('registerModal'));
-            showUserPanel();
             
             // Clear form
             document.getElementById('registerForm').reset();
             
-            alert('¡Registro exitoso! Bienvenido a Mordipets');
+            alert('¡Registro exitoso! Ahora puedes iniciar sesión con tus credenciales.');
         } else {
             alert(`❌ Error: ${result.error}`);
         }
@@ -378,8 +411,8 @@ async function handleRegister(e) {
 }
 
 function handleLogout() {
-    currentUser = null;
-    isAdmin = false;
+    // Limpiar sesión guardada
+    clearSession();
     cart = [];
     
     // Hide both panels
@@ -395,6 +428,8 @@ function handleLogout() {
     
     if (loginBtn) loginBtn.style.display = 'flex';
     if (registerBtn) registerBtn.style.display = 'flex';
+    
+    alert('Sesión cerrada exitosamente');
 }
 
 function showUserPanel() {
