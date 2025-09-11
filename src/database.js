@@ -116,6 +116,59 @@ async function createDefaultAdmin() {
   }
 }
 
+// Función para crear usuarios de prueba
+async function createTestUsers() {
+  try {
+    // Verificar si ya hay usuarios de prueba
+    const userCount = await pool.query('SELECT COUNT(*) FROM users WHERE email LIKE $1', ['%test%']);
+    if (userCount.rows[0].count > 0) {
+      console.log('👥 Los usuarios de prueba ya existen');
+      return;
+    }
+
+    // Crear usuarios de prueba
+    const testUsers = [
+      {
+        name: 'Usuario Prueba 1',
+        email: 'test1@gmail.com',
+        phone: '3001234567',
+        location: 'Bogotá, Colombia',
+        password: 'test123',
+        is_admin: false
+      },
+      {
+        name: 'Usuario Prueba 2',
+        email: 'test2@hotmail.com',
+        phone: '3007654321',
+        location: 'Medellín, Colombia',
+        password: 'test123',
+        is_admin: false
+      },
+      {
+        name: 'Cliente VIP',
+        email: 'cliente@outlook.com',
+        phone: '3009876543',
+        location: 'Cali, Colombia',
+        password: 'cliente123',
+        is_admin: false
+      }
+    ];
+
+    for (const user of testUsers) {
+      await pool.query(
+        'INSERT INTO users (name, email, phone, location, password, is_admin) VALUES ($1, $2, $3, $4, $5, $6)',
+        [user.name, user.email, user.phone, user.location, user.password, user.is_admin]
+      );
+    }
+
+    console.log('✅ Usuarios de prueba creados correctamente');
+    console.log('📧 Emails de prueba: test1@gmail.com, test2@hotmail.com, cliente@outlook.com');
+    console.log('🔑 Contraseña: test123 (para test1 y test2), cliente123 (para cliente)');
+  } catch (error) {
+    console.error('❌ Error creando usuarios de prueba:', error);
+  }
+}
+
 // Función para insertar datos de ejemplo
 async function insertSampleData() {
   try {
@@ -178,5 +231,6 @@ module.exports = {
   pool,
   initializeDatabase,
   insertSampleData,
-  createDefaultAdmin
+  createDefaultAdmin,
+  createTestUsers
 };

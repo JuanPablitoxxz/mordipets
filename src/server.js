@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { pool, initializeDatabase, insertSampleData, createDefaultAdmin } = require('./database');
+const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
 const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
 
 const app = express();
@@ -17,6 +17,7 @@ async function startServer() {
   try {
     await initializeDatabase();
     await createDefaultAdmin();
+    await createTestUsers();
     await insertSampleData();
     
     app.listen(PORT, () => {
@@ -35,23 +36,10 @@ async function startServer() {
 
 // Rutas API
 
-// Función para verificar si la base de datos está disponible
-async function isDatabaseAvailable() {
-  try {
-    await pool.query('SELECT 1');
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
 
 // Crear un nuevo usuario
 app.post('/api/users', async (req, res) => {
   try {
-    if (!(await isDatabaseAvailable())) {
-      return res.status(503).json({ error: 'Base de datos no disponible' });
-    }
-    
     const { name, email, phone, location, password, isAdmin } = req.body;
     
     // Verificar si el email ya existe
@@ -79,10 +67,6 @@ app.post('/api/users', async (req, res) => {
 // Login de usuario
 app.post('/api/users/login', async (req, res) => {
   try {
-    if (!(await isDatabaseAvailable())) {
-      return res.status(503).json({ error: 'Base de datos no disponible' });
-    }
-    
     const { email, password } = req.body;
     
     const result = await pool.query(
@@ -108,21 +92,6 @@ app.post('/api/users/login', async (req, res) => {
 // Obtener todos los productos
 app.get('/api/products', async (req, res) => {
   try {
-    if (!(await isDatabaseAvailable())) {
-      // Datos de prueba cuando la base de datos no está disponible
-      const productosPrueba = [
-        { id: 1, code: 'GL001', name: 'Galleta Leche', description: 'Deliciosa galleta con sabor a leche', price: 5000, stock: 50, weight: 100 },
-        { id: 2, code: 'GL002', name: 'Galleta Carne', description: 'Galleta rica en proteínas de carne', price: 5500, stock: 30, weight: 100 },
-        { id: 3, code: 'GL003', name: 'Galleta Pollo', description: 'Galleta con sabor a pollo natural', price: 5200, stock: 25, weight: 100 },
-        { id: 4, code: 'GL004', name: 'Galleta Hígado', description: 'Galleta nutritiva con hígado', price: 5800, stock: 15, weight: 100 },
-        { id: 5, code: 'GL005', name: 'Galleta Espinaca', description: 'Galleta verde con espinaca', price: 4800, stock: 40, weight: 100 },
-        { id: 6, code: 'GL006', name: 'Galleta Zanahoria', description: 'Galleta naranja con zanahoria', price: 4900, stock: 35, weight: 100 },
-        { id: 7, code: 'GL007', name: 'Galleta Avena', description: 'Galleta saludable con avena', price: 5100, stock: 20, weight: 100 },
-        { id: 8, code: 'GL008', name: 'Galleta Mixta', description: 'Mezcla de sabores naturales', price: 5600, stock: 10, weight: 100 }
-      ];
-      return res.json(productosPrueba);
-    }
-    
     const result = await pool.query('SELECT * FROM products ORDER BY name');
     res.json(result.rows);
   } catch (error) {
@@ -339,18 +308,9 @@ app.post('/api/auth/send-verification-code', async (req, res) => {
     }
     
     // Verificar si el email existe en la base de datos
-    let userExists = false;
+    const result = await pool.query('SELECT id, name FROM users WHERE email = $1', [email]);
     
-    if (await isDatabaseAvailable()) {
-      // Verificar en base de datos real
-      const result = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-      userExists = result.rows.length > 0;
-    } else {
-      // Para desarrollo, aceptar cualquier email que termine en @gmail.com o @hotmail.com
-      userExists = email.includes('@gmail.com') || email.includes('@hotmail.com') || email.includes('@outlook.com');
-    }
-    
-    if (!userExists) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'No existe una cuenta con este correo electrónico' });
     }
     
@@ -446,21 +406,16 @@ app.post('/api/auth/reset-password', async (req, res) => {
     }
     
     // Código válido, proceder con el cambio de contraseña
-    let userName = email.split('@')[0]; // Nombre por defecto
+    const result = await pool.query(
+      'UPDATE users SET password = $1 WHERE email = $2 RETURNING name',
+      [newPassword, email]
+    );
     
-    if (await isDatabaseAvailable()) {
-      // Actualizar en base de datos real
-      const result = await pool.query(
-        'UPDATE users SET password = $1 WHERE email = $2 RETURNING name',
-        [newPassword, email]
-      );
-      
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Usuario no encontrado' });
-      }
-      
-      userName = result.rows[0].name;
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
+    
+    const userName = result.rows[0].name;
     
     // Limpiar código usado
     verificationCodes.delete(email);
