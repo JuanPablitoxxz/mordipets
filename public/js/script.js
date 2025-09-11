@@ -653,7 +653,19 @@ function createOrderCard(order) {
         <div class="order-details">
             <div class="order-detail">
                 <label>Cliente</label>
-                <span>${order.clientName}</span>
+                <span>${order.client_name || order.clientName}</span>
+            </div>
+            <div class="order-detail">
+                <label>Email</label>
+                <span>${order.client_email || order.clientEmail}</span>
+            </div>
+            <div class="order-detail">
+                <label>Teléfono</label>
+                <span>${order.client_phone || order.clientPhone || 'No especificado'}</span>
+            </div>
+            <div class="order-detail">
+                <label>Ubicación</label>
+                <span>${order.client_location || order.clientLocation || 'No especificado'}</span>
             </div>
             <div class="order-detail">
                 <label>Fecha</label>
@@ -665,7 +677,7 @@ function createOrderCard(order) {
             </div>
             <div class="order-detail">
                 <label>Método de Pago</label>
-                <span>${order.paymentMethod === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
+                <span>${order.payment_method === 'online' || order.paymentMethod === 'online' ? 'Pago Online' : 'Contraentrega'}</span>
             </div>
         </div>
         <div class="order-items">
@@ -951,6 +963,8 @@ function handleSearch(e) {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
+    console.log('Actualizando pedido:', orderId, 'a estado:', newStatus);
+    
     try {
         const response = await fetch(`/api/orders/${orderId}/status`, {
             method: 'PUT',
@@ -960,9 +974,13 @@ async function updateOrderStatus(orderId, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
         
+        console.log('Respuesta del servidor:', response.status);
+        
         if (response.ok) {
             const updatedOrder = await response.json();
-            const orderIndex = orders.findIndex(o => o.id === orderId);
+            console.log('Pedido actualizado:', updatedOrder);
+            
+            const orderIndex = orders.findIndex(o => o.id == orderId);
             if (orderIndex !== -1) {
                 orders[orderIndex] = updatedOrder;
             }
@@ -971,6 +989,7 @@ async function updateOrderStatus(orderId, newStatus) {
             alert(`Estado del pedido actualizado a: ${newStatus}`);
         } else {
             const error = await response.json();
+            console.error('Error del servidor:', error);
             alert(`❌ Error: ${error.error}`);
         }
     } catch (error) {

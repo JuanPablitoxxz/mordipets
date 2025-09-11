@@ -336,12 +336,17 @@ app.put('/api/orders/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     
+    console.log('Actualizando pedido:', id, 'a estado:', status);
+    
     const result = await pool.query(
       'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
       [status, id]
     );
     
+    console.log('Resultado de la actualización:', result.rows);
+    
     if (result.rows.length === 0) {
+      console.log('Pedido no encontrado:', id);
       return res.status(404).json({ error: 'Pedido no encontrado' });
     }
     
