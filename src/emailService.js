@@ -3,11 +3,19 @@ const nodemailer = require('nodemailer');
 // Configuración del transporter de email
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true para 465, false para otros puertos
     auth: {
       user: process.env.EMAIL_USER || 'tu-email@gmail.com',
       pass: process.env.EMAIL_PASS || 'tu-app-password'
-    }
+    },
+    tls: {
+      rejectUnauthorized: false
+    },
+    connectionTimeout: 60000, // 60 segundos
+    greetingTimeout: 30000,   // 30 segundos
+    socketTimeout: 60000      // 60 segundos
   });
 };
 
