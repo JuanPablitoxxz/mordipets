@@ -15,13 +15,20 @@ const createTransporter = () => {
 const sendVerificationCode = async (email, code) => {
   try {
     console.log(`📧 Intentando enviar código de verificación a: ${email}`);
+    console.log('🔍 Verificando variables de entorno...');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✅ Configurada' : '❌ No configurada');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Configurada' : '❌ No configurada');
     
     // Verificar configuración
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.error('❌ Variables de entorno de email no configuradas');
+      console.error('📝 Configura en Railway:');
+      console.error('   EMAIL_USER = mordipetss@gmail.com');
+      console.error('   EMAIL_PASS = tu-app-password-de-16-caracteres');
+      console.error('   FRONTEND_URL = https://tu-app.vercel.app');
       return { 
         success: false, 
-        error: 'Variables de entorno de email no configuradas' 
+        error: 'Variables de entorno de email no configuradas. Verifica la configuración en Railway.' 
       };
     }
     
