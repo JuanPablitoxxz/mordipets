@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
-// Usar servicio de email simple con Gmail
-const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
-console.log('📧 Usando Gmail simple para emails');
+// Usar servicio de email simple que funciona con Railway
+const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailServiceSimple');
+console.log('📧 Usando servicio de email simple (códigos en logs)');
 const paymentService = require('./paymentService');
 
 const app = express();
