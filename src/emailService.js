@@ -18,6 +18,7 @@ const sendVerificationCode = async (email, code) => {
     console.log('🔍 Verificando variables de entorno...');
     console.log('EMAIL_USER:', process.env.EMAIL_USER ? '✅ Configurada' : '❌ No configurada');
     console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Configurada' : '❌ No configurada');
+    console.log('🔄 Forzando redeploy para aplicar variables...');
     
     // Verificar configuración
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
