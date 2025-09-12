@@ -35,10 +35,11 @@ const sampleIngredients = [
 ];
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     initializeApp();
     setupEventListeners();
     loadSampleData();
+    await loadProductsFromAPI();
     loadPublicProducts();
     checkSavedSession();
 });
@@ -97,28 +98,31 @@ function loadPublicProducts() {
     const grid = document.getElementById('productosGrid');
     if (!grid) return;
     
-    // Filtrar solo productos que tienen imágenes
-    const productsWithImages = products.filter(product => {
-        const imageMap = {
-            'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
-            'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
-            'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
-            'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
-            'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
-            'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
-            'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-            'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg'
-        };
-        return imageMap[product.name];
-    });
+    console.log('Cargando productos públicos. Total productos:', products.length);
     
-    if (productsWithImages.length === 0) {
+    // Mapeo de productos a imágenes disponibles
+    const imageMap = {
+        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
+        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
+        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
+        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
+        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
+        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Monedita Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Monedita Carne x 1000 gr': 'galletasCarne.jpg'
+    };
+    
+    // Mostrar todos los productos, no solo los que tienen imágenes específicas
+    if (products.length === 0) {
         grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
         return;
     }
     
     grid.innerHTML = '';
-    productsWithImages.forEach(product => {
+    products.forEach(product => {
         const productCard = createPublicProductCard(product);
         grid.appendChild(productCard);
     });
@@ -128,7 +132,7 @@ function createPublicProductCard(product) {
     const card = document.createElement('div');
     card.className = 'producto-card';
     
-    // Mapeo exacto de productos a imágenes disponibles
+    // Mapeo de productos a imágenes disponibles
     const imageMap = {
         'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
         'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
@@ -137,7 +141,10 @@ function createPublicProductCard(product) {
         'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
         'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
         'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg'
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Monedita Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Monedita Carne x 1000 gr': 'galletasCarne.jpg'
     };
     
     const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
@@ -149,6 +156,10 @@ function createPublicProductCard(product) {
         <div class="producto-info" style="padding: 15px;">
             <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #333;">${product.name}</h4>
             <p class="producto-description" style="margin: 0; font-size: 14px; color: #666; line-height: 1.4;">${product.description}</p>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #ff6b35; font-weight: 700; font-size: 18px;">$${product.price.toLocaleString('es-CO')}</span>
+                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px;">${product.stock} disponibles</span>
+            </div>
         </div>
     `;
     
