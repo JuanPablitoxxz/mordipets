@@ -2,11 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
-// Usar servicio de email simulado para desarrollo
-const emailService = require('./emailServiceMock');
-console.log('📧 Usando servicio de email simulado (códigos se muestran en consola)');
-
-const { sendVerificationCode, sendPasswordChangedConfirmation } = emailService;
+// Usar servicio de email simple con Gmail
+const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
+console.log('📧 Usando Gmail simple para emails');
 const paymentService = require('./paymentService');
 
 const app = express();
