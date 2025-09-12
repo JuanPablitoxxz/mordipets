@@ -156,10 +156,6 @@ function createPublicProductCard(product) {
         <div class="producto-info" style="padding: 15px;">
             <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #333;">${product.name}</h4>
             <p class="producto-description" style="margin: 0; font-size: 14px; color: #666; line-height: 1.4;">${product.description}</p>
-            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="color: #ff6b35; font-weight: 700; font-size: 18px;">$${product.price.toLocaleString('es-CO')}</span>
-                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px;">${product.stock} disponibles</span>
-            </div>
         </div>
     `;
     
