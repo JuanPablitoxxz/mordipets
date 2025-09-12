@@ -709,6 +709,32 @@ app.put('/api/orders/:id/cancel', async (req, res) => {
   }
 });
 
+// Ruta para limpiar productos (solo para desarrollo)
+app.post('/api/admin/clear-products', async (req, res) => {
+  try {
+    const { clearAllProducts } = require('./clear-products');
+    const result = await clearAllProducts();
+    
+    if (result.success) {
+      res.json({ 
+        success: true, 
+        message: `${result.deletedCount} productos eliminados correctamente` 
+      });
+    } else {
+      res.status(500).json({ 
+        success: false, 
+        error: result.error 
+      });
+    }
+  } catch (error) {
+    console.error('Error en limpieza de productos:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error interno del servidor' 
+    });
+  }
+});
+
 // Ruta para servir la aplicación principal
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
