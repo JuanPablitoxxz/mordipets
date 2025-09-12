@@ -186,26 +186,8 @@ async function insertSampleData() {
       return;
     }
 
-    // Insertar productos de ejemplo
-    const sampleProducts = [
-      { code: '10', name: 'Galleta Leche x 1000 gr', price: 15500, stock: 25, weight: 1000, description: 'Deliciosas galletas de leche para perros' },
-      { code: '20', name: 'Galleta Carne x 1000 gr', price: 16000, stock: 30, weight: 1000, description: 'Galletas con sabor a carne' },
-      { code: '30', name: 'Galleta Pollo x 1000 gr', price: 15750, stock: 20, weight: 1000, description: 'Galletas de pollo nutritivas' },
-      { code: '40', name: 'Galleta Higado x 1000 gr', price: 17000, stock: 15, weight: 1000, description: 'Galletas de hígado ricas en hierro' },
-      { code: '50', name: 'Galleta Espinaca x 1000 gr', price: 16250, stock: 18, weight: 1000, description: 'Galletas con espinaca para perros' },
-      { code: '60', name: 'Galleta Zanahoria x 1000 gr', price: 15000, stock: 22, weight: 1000, description: 'Galletas de zanahoria saludables' },
-      { code: '70', name: 'Galleta Avena x 1000 gr', price: 14750, stock: 28, weight: 1000, description: 'Galletas de avena energéticas' },
-      { code: '80', name: 'Galleta Linaza x 1000 gr', price: 16500, stock: 12, weight: 1000, description: 'Galletas de linaza con omega-3' },
-      { code: '90', name: 'Galleta Monedita Leche x 1000 gr', price: 18000, stock: 20, weight: 1000, description: 'Galletas monedita de leche' },
-      { code: '100', name: 'Galleta Monedita Carne x 1000 gr', price: 18500, stock: 15, weight: 1000, description: 'Galletas monedita de carne' }
-    ];
-
-    for (const product of sampleProducts) {
-      await pool.query(
-        'INSERT INTO products (code, name, description, price, stock, weight) VALUES ($1, $2, $3, $4, $5, $6)',
-        [product.code, product.name, product.description, product.price, product.stock, product.weight]
-      );
-    }
+    // No insertar productos de ejemplo - base de datos vacía
+    console.log('📦 Base de datos iniciada sin productos de ejemplo');
 
     // Insertar ingredientes de ejemplo
     const sampleIngredients = [
@@ -228,7 +210,7 @@ async function insertSampleData() {
       );
     }
 
-    console.log('✅ Datos de ejemplo insertados correctamente');
+    console.log('✅ Ingredientes de ejemplo insertados correctamente');
   } catch (error) {
     console.error('❌ Error insertando datos de ejemplo:', error);
   }
