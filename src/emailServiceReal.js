@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   // Intentar usar Resend primero (más confiable)
   if (process.env.RESEND_API_KEY) {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       host: 'smtp.resend.com',
       port: 587,
       secure: false,
@@ -16,7 +16,7 @@ const createTransporter = () => {
   }
   
   // Fallback a Gmail con configuración mejorada
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
