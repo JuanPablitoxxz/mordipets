@@ -98,34 +98,8 @@ function loadPublicProducts() {
     const grid = document.getElementById('productosGrid');
     if (!grid) return;
     
-    console.log('Cargando productos públicos. Total productos:', products.length);
-    
-    // Mapeo de productos a imágenes disponibles
-    const imageMap = {
-        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
-        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
-        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
-        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
-        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
-        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
-        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
-        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
-        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg',
-        'Galleta Monedita Leche x 1000 gr': 'GalletasLechee.jpg',
-        'Galleta Monedita Carne x 1000 gr': 'galletasCarne.jpg'
-    };
-    
-    // Mostrar todos los productos, no solo los que tienen imágenes específicas
-    if (products.length === 0) {
-        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
-        return;
-    }
-    
-    grid.innerHTML = '';
-    products.forEach(product => {
-        const productCard = createPublicProductCard(product);
-        grid.appendChild(productCard);
-    });
+    // Siempre mostrar mensaje de próximamente más productos
+    grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;"><h3>Próximamente más productos</h3><p>Estamos trabajando en traerte las mejores galletas para tu mascota</p></div>';
 }
 
 function createPublicProductCard(product) {
