@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
-// Usar servicio de email real
-const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailServiceReal');
-console.log('📧 Usando servicio de email real (envía a correo del cliente)');
+// Usar servicio de email híbrido (intenta enviar, si falla muestra en logs)
+const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailServiceHybrid');
+console.log('📧 Usando servicio de email híbrido (intenta enviar, fallback a logs)');
 const paymentService = require('./paymentService');
 
 const app = express();
