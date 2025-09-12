@@ -2,7 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { pool, initializeDatabase, insertSampleData, createDefaultAdmin, createTestUsers } = require('./database');
-const { sendVerificationCode, sendPasswordChangedConfirmation } = require('./emailService');
+// Intentar usar SendGrid primero, luego Gmail como fallback
+let emailService;
+try {
+  emailService = require('./emailServiceSendGrid');
+  console.log('📧 Usando SendGrid para emails');
+} catch (error) {
+  emailService = require('./emailService');
+  console.log('📧 Usando Gmail para emails (fallback)');
+}
+
+const { sendVerificationCode, sendPasswordChangedConfirmation } = emailService;
 const paymentService = require('./paymentService');
 
 const app = express();
