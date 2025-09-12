@@ -556,9 +556,11 @@ body {
     background: white;
     border: 2px solid #f0f0f0;
     border-radius: 15px;
-    padding: 20px;
+    padding: 0;
     transition: all 0.3s ease;
     position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .product-card:hover,
@@ -575,6 +577,31 @@ body {
     color: #333;
     margin-bottom: 10px;
     font-size: 18px;
+}
+
+/* Estilos para imágenes de productos */
+.product-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+    position: relative;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img,
+.catalog-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-content {
+    padding: 20px;
 }
 
 .product-info,

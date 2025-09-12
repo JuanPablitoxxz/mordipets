@@ -554,34 +554,56 @@ function createProductCard(product, isAdmin = false) {
     const stockClass = product.stock > 10 ? 'stock' : product.stock > 0 ? 'stock low' : 'stock out';
     const stockText = product.stock > 0 ? `${product.stock} disponibles` : 'AGOTADO';
     
+    // Mapeo de productos a imágenes disponibles
+    const imageMap = {
+        'Galleta Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Carne x 1000 gr': 'galletasCarne.jpg',
+        'Galleta Pollo x 1000 gr': 'galletasPollo.jpg',
+        'Galleta Higado x 1000 gr': 'galletasHigado.jpg',
+        'Galleta Espinaca x 1000 gr': 'galletasEspinaca.jpg',
+        'Galleta Zanahoria x 1000 gr': 'galletasZanahoria.jpg',
+        'Galleta Avena x 1000 gr': 'galletasAvena.jpg',
+        'Galleta Mixta x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Linaza x 1000 gr': 'galletasMixtas.jpg',
+        'Galleta Monedita Leche x 1000 gr': 'GalletasLechee.jpg',
+        'Galleta Monedita Carne x 1000 gr': 'galletasCarne.jpg'
+    };
+    
+    const imageName = imageMap[product.name] || 'galletasMixtas.jpg';
+    
     card.innerHTML = `
         ${isOutOfStock && !isAdmin ? '<div class="out-of-stock-badge">AGOTADO</div>' : ''}
-        <h4>${product.name}</h4>
-        <div class="product-info">
-            <span class="price">$${product.price.toLocaleString('es-CO')}</span>
-            <span class="${stockClass}">${stockText}</span>
+        <div class="product-image" style="width: 100%; height: 200px; overflow: hidden; border-radius: 8px 8px 0 0; position: relative;">
+            <img src="images/${imageName}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-        <p><strong>Código:</strong> ${product.code}</p>
-        <p><strong>Peso:</strong> ${product.weight} gr</p>
-        <p>${product.description}</p>
-        <div class="${isAdmin ? 'product-actions' : 'catalog-actions'}">
-            ${isAdmin ? `
-                <button class="btn-small btn-edit" onclick="editProduct(${product.id})">
-                    <i class="fas fa-edit"></i> Editar
-                </button>
-                <button class="btn-small btn-delete" onclick="deleteProduct(${product.id})">
-                    <i class="fas fa-trash"></i> Eliminar
-                </button>
-            ` : `
-                <div class="quantity-controls ${isOutOfStock ? 'disabled' : ''}">
-                    <button onclick="decreaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>-</button>
-                    <span id="qty-${product.id}" class="quantity-display">1</span>
-                    <button onclick="increaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>+</button>
-                </div>
-                <button class="btn-small btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}" onclick="addToCart(${product.id})" ${isOutOfStock ? 'disabled' : ''}>
-                    <i class="fas fa-cart-plus"></i> ${isOutOfStock ? 'Agotado' : 'Agregar al Carrito'}
-                </button>
-            `}
+        <div class="product-content" style="padding: 15px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #333;">${product.name}</h4>
+            <div class="product-info">
+                <span class="price">$${product.price.toLocaleString('es-CO')}</span>
+                <span class="${stockClass}">${stockText}</span>
+            </div>
+            <p><strong>Código:</strong> ${product.code}</p>
+            <p><strong>Peso:</strong> ${product.weight} gr</p>
+            <p style="margin-bottom: 15px;">${product.description}</p>
+            <div class="${isAdmin ? 'product-actions' : 'catalog-actions'}">
+                ${isAdmin ? `
+                    <button class="btn-small btn-edit" onclick="editProduct(${product.id})">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                    <button class="btn-small btn-delete" onclick="deleteProduct(${product.id})">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                ` : `
+                    <div class="quantity-controls ${isOutOfStock ? 'disabled' : ''}">
+                        <button onclick="decreaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>-</button>
+                        <span id="qty-${product.id}" class="quantity-display">1</span>
+                        <button onclick="increaseQuantity(${product.id})" class="quantity-btn" ${isOutOfStock ? 'disabled' : ''}>+</button>
+                    </div>
+                    <button class="btn-small btn-add-to-cart ${isOutOfStock ? 'disabled' : ''}" onclick="addToCart(${product.id})" ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-cart-plus"></i> ${isOutOfStock ? 'Agotado' : 'Agregar al Carrito'}
+                    </button>
+                `}
+            </div>
         </div>
     `;
     
