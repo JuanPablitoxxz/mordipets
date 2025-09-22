@@ -1091,7 +1091,13 @@ function handleSearch(e) {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
-    console.log('Actualizando pedido:', orderId, 'a estado:', newStatus);
+    console.log('🔄 Actualizando pedido:', orderId, 'a estado:', newStatus);
+    
+    // Mostrar indicador de carga
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    button.disabled = true;
     
     try {
         const response = await fetch(`/api/orders/${orderId}/status`, {
@@ -1102,27 +1108,63 @@ async function updateOrderStatus(orderId, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
         
-        console.log('Respuesta del servidor:', response.status);
+        console.log('📡 Respuesta del servidor:', response.status, response.statusText);
         
         if (response.ok) {
-            const updatedOrder = await response.json();
-            console.log('Pedido actualizado:', updatedOrder);
+            const result = await response.json();
+            console.log('✅ Pedido actualizado:', result);
             
+            // Actualizar el pedido en la lista local
             const orderIndex = orders.findIndex(o => o.id == orderId);
             if (orderIndex !== -1) {
-                orders[orderIndex] = updatedOrder;
+                orders[orderIndex] = result.order;
             }
             
+            // Recargar la lista de pedidos
             loadOrdersList();
-            alert(`Estado del pedido actualizado a: ${newStatus}`);
+            
+            // Mostrar mensaje de éxito
+            const statusText = {
+                'pending': 'Pendiente',
+                'confirmed': 'Confirmado',
+                'delivered': 'Entregado',
+                'cancelled': 'Cancelado',
+                'pending_payment': 'Pago Pendiente',
+                'paid': 'Pagado',
+                'failed': 'Pago Fallido'
+            };
+            
+            alert(`✅ ${result.message}\n\nEstado actualizado a: ${statusText[newStatus] || newStatus}`);
+            
         } else {
             const error = await response.json();
-            console.error('Error del servidor:', error);
-            alert(`❌ Error: ${error.error}`);
+            console.error('❌ Error del servidor:', error);
+            
+            let errorMessage = 'Error desconocido';
+            if (error.error) {
+                errorMessage = error.error;
+            } else if (error.details) {
+                errorMessage = error.details;
+            }
+            
+            alert(`❌ Error: ${errorMessage}`);
         }
     } catch (error) {
-        console.error('Error actualizando pedido:', error);
-        alert('❌ Error de conexión. Intenta nuevamente.');
+        console.error('❌ Error de conexión:', error);
+        
+        let errorMessage = 'Error de conexión. Intenta nuevamente.';
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+        } else if (error.name === 'SyntaxError') {
+            errorMessage = 'Error procesando la respuesta del servidor.';
+        }
+        
+        alert(`❌ ${errorMessage}`);
+    } finally {
+        // Restaurar el botón
+        button.innerHTML = originalText;
+        button.disabled = false;
     }
 }
 
