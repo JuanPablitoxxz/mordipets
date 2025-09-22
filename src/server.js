@@ -339,24 +339,57 @@ app.put('/api/orders/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     
-    console.log('Actualizando pedido:', id, 'a estado:', status);
+    console.log('🔄 Actualizando pedido:', id, 'a estado:', status);
     
+    // Validar que el ID sea un número
+    if (isNaN(id)) {
+      console.log('❌ ID de pedido inválido:', id);
+      return res.status(400).json({ error: 'ID de pedido inválido' });
+    }
+    
+    // Validar que el status sea válido
+    const validStatuses = ['pending', 'confirmed', 'delivered', 'cancelled', 'pending_payment', 'paid', 'failed'];
+    if (!validStatuses.includes(status)) {
+      console.log('❌ Estado inválido:', status);
+      return res.status(400).json({ error: 'Estado de pedido inválido' });
+    }
+    
+    // Verificar que el pedido existe antes de actualizar
+    const checkResult = await pool.query('SELECT id, status FROM orders WHERE id = $1', [id]);
+    if (checkResult.rows.length === 0) {
+      console.log('❌ Pedido no encontrado:', id);
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    
+    console.log('✅ Pedido encontrado. Estado actual:', checkResult.rows[0].status);
+    
+    // Actualizar el pedido
     const result = await pool.query(
       'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *',
       [status, id]
     );
     
-    console.log('Resultado de la actualización:', result.rows);
+    console.log('✅ Pedido actualizado exitosamente:', result.rows[0]);
     
-    if (result.rows.length === 0) {
-      console.log('Pedido no encontrado:', id);
-      return res.status(404).json({ error: 'Pedido no encontrado' });
-    }
+    res.json({
+      success: true,
+      message: 'Estado del pedido actualizado correctamente',
+      order: result.rows[0]
+    });
     
-    res.json(result.rows[0]);
   } catch (error) {
-    console.error('Error actualizando pedido:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('❌ Error actualizando pedido:', error);
+    console.error('❌ Detalles del error:', {
+      message: error.message,
+      code: error.code,
+      detail: error.detail,
+      hint: error.hint
+    });
+    
+    res.status(500).json({ 
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Error procesando la solicitud'
+    });
   }
 });
 
